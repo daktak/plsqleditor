@@ -45,7 +45,7 @@ public class PackageDetails implements Cloneable
     /**
      * This method returns the location.
      * 
-     * @return {@link #myLocations}.
+     * @return {@link #myLocation}.
      */
     public String getLocation()
     {
@@ -87,7 +87,7 @@ public class PackageDetails implements Cloneable
 
 
     /**
-     * @return
+     * @return The image descriptor for this object.
      */
     public ImageDescriptor getImageDescriptor()
     {

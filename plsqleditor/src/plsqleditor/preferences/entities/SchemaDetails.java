@@ -128,7 +128,7 @@ public class SchemaDetails implements Cloneable
     }
 
     /**
-     * @return
+     * @return The image descriptor for this object.
      */
     public ImageDescriptor getImageDescriptor()
     {
@@ -147,7 +147,7 @@ public class SchemaDetails implements Cloneable
 
 
     /**
-     * @return
+     * @return The list of package details in this schema.
      */
     public PackageDetails[] getPackages()
     {

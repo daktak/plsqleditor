@@ -68,7 +68,7 @@ public class PlSqlSchema
     /**
      * This method returns the source.
      * 
-     * @return {@link #mySource}.
+     * @return {@link #mySources}.
      */
     public Source[] getSources()
     {

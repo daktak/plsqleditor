@@ -36,7 +36,7 @@ import plsqleditor.parsers.Segment;
  */
 public class PlSqlCompletionProcessor implements IContentAssistProcessor
 {
-    public static char [] autoCompleteDelimiters = new char [] {' ', '\t', '(', ';'};
+    public static char[]                   autoCompleteDelimiters = new char[]{' ', '\t', '(', ';'};
 
     private static final String[]          fgProposals;
     private static final SortedSet<String> ACS;
@@ -101,6 +101,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
     {
         try
         {
+            PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
             IDocument doc = viewer.getDocument();
             int line = doc.getLineOfOffset(documentOffset);
             int start = doc.getLineOffset(line);
@@ -109,103 +110,17 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
             int lastNonUsableCharacter = -1;
             for (char c : autoCompleteDelimiters)
             {
-                lastNonUsableCharacter = Math.max(lastNonUsableCharacter, lineOfText.lastIndexOf(c));
+                lastNonUsableCharacter = Math
+                        .max(lastNonUsableCharacter, lineOfText.lastIndexOf(c));
             }
 
-            String currText = lineOfText.substring(lastNonUsableCharacter + 1).toUpperCase();
             List<Segment> completions = new ArrayList<Segment>();
 
-            PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
-            List<Segment> thisDocsSegments = plugin.getSegments(doc);
-
-            Position dummyPosition = new Position(0);
-
-            // check qualifiers
-            if (currText.contains("."))
-            {
-                int lastDotIndex = currText.lastIndexOf(".");
-                String prior = currText.substring(0, lastDotIndex).toLowerCase();
-                currText = currText.substring(lastDotIndex + 1);
-                if (prior.contains("."))
-                {
-                    // currText is text after first dot
-                    int index = prior.lastIndexOf(".");
-                    String schema = prior.substring(0, index);
-                    String packageName = prior.substring(index + 1);
-                    for (Segment segment : plugin.getSegments(schema, packageName))
-                    {
-                        checkSegment(documentOffset, currText, completions, segment, false);
-                    }
-                }
-                else
-                {
-                    // only one dot, could be schema or package name
-                    // currText is text after the dot
-                    String schema = null;
-                    String packageName = null;
-                    List<String> schemas = plugin.getSchemas();
-                    if (schemas.contains(prior))
-                    {
-                        schema = prior;
-                        for (String str : plugin.getPackages(schema))
-                        {
-                            if (str != null && str.toUpperCase().startsWith(currText))
-                            {
-                                completions.add(new Segment(str, dummyPosition,
-                                        Segment.SegmentType.Package));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        schema = plugin.getCurrentSchema();
-                        packageName = prior;
-                        if (packageName != null)
-                        {
-                            for (Segment segment : plugin.getSegments(schema, packageName))
-                            {
-                                checkSegment(documentOffset, currText, completions, segment, false);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            // no dots
-            {
-                for (String str : plugin.getSchemas())
-                {
-                    if (str != null && str.toUpperCase().startsWith(currText))
-                    {
-                        completions
-                                .add(new Segment(str, dummyPosition, Segment.SegmentType.Schema));
-                    }
-                }
-                String schema = plugin.getCurrentSchema();
-                if (schema != null)
-                {
-                    for (String str : plugin.getPackages(schema))
-                    {
-                        if (str.toUpperCase().startsWith(currText))
-                        {
-                            completions
-                                    .add(new Segment(str, dummyPosition, Segment.SegmentType.Package));
-                        }
-                    }
-                }
-                for (Segment segment : thisDocsSegments)
-                {
-                    checkSegment(documentOffset, currText, completions, segment, true);
-                }
-                for (String string : ACS)
-                {
-                    Segment segment = new Segment(string, dummyPosition, Segment.SegmentType.Label);
-                    if (string.startsWith(currText))
-                    {
-                        completions.add(segment);
-                    }
-                }
-            }
+            String currText = computeCompletionSegments(completions,
+                                                        documentOffset,
+                                                        lineOfText,
+                                                        lastNonUsableCharacter,
+                                                        doc);
 
             ICompletionProposal result[] = new ICompletionProposal[completions.size()];
             int index = 0;
@@ -245,6 +160,110 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
             e.printStackTrace();
         }
         return null;
+    }
+
+    /**
+     * @param completions
+     * @return the current text
+     */
+    public String computeCompletionSegments(List<Segment> completions,
+                                            int documentOffset,
+                                            String lineOfText,
+                                            int lastNonUsableCharacter,
+                                            IDocument doc)
+    {
+        String currText = lineOfText.substring(lastNonUsableCharacter + 1).toUpperCase();
+        PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
+        List<Segment> thisDocsSegments = plugin.getSegments(doc);
+
+        Position dummyPosition = new Position(0);
+
+        // check qualifiers
+        if (currText.contains("."))
+        {
+            int lastDotIndex = currText.lastIndexOf(".");
+            String prior = currText.substring(0, lastDotIndex).toLowerCase();
+            currText = currText.substring(lastDotIndex + 1);
+            if (prior.contains("."))
+            {
+                // currText is text after first dot
+                int index = prior.lastIndexOf(".");
+                String schema = prior.substring(0, index);
+                String packageName = prior.substring(index + 1);
+                for (Segment segment : plugin.getSegments(schema, packageName))
+                {
+                    checkSegment(documentOffset, currText, completions, segment, false);
+                }
+            }
+            else
+            {
+                // only one dot, could be schema or package name
+                // currText is text after the dot
+                String schema = null;
+                String packageName = null;
+                List<String> schemas = plugin.getSchemas();
+                if (schemas.contains(prior))
+                {
+                    schema = prior;
+                    for (String str : plugin.getPackages(schema))
+                    {
+                        if (str != null && str.toUpperCase().startsWith(currText))
+                        {
+                            completions.add(new Segment(str, dummyPosition,
+                                    Segment.SegmentType.Package));
+                        }
+                    }
+                }
+                else
+                {
+                    schema = plugin.getCurrentSchema();
+                    packageName = prior;
+                    if (packageName != null)
+                    {
+                        for (Segment segment : plugin.getSegments(schema, packageName))
+                        {
+                            checkSegment(documentOffset, currText, completions, segment, false);
+                        }
+                    }
+                }
+            }
+        }
+        else
+        // no dots
+        {
+            for (String str : plugin.getSchemas())
+            {
+                if (str != null && str.toUpperCase().startsWith(currText))
+                {
+                    completions.add(new Segment(str, dummyPosition, Segment.SegmentType.Schema));
+                }
+            }
+            String schema = plugin.getCurrentSchema();
+            if (schema != null)
+            {
+                for (String str : plugin.getPackages(schema))
+                {
+                    if (str.toUpperCase().startsWith(currText))
+                    {
+                        completions
+                                .add(new Segment(str, dummyPosition, Segment.SegmentType.Package));
+                    }
+                }
+            }
+            for (Segment segment : thisDocsSegments)
+            {
+                checkSegment(documentOffset, currText, completions, segment, true);
+            }
+            for (String string : ACS)
+            {
+                Segment segment = new Segment(string, dummyPosition, Segment.SegmentType.Label);
+                if (string.startsWith(currText))
+                {
+                    completions.add(segment);
+                }
+            }
+        }
+        return currText;
     }
 
     private void checkSegment(int documentOffset,

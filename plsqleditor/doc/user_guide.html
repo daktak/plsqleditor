@@ -13,20 +13,24 @@ will eventually become a more useful aid.
 </p>
 
 <ul>
-	<li>Directory structure for you pl sql code. <br>
+    <li> <b>An example</b> <br/>
+         This example of a <a href="tmp_fake.pkb">package body file</a> is not complete, but it 
+         should give you an idea of how to write a package body file that has the correct
+         outline and parsing etc.</li>
+	<li><b>Directory structure for you pl sql code.</b> <br/>
 	The best thing you can do is have your schemas in separate directories
 	- one directory per schema. This way it will be easy for the editor to
 	find all of your packages per schema.</li>
-	<li>Package Naming Format <br>
+	<li><b>Package Naming Format</b> <br/>
 	The editor expects your package files to be named
 	schemaname_pkgname.pkb. If you don't name them in this way, there is no
 	guarantee that the editor will correctly assign your package to its
 	schema. You can override this by going to the preferences and assigning
 	particular packages to particular files.</li>
-	<li>Dabase access support. <br>
+	<li><b>Dabase access support.</b> <br/>
 	There are several components of database access support.
 	<ol>
-		<li>Configuring access to the database <br>
+		<li><b>Configuring access to the database</b> <br/>
 		This involves navigating to the Database Connectivity Setup Preference
 		Page within the PL/SQL Preferences. Once you have navigated there, you
 		must specify an Oracle driver. The default driver that is supplied
@@ -41,14 +45,14 @@ will eventually become a more useful aid.
 		one at a time within the eclipse architecture. This is built in for
 		future enhancements where the same connection might be used for
 		separate purposes.</li>
-		<li>Configuring the dba user for database procedure/function content
-		assist <br>
+		<li><b>Configuring the dba user for database procedure/function content
+		assist</b> <br/>
 		This involves modifying the user name and password on the same
 		Database Connectivity Setup Preference Page screen. The user name and
 		password here should have dba access so they can query the schema,
 		package and procedure tables to allow content assist to present these
 		methods to the user.</li>
-		<li>Configuring each schema to allow upload of code to the database. <br>
+		<li><b>Configuring each schema to allow upload of code to the database.</b> <br/>
 		This involves modifying the schema objects in the Schema Mapping
 		Preference Page. Each schema has a name, a list of comma separated
 		locations and a password. The schema name is the user and the password
@@ -58,11 +62,6 @@ will eventually become a more useful aid.
 		upload code for that schema.</li>
 	</ol>
 	</li>
-
 </ul>
-
-<A href="http://sourceforge.net"> <IMG
-	src="http://sourceforge.net/sflogo.php?group_id=133826&amp;type=5"
-	width="210" height="62" border="0" alt="SourceForge.net Logo" /></A>
-	</body>
+</body>
 </html>

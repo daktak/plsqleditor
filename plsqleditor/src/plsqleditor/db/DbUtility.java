@@ -414,10 +414,10 @@ public class DbUtility
     }
 
     /**
-     * This method closes a statement if it is not null, ignoring any errors.
+     * This method closes a result set if it is not null, ignoring any errors.
      * 
-     * @param s
-     *            The statement to close.
+     * @param rs
+     *            The result set to close.
      */
     public static void close(ResultSet rs)
     {
@@ -523,20 +523,15 @@ public class DbUtility
      * This method loads a file into the database, returning any errors it
      * found.
      * 
-     * @param c
-     *            The connection to use to load the database.
-     * 
-     * @param packageName
-     *            The name of the package being loaded, for error purposes.
+     * @param schemaName
+     *            The name of the schema being loaded, for error purposes.
      * 
      * @param toLoad
      *            The text representation of the entire package.
      * 
-     * @param type
-     *            The type of thing being loaded. (package/package body etc).
-     * 
      * @return The list of errors from the compile, or null if there were none.
-     * @throws SQLException
+     * 
+     * @throws SQLException when there is a database error
      */
     public static ResultSetWrapper loadCode(String schemaName, String toLoad) throws SQLException
     {

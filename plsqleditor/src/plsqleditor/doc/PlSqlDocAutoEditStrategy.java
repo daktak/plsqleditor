@@ -61,13 +61,42 @@ public class PlSqlDocAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
 
     public void customizeDocumentCommand(IDocument d, DocumentCommand c)
     {
-        if (c.length == 0 && c.text != null && endsWithDelimiter(d, c.text))
+        try
         {
-            javaDocAfterNewLine(d, c);
+            if (c.length == 0 && c.text != null && endsWithDelimiter(d, c.text))
+            {
+                int line = d.getLineOfOffset(c.offset);
+                int start = d.getLineOffset(line);
+                int length = c.offset - start;
+                String str = d.get(start,length);
+
+                int starIndex = str.indexOf('*');
+                StringBuffer sb = new StringBuffer();
+                appendSpaces(starIndex, sb);
+                String preSpaces = sb.toString();
+                
+                if (!javaDocAfterNewLine(d, c, preSpaces))
+                {
+                    addCommentString(d, c, preSpaces);
+                }
+            }
+        }
+        catch (BadLocationException e)
+        {
+            e.printStackTrace();
         }
     }
 
-    private boolean javaDocAfterNewLine(IDocument document, DocumentCommand command)
+    /**
+     * @param d
+     * @param c
+     */
+    private void addCommentString(IDocument d, DocumentCommand c, String preSpaces)
+    {
+        c.text += preSpaces + "* ";
+    }
+
+    private boolean javaDocAfterNewLine(IDocument document, DocumentCommand command, String preSpaces)
     {
         int textLength = 3;
         int endTextLength = 2;
@@ -109,16 +138,15 @@ public class PlSqlDocAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                 }
                 StringBuffer toAppend = new StringBuffer();
-                toAppend.append(" *");
                 if (foundSegment != null && (foundIndex == -1 || foundSegment.getPosition().getOffset() < foundIndex))
                 {
-                    // TODO should get the correct indent from the previous line
+                    toAppend.append(preSpaces).append("*");
                     for (Segment parameter : foundSegment.getParameterList())
                     {
                         toAppend.append(" @param ");
                         toAppend.append(parameter.getName());
                         toAppend.append(newLine);
-                        toAppend.append(" *");
+                        toAppend.append(preSpaces).append("*");
                     }
                     String returnType = foundSegment.getReturnType();
                     if (returnType.trim().length() > 0)
@@ -127,10 +155,10 @@ public class PlSqlDocAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                         toAppend.append(returnType);
                         toAppend.append(newLine);
                     }
-                    toAppend.append(" */");
+                    toAppend.append(preSpaces).append("*/");
                 }
                 command.text += toAppend.toString();
-                return true;
+                return toAppend.length() > 0;
             }
         }
         catch (BadLocationException e)
@@ -142,5 +170,13 @@ public class PlSqlDocAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
             e.printStackTrace();
         }
         return false;
+    }
+    
+    private void appendSpaces(int numSpaces, StringBuffer buf)
+    {
+        for (int i = 0; i < numSpaces; i++)
+        {
+            buf.append(' ');
+        }
     }
 }

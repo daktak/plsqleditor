@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import plsqleditor.preferences.entities.SchemaDetails;
@@ -36,7 +35,7 @@ public class SchemaRegistry
     private List<RegistryUpdateListener> myListeners;
     private static final Object          OPEN_SCHEMA_DETAILS_LIST  = "<SchemaDetailsList>";
     private static final Object          CLOSE_SCHEMA_DETAILS_LIST = "</SchemaDetailsList>";
-    private boolean                      myIsUpdated = false;
+    private boolean                      myIsUpdated               = false;
 
     public interface RegistryUpdateListener
     {
@@ -72,8 +71,6 @@ public class SchemaRegistry
     }
 
     /**
-     * @throws CoreException
-     * 
      */
     public void saveSchemaMappings(boolean updateListeners)
     {
@@ -127,7 +124,7 @@ public class SchemaRegistry
     }
 
     /**
-     * @return
+     * @return The list of schema details objects stored in this registry.
      */
     public SchemaDetails[] getSchemaMappings()
     {
@@ -188,7 +185,7 @@ public class SchemaRegistry
     }
 
     /**
-     * @return
+     * @return The file that stores this schema registry.
      */
     private File getStorageFile()
     {

@@ -44,15 +44,11 @@ public class LoadPackageManager
 
 
     /**
-     * This constructor creates the SQLErrorManager, passing in the textPane
-     * that will be hilited when errors occur, and the {@link #nextError()} and
-     * {@link #previousError()} calls are made.
-     * 
-     * @param textPane
+     * This constructor creates the LoadPackageManager, instantiating the map of 
+     * resultset wrappers.
      */
     private LoadPackageManager()
     {
-        //
         myResultSetWrapperMap = new HashMap<String, ResultSetWrapper>();
     }
 
@@ -277,8 +273,8 @@ public class LoadPackageManager
      * create/replace the procedure/function of type <code>procType</code> and
      * name <code>procName</code>.
      * 
-     * @param s
-     *            The statement to use to retrieve the errors.
+     * @param c
+     *            The connection to use to create the error request statement.
      * 
      * @param packageName
      *            The name of the package or package body that was compiled, but
