@@ -148,6 +148,12 @@ public class TestDBPackageStore extends TestCase {
 		assertTrue("Second version of FOOBAR has 3 elements",(segments2.size() == 3));
 	    stmt.execute("drop package foobar");
 		stmt.close();
+		
+		//Check that the refresh of aliases works
+		segments = dbps.getSegments("SVCMDL","DBMS_OUTPUT");
+		assertTrue("dbms_output segments found", (segments.size() > 0));
+		segments = dbps.getSegments("SVCMDL","DBMS_OUTPUT");		
+		assertTrue("dbms_output segments found", (segments.size() > 0));
 	}
 
 	public void testGetPackages() throws SQLException, InterruptedException {
