@@ -23,6 +23,7 @@ public class PlSqlActionContributor extends TextEditorActionContributor
 
     protected RetargetTextEditorAction fContentAssistProposal;
     protected RetargetTextEditorAction fContentAssistTip;
+//    protected RetargetTextEditorAction fLoadToDatabase;
     protected TextEditorAction         fTogglePresentation;
 
     public PlSqlActionContributor()
@@ -35,6 +36,11 @@ public class PlSqlActionContributor extends TextEditorActionContributor
                 "ContentAssistTip.");
         fContentAssistTip
                 .setActionDefinitionId("org.eclipse.ui.edit.text.contentAssist.contextInformation");
+
+//        fLoadToDatabase = new RetargetTextEditorAction(PlSqlEditorMessages.getResourceBundle(),
+//                "LoadToDatabase.");
+//        fLoadToDatabase.setActionDefinitionId("plsqleditor.loadToDatabase");
+
         fTogglePresentation = new PresentationAction();
     }
 
@@ -61,7 +67,10 @@ public class PlSqlActionContributor extends TextEditorActionContributor
     {
         super.setActiveEditor(part);
         ITextEditor editor = null;
-        if (part instanceof ITextEditor) editor = (ITextEditor) part;
+        if (part instanceof ITextEditor)
+        {
+            editor = (ITextEditor) part;
+        }
         fContentAssistProposal.setAction(getAction(editor, "ContentAssistProposal"));
         fContentAssistTip.setAction(getAction(editor, "ContentAssistTip"));
         fTogglePresentation.setEditor(editor);

@@ -1,12 +1,9 @@
 package plsqleditor.popup.actions;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Iterator;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -20,10 +17,7 @@ import org.eclipse.ui.IWorkbenchPartSite;
 
 public class GenerateHeaderAction implements IObjectActionDelegate
 {
-
     private IWorkbenchPart myWorkBenchPart;
-    
-    private PlsqlHeaderGenerator myHeaderGenerator = new PlsqlHeaderGenerator();
 
     /**
      * Constructor for Action1.
@@ -70,7 +64,7 @@ public class GenerateHeaderAction implements IObjectActionDelegate
                                 IFile file = (IFile) o;
                                 try
                                 {
-                                    successBuffer.append(generateHeader(file)).append("\n");
+                                    successBuffer.append(plsqleditor.actions.GenerateHeaderAction.generateHeader(file)).append("\n");
                                 }
                                 catch (IOException e)
                                 {
@@ -97,31 +91,10 @@ public class GenerateHeaderAction implements IObjectActionDelegate
     }
 
     /**
-     * This method 
-     * 
-     * @param file
-     */
-    private String generateHeader(IFile file) throws IOException, CoreException
-    {
-        IFolder parent = (IFolder) file.getParent();
-        String filename = file.getName().replaceFirst("\\.pkb", ".pkh");
-        IFile pkhFile = parent.getFile(filename);
-        String result = myHeaderGenerator.parseBodyFile(file.getContents());
-        InputStream resultingInputStream = new ByteArrayInputStream(result.getBytes());
-        if (pkhFile.exists())
-        {
-            pkhFile.delete(true, true, null);
-        }
-        pkhFile.create(resultingInputStream, true, null);
-        return filename;
-    }
-
-    /**
      * @see org.eclipse.ui.IActionDelegate#selectionChanged(IAction, ISelection)
      */
     public void selectionChanged(IAction action, ISelection selection)
     {
         // do nothing for the moment
     }
-
 }

@@ -3,7 +3,7 @@
 <plugin
    id="plsqleditor"
    name="Toby's PL SQL Editor"
-   version="0.2.6"
+   version="0.2.7"
    provider-name="Toby Zines"
    class="plsqleditor.PlsqleditorPlugin">
 
@@ -83,25 +83,26 @@
             <separator name="group1"/>
          </menu>
          <action
-               class="plsqleditor.popup.actions.LoadAction"
+               class="plsqleditor.actions.ResourceMenuOpenFileAction"
                definitionId="plsqleditor.loadToDatabase"
                enablesFor="1"
                icon="icons/transfer.gif"
-               id="plsqleditor.loadAction"
+               id="plsqleditor.loadToDatabase.action"
                label="Load to Database"
                menubarPath="plsqleditor.menu/group1"/>
          <action
                class="plsqleditor.popup.actions.GenerateHeaderAction"
                enablesFor="+"
                icon="icons/grrarr.gif"
-               id="pkhgen.genHeader"
+               id="plsqleditor.generateHeader.action"
                label="Generate Header"
                menubarPath="plsqleditor.menu/group1"/>
          <action
-               class="plsqleditor.popup.actions.RefreshErrorStatusAction"
+               class="plsqleditor.actions.ResourceMenuOpenFileAction"
+               definitionId="plsqleditor.refreshErrorStatus"
                enablesFor="+"
                icon="icons/togglepresentation.gif"
-               id="plsqleditor.refreshStatus"
+               id="plsqleditor.refreshErrorStatus.action"
                label="Refresh Error Status"
                menubarPath="plsqleditor.menu/group1"/>
       </objectContribution>
@@ -128,6 +129,24 @@
             contextId="plsql.editor"
             keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
             keySequence="Ctrl+Alt+L"/>
+      <command
+            categoryId="plsql.editor"
+            id="plsqleditor.generateHeader"
+            name="Generate Header"/>
+      <keyBinding
+            commandId="plsqleditor.generateHeader"
+            contextId="plsql.editor"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            keySequence="Ctrl+Alt+H"/>
+      <command
+            categoryId="plsql.editor"
+            id="plsqleditor.refreshErrorStatus"
+            name="Refresh Error Status"/>
+      <keyBinding
+            commandId="plsqleditor.refreshErrorStatus"
+            contextId="plsql.editor"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            keySequence="Ctrl+Alt+R"/>
    </extension>
    <extension
          point="org.eclipse.ui.actionSets">

@@ -39,7 +39,7 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
     private PlSqlCodeScanner         fCodeScanner;
     private PackageStore             myPackageStore;
     private SchemaRegistry           theSchemaRegistry;
-    private IProject myProject;
+    private IProject                 myProject;
 
     public PlsqleditorPlugin()
     {

@@ -19,6 +19,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.projection.ProjectionAnnotation;
+import org.eclipse.jface.text.source.projection.ProjectionAnnotationModel;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 import org.eclipse.jface.viewers.ISelection;
@@ -31,17 +32,25 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 
 import plsqleditor.PlsqleditorPlugin;
+import plsqleditor.actions.GenerateHeaderAction;
 import plsqleditor.actions.LoadToDatabaseAction;
+import plsqleditor.actions.RefreshErrorStatusAction;
 
 public class PlSqlEditor extends TextEditor
 {
+    private static final String PLSQLEDITOR_LOADTODATABASE_DEF_ID = "plsqleditor.loadToDatabase";
+    private static final String PLSQLEDITOR_LOADTODATABASE_ID = PLSQLEDITOR_LOADTODATABASE_DEF_ID + ".action";
+    private static final String PLSQLEDITOR_REFRESH_ERROR_STATUS_DEF_ID = "plsqleditor.refreshErrorStatus";
+    private static final String PLSQLEDITOR_REFRESH_ERROR_STATUS_ID = PLSQLEDITOR_REFRESH_ERROR_STATUS_DEF_ID + ".action";
+    private static final String PLSQLEDITOR_GENERATEHEADER_DEF_ID = "plsqleditor.generateHeader";
+    private static final String PLSQLEDITOR_GENERATEHEADER_ID = PLSQLEDITOR_GENERATEHEADER_DEF_ID + ".action";
+    
     private PlSqlContentOutlinePage fOutlinePage;
     private ProjectionSupport       fProjectionSupport;
 
     public PlSqlEditor()
     {
         super();
-        // setDocumentProvider(new PlSqlDocumentProvider());
     }
 
     /**
@@ -69,7 +78,7 @@ public class PlSqlEditor extends TextEditor
         private IAnnotationModel getAnnotationModel(ITextEditor editor)
         {
             return (IAnnotationModel) editor
-                    .getAdapter(org.eclipse.jface.text.source.projection.ProjectionAnnotationModel.class);
+                    .getAdapter(ProjectionAnnotationModel.class);
         }
 
         public void run()
@@ -125,9 +134,17 @@ public class PlSqlEditor extends TextEditor
                 "DefineFoldingRegion.", this);
         setAction("DefineFoldingRegion", a);
         
-        a = new LoadToDatabaseAction(PlSqlEditorMessages.getResourceBundle(),"LoadToDatabase.",this);
-        a.setActionDefinitionId("plsqleditor.loadToDatabase");
-        setAction("LoadToDatabase",a);
+        a = new LoadToDatabaseAction(PlSqlEditorMessages.getResourceBundle(),PLSQLEDITOR_LOADTODATABASE_ID + ".",this);
+        a.setActionDefinitionId(PLSQLEDITOR_LOADTODATABASE_DEF_ID);
+        setAction(PLSQLEDITOR_LOADTODATABASE_ID, a);
+        
+        a = new RefreshErrorStatusAction(PlSqlEditorMessages.getResourceBundle(),PLSQLEDITOR_REFRESH_ERROR_STATUS_ID + ".",this);
+        a.setActionDefinitionId(PLSQLEDITOR_REFRESH_ERROR_STATUS_DEF_ID);
+        setAction(PLSQLEDITOR_REFRESH_ERROR_STATUS_ID, a);
+        
+        a = new GenerateHeaderAction(PlSqlEditorMessages.getResourceBundle(),PLSQLEDITOR_GENERATEHEADER_ID + ".",this);
+        a.setActionDefinitionId(PLSQLEDITOR_GENERATEHEADER_DEF_ID);
+        setAction(PLSQLEDITOR_GENERATEHEADER_ID, a);
     }
 
     public void doRevertToSaved()
@@ -172,6 +189,9 @@ public class PlSqlEditor extends TextEditor
         addAction(menu, "ContentAssistProposal");
         addAction(menu, "ContentAssistTip");
         addAction(menu, "DefineFoldingRegion");
+        addAction(menu, PLSQLEDITOR_LOADTODATABASE_ID);
+        addAction(menu, PLSQLEDITOR_REFRESH_ERROR_STATUS_ID);
+        addAction(menu, PLSQLEDITOR_GENERATEHEADER_ID);
     }
 
     public Object getAdapter(Class required)
