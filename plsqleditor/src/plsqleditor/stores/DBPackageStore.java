@@ -284,10 +284,10 @@ public class DBPackageStore
      * @return The list of currently known schema names.
      * @throws SQLException
      */
-    public List<String> getSchemas(boolean forceUpdate, boolean updateList) throws SQLException
+    public List<String> getSchemas(boolean forceUpdate, boolean updateList, int refreshSeconds) throws SQLException
     {
         List<String> schemaList = new ArrayList<String>();
-        List<String> newSchemaList = null; // this gets initialized later
+        List<String> newSchemaList = new ArrayList<String>();
         String allSchemasSql = "SELECT username " + "FROM all_users u "
                 + "WHERE EXISTS (SELECT p.procedure_name " + "              FROM all_procedures p "
                 + "              WHERE p.owner = u.username)";
@@ -302,13 +302,19 @@ public class DBPackageStore
             myDBLastCacheTime = getSysTimestamp();
             newSchemaList = schemaList;
         }
-        else if (updateList)
+        else if (updateList && 
+				(getSysTimestamp().getTime() > 
+						myDBLastCacheTime.getTime() + (long) (refreshSeconds * 1000)))
         {
             newSchemaList = getObjectsByVariables(newSchemasSql, new Object[]{myDBLastCacheTime});
             schemaList.addAll(newSchemaList);
             myDBLastCacheTime = getSysTimestamp();
         }
-        // Now add all new schemas to our cache
+/*		else
+		{
+			System.out.println("Using cached schemas");
+		}
+*/        // Now add all new schemas to our cache
         for (String s : newSchemaList)
         {
             mySchemaToPackageMap.put(s, null);
@@ -318,7 +324,7 @@ public class DBPackageStore
 
     public List<String> getSchemas() throws SQLException
     {
-        return getSchemas(false, true);
+        return getSchemas(false, true, 10);
     }
 
     /**
@@ -379,7 +385,7 @@ public class DBPackageStore
 			"AND    a.OBJECT_NAME = UPPER(?) " +
 			"AND    a.DATA_LEVEL = 0 " +
 			"ORDER BY a.position";
-		System.out.println(sql);
+//		System.out.println(sql);
         Segment.SegmentType segmentType = Segment.SegmentType.Procedure;
         String segmentReturnType = null;
         Segment segment = null;
@@ -421,12 +427,17 @@ public class DBPackageStore
      * @return the list of segments for the given schema and package.
      * @throws SQLException
      */
-    public List<Segment> getSegments(String schemaName, String packageName, boolean forceUpdate)
+    public List<Segment> getSegments(String schemaName, String packageName, boolean forceUpdate, int refreshSeconds)
             throws SQLException
     {
         String lastPackageDDLDateSQL = 
 			"SELECT last_ddl_time " + 
-			"FROM   (" + myViewablePackagesSQL + ") o " + 
+			"FROM   all_objects o " + //was (" + myViewablePackagesSQL + ") 
+			"WHERE  o.owner = UPPER(?) " +  
+			"AND    o.object_name = UPPER(?) ";
+        String lastPublicPackageDDLDateSQL = 
+			"SELECT last_ddl_time " + 
+			"FROM   (" + myViewablePackagesSQL + ") o " + //was  
 			"WHERE  o.owner IN (UPPER(?),'PUBLIC') " +  
 			"AND    o.name = UPPER(?) ";
 
@@ -436,26 +447,42 @@ public class DBPackageStore
         {
             segmentList = loadSegments(schemaName, packageName);
         }
-        else
+        else if (getSysTimestamp().getTime() > myPackageToLastCacheTimeMap.get(getPackageName(schemaName, packageName)).getTime() + (long) (refreshSeconds * 1000))
         {
             Timestamp lastCacheTime = myPackageToLastCacheTimeMap.get(getPackageName(schemaName,
                                                                                      packageName));
-            List<Timestamp> lastUpdateTime = getObjectsByVariables(lastPackageDDLDateSQL,
-                                                                   new Object[]{schemaName, schemaName, schemaName, schemaName, 
-                                                                           packageName},
-                                                                   new Timestamp[0]);
-            if (lastUpdateTime.size() == 0 || lastUpdateTime.get(0).after(lastCacheTime))
+			List<Timestamp> lastUpdateTimeList;
+			if (segmentList.get(0).isPublic())
+			{
+	            lastUpdateTimeList = getObjectsByVariables(lastPublicPackageDDLDateSQL,
+						new Object[]{schemaName, schemaName, schemaName, schemaName,packageName},
+                        new Timestamp[0]);
+			} 
+			else
+			{
+				lastUpdateTimeList = getObjectsByVariables(lastPackageDDLDateSQL,
+														   new Object[]{schemaName,packageName},
+                                                           new Timestamp[0]);
+			}
+            if (lastUpdateTimeList.size() == 0 || lastUpdateTimeList.get(0).after(lastCacheTime))
             {
                 segmentList = loadSegments(schemaName, packageName);
-
             }
         }
+/*		else
+		{
+			System.out.println("Using cached segments");
+		}
+*/
         return segmentList;
     }
 
+	/**
+	 * @see getSegments
+	 */
     public List<Segment> getSegments(String schemaName, String packageName) throws SQLException
     {
-        return getSegments(schemaName, packageName, false);
+        return getSegments(schemaName, packageName, false, 10);
     }
 
     /**
@@ -468,7 +495,7 @@ public class DBPackageStore
      * @return The list of packages for the given schema.
      * @throws SQLException
      */
-    public List<String> getPackages(String schemaName, boolean forceUpdate) throws SQLException
+    public List<String> getPackages(String schemaName, boolean forceUpdate, int refreshSeconds) throws SQLException
     {
 
         String allPackagesSQL = 
@@ -494,7 +521,7 @@ public class DBPackageStore
             mySchemaToPackageMap.put(schemaName, packageList);
             mySchemaToLastCacheTimeMap.put(schemaName, newCacheTime);
         }
-        else
+        else if (getSysTimestamp().getTime() > mySchemaToLastCacheTimeMap.get(schemaName).getTime() + (long) (refreshSeconds * 1000))
         {
             newPackageList = getObjectsByVariables(newPackagesSQL, new Object[]{schemaName, schemaName, schemaName,
                     mySchemaToLastCacheTimeMap.get(schemaName)});
@@ -506,13 +533,17 @@ public class DBPackageStore
                 mySchemaToLastCacheTimeMap.put(schemaName, newCacheTime);
             }
         }
-
+/*        else
+		{
+			System.out.println("Using cached packages");
+		}
+*/
         return packageList;
     }
 
     public List<String> getPackages(String schemaName) throws SQLException
     {
-        return getPackages(schemaName, false);
+        return getPackages(schemaName, false,10);
     }
 
     public String getSource(String schemaName, String packageName) throws SQLException

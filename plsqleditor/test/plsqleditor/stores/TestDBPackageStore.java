@@ -10,6 +10,7 @@ import java.util.List;
 import junit.framework.TestCase;
 import plsqleditor.db.ConnectionPool;
 import plsqleditor.parsers.Segment;
+//import plsqleditor.stores.DBPackageStore;
 
 public class TestDBPackageStore extends TestCase {
 
@@ -90,7 +91,7 @@ public class TestDBPackageStore extends TestCase {
 		assertTrue("Time to refresh is at least 10x as fast as initial time", (timesFaster >= 10));
 	}
 
-	public void testGetSegments() throws SQLException {
+	public void testGetSegments() throws SQLException, InterruptedException {
 	    Statement stmt = myConn.createStatement ();
 
 	    stmt.execute("create or replace package foobar " + 
@@ -115,6 +116,7 @@ public class TestDBPackageStore extends TestCase {
 				}
 			}
 		}
+		Thread.sleep(2000); //just to make sure the DDL time gets updated
 	    stmt.execute("create or replace package foobar " + 
  				 "as procedure foo; " +
  				 "function bar return number; " +
@@ -125,8 +127,8 @@ public class TestDBPackageStore extends TestCase {
 		long t4 = System.currentTimeMillis();
 		double timesFaster = ((t4 - t3 == 0) ? 999 : (t2-t1)/(t4-t3)); 
 		System.out.println("Time to get segments second time: " + (t4-t3) + " :");
-		assertTrue("Time to refresh is at least 1.5x as fast as initial time", (timesFaster >= 1.5));
-		assertTrue("First version of FOOBAR has 2 elements",(segments2.size() == 2));
+		assertTrue("Time to refresh is at least 10x as fast as initial time", (timesFaster >= 10));
+		assertTrue("First version of FOOBAR has 2 elements",(segments.size() == 2));
 		for (Segment s : segments2)
 		{
 			System.out.println(s.getName() + "|" + s.getReturnType());
@@ -141,6 +143,9 @@ public class TestDBPackageStore extends TestCase {
 				}
 			}
 		}
+		Thread.sleep(11000);
+		segments2 = dbps.getSegments("SVCMDL","FOOBAR");
+		assertTrue("Second version of FOOBAR has 3 elements",(segments2.size() == 3));
 	    stmt.execute("drop package foobar");
 		stmt.close();
 	}
@@ -178,7 +183,10 @@ public class TestDBPackageStore extends TestCase {
 		long t4 = System.currentTimeMillis();
 		System.out.println("Time to get packages second time: " + (t4-t3) + " :");
 		double timesFaster = ((t4 - t3 == 0) ? 999 : (double)(t2-t1)/(double)(t4-t3)); 
-		assertTrue("Time to refresh is at least 1.5x as fast as initial time", (timesFaster >= 1.5));
+		assertTrue("Time to refresh is at least 10x as fast as initial time", (timesFaster >= 10));
+		Thread.sleep(11000);
+		packages2 = dbps.getPackages("SVCMDL");
+		
 		assertTrue("((" + packagesSize + " + 1) == " + packages2.size() + "))",((packagesSize + 1) == packages2.size()));
 		for (String p : packages2)
 		{
