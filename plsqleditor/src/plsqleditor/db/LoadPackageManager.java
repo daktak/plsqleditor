@@ -9,6 +9,16 @@ import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Vector;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.eclipse.jface.preference.IPreferenceStore;
+
+import plsqleditor.PlsqleditorPlugin;
+import plsqleditor.parsers.StringLocationMap;
+import plsqleditor.preferences.PreferenceConstants;
+import plsqleditor.process.CannotCompleteException;
+import plsqleditor.process.SqlPlusProcessExecutor;
 
 /**
  * This class
@@ -21,15 +31,16 @@ import java.util.Vector;
  */
 public class LoadPackageManager
 {
-    public enum PackageType {
+    public enum PackageType
+    {
         Package_Body, Package
     }
 
-    private SQLErrorDetail[] mySQLErrors     = new SQLErrorDetail[0];
+    private SQLErrorDetail[] mySQLErrors = new SQLErrorDetail[0];
 
     /**
-     * This constructor creates the SQLErrorManager, passing in the textPane that will be hilited when errors occur, and
-     * the {@link #nextError()} and {@link #previousError()} calls are made.
+     * This constructor creates the SQLErrorManager, passing in the textPane that will be hilited
+     * when errors occur, and the {@link #nextError()} and {@link #previousError()} calls are made.
      * 
      * @param textPane
      */
@@ -38,13 +49,78 @@ public class LoadPackageManager
         //
     }
 
-    public SQLErrorDetail [] loadFile(String schemaName, String packageName, String toLoad, PackageType type)
+    public SQLErrorDetail[] execute(String schema,
+                                    String packageName,
+                                    String toLoad,
+                                    PackageType type)
+    {
+        SQLErrorDetail[] details = null;
+        PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
+        IPreferenceStore prefs = plugin.getPreferenceStore();
+        boolean useLocalClient = prefs.getBoolean(PreferenceConstants.P_USE_LOCAL_CLIENT);
+
+        String executable = prefs.getString(PreferenceConstants.P_SQLPLUS_EXECUTABLE);
+
+        if (useLocalClient && (executable != null && executable.length() > 0))
+        {
+            String passwd = DbUtility.getPasswordForSchema(schema);
+            String sid = DbUtility.getSid();
+
+            SqlPlusProcessExecutor sqlplus = new SqlPlusProcessExecutor(executable, schema, passwd,
+                    sid);
+            try
+            {
+                sqlplus.execute(toLoad);
+                details = getErrorDetails(schema, packageName, type);
+            }
+            catch (CannotCompleteException e)
+            {
+                final String msg = "Failed to execute sqlplus for package " + packageName + ": " + e;
+                details = new SQLErrorDetail[]{new SQLErrorDetail(0, 0, msg)};
+            }
+        }
+        else
+        {
+            String separator = System.getProperty("line.separator");
+            toLoad = modifyCodeToLoad(toLoad, packageName, separator);
+            details = loadFile(schema, packageName, toLoad, type);
+        }
+
+        return details;
+    }
+
+    protected String modifyCodeToLoad(String toLoad, String packageName, String separator)
+    {
+        StringBuffer spacesBuffer = new StringBuffer();
+        for (int i = 0; i < separator.length(); i++)
+        {
+            spacesBuffer.append(' ');
+        }
+        String spaces = spacesBuffer.toString();
+        toLoad = StringLocationMap.replacePlSqlSingleLineComments(toLoad);
+        toLoad = toLoad.replaceAll(separator, spaces);
+        String terminator = "[Ee][Nn][Dd] +" + packageName + ";";
+        int end = toLoad.length();
+        Pattern p = Pattern.compile(terminator);
+        Matcher m = p.matcher(toLoad);
+        while (m.find())
+        {
+            end = m.end();
+        }
+        toLoad = toLoad.substring(0, end);
+        return toLoad;
+    }
+
+    public SQLErrorDetail[] loadFile(String schemaName,
+                                     String packageName,
+                                     String toLoad,
+                                     PackageType type)
     {
         Connection c = null;
         try
         {
             c = DbUtility.getConnection(schemaName);
-            return loadFile(c,packageName,toLoad,type);
+            return loadFile(c, packageName, toLoad, type);
         }
         finally
         {
@@ -54,7 +130,7 @@ public class LoadPackageManager
             }
         }
     }
-    
+
     /**
      * This method loads a file into the database, returning any errors it found.
      * 
@@ -68,14 +144,17 @@ public class LoadPackageManager
      * 
      * @return The list of errors from the compile, or null if there were none.
      */
-    private SQLErrorDetail [] loadFile(Connection c, String packageName, String toLoad, LoadPackageManager.PackageType type)
+    private SQLErrorDetail[] loadFile(Connection c,
+                                      String packageName,
+                                      String toLoad,
+                                      LoadPackageManager.PackageType type)
     {
         Statement s = null;
         try
         {
             s = c.createStatement();
             s.execute(toLoad);
-            
+
             String warning = getErrorStatus(c, s, packageName, type);
             if (warning != null)
             {
@@ -87,8 +166,8 @@ public class LoadPackageManager
         {
             DbUtility.printErrors(e);
             DbUtility.close(s);
-            final String msg ="Failed to load package " + packageName + ": " + e;
-            return new SQLErrorDetail[] { new SQLErrorDetail(0,0,msg) };
+            final String msg = "Failed to load package " + packageName + ": " + e;
+            return new SQLErrorDetail[]{new SQLErrorDetail(0, 0, msg)};
         }
     }
 
@@ -106,7 +185,10 @@ public class LoadPackageManager
      * 
      * @return The message from the first warning, or null if there were no warnings.
      */
-    private String getErrorStatus(Connection c, Statement s, String packageName, PackageType packageType)
+    private String getErrorStatus(Connection c,
+                                  Statement s,
+                                  String packageName,
+                                  PackageType packageType)
     {
         try
         {
@@ -114,7 +196,7 @@ public class LoadPackageManager
 
             if (warning != null)
             {
-                //DbUtility.printWarnings(warning);
+                // DbUtility.printWarnings(warning);
                 SQLErrorDetail[] details = getErrorDetails(c, packageName, packageType);
 
                 setErrors(details);
@@ -131,7 +213,9 @@ public class LoadPackageManager
         }
     }
 
-    public SQLErrorDetail[] getErrorDetails(String schemaName, String packageName, PackageType errorType)
+    public SQLErrorDetail[] getErrorDetails(String schemaName,
+                                            String packageName,
+                                            PackageType errorType)
     {
         Connection c = null;
         try
@@ -147,14 +231,15 @@ public class LoadPackageManager
             }
         }
     }
-    
+
     /**
-     * This method gets the error details from the statement that attempted to create/replace the procedure/function of
-     * type <code>procType</code> and name <code>procName</code>.
+     * This method gets the error details from the statement that attempted to create/replace the
+     * procedure/function of type <code>procType</code> and name <code>procName</code>.
      * 
      * @param s The statement to use to retrieve the errors.
      * 
-     * @param packageName The name of the package or package body that was compiled, but caused warnings.
+     * @param packageName The name of the package or package body that was compiled, but caused
+     *            warnings.
      * 
      * @param errorType the type of the errors to look for.
      * 
@@ -178,7 +263,7 @@ public class LoadPackageManager
             List<SQLErrorDetail> v = new Vector<SQLErrorDetail>();
             while (rs.next())
             {
-                detail = new SQLErrorDetail(rs.getInt(1), rs.getInt(2),rs.getString(3));
+                detail = new SQLErrorDetail(rs.getInt(1), rs.getInt(2), rs.getString(3));
                 v.add(detail);
             }
             toReturn = v.toArray(new SQLErrorDetail[v.size()]);
@@ -188,7 +273,7 @@ public class LoadPackageManager
         {
             final String msg = "Failed to retrieve error details: " + e;
             System.out.println(msg);
-            toReturn = new SQLErrorDetail[] { new SQLErrorDetail(0, 0, msg) };
+            toReturn = new SQLErrorDetail[]{new SQLErrorDetail(0, 0, msg)};
         }
         finally
         {
@@ -201,14 +286,14 @@ public class LoadPackageManager
     private void setErrors(SQLErrorDetail[] details)
     {
         mySQLErrors = details;
-//        for (int i = 0; i < details.length; i++)
-//        {
-//            SQLErrorDetail detail = details[i];
-//            if (detail.getRow() == 1)
-//            {
-//                detail.getColumn() -= 24;
-//            }
-//        }
+        // for (int i = 0; i < details.length; i++)
+        // {
+        // SQLErrorDetail detail = details[i];
+        // if (detail.getRow() == 1)
+        // {
+        // detail.getColumn() -= 24;
+        // }
+        // }
     }
 
     /**

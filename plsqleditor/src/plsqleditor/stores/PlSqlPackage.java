@@ -27,9 +27,11 @@ public class PlSqlPackage
     private String        myName;
     private List<Segment> mySegments;
     private Source        mySource;
+    private PlSqlSchema   mySchema;
 
-    public PlSqlPackage(String name, Source type)
+    public PlSqlPackage(PlSqlSchema owner, String name, Source type)
     {
+        mySchema = owner;
         myName = name;
         mySource = type;
         mySegments = new ArrayList<Segment>();
@@ -123,4 +125,27 @@ public class PlSqlPackage
     {
         return mySegments.contains(segment);
     }
+
+    /**
+     * This method returns the schema.
+     * 
+     * @return {@link #mySchema}.
+     */
+    public PlSqlSchema getSchema()
+    {
+        return mySchema;
+    }
+    
+
+    /**
+     * This method sets the schema.  It should only ever get called by a schema when
+     * this object is being added to it.
+     *
+     * @param schema The schema to set.
+     */
+    void setSchema(PlSqlSchema schema)
+    {
+        mySchema = schema;
+    }
+    
 }

@@ -34,7 +34,8 @@ public class SchemaDetailsDialog extends TitleAreaDialog
 {
     protected String myName          = "";  //$NON-NLS-1$
     protected String myPassword      = "";  //$NON-NLS-1$
-    protected String myLocation      = "";  //$NON-NLS-1$
+    // This field represents the locations for this schema in a comma separated list.
+    protected String myLocations      = "";  //$NON-NLS-1$
 
     protected Text   mySchemaNameField;
     protected Text   mySchemaLocationField;
@@ -113,7 +114,7 @@ public class SchemaDetailsDialog extends TitleAreaDialog
                 }
                 else if (event.widget == mySchemaLocationField)
                 {
-                    myLocation = mySchemaLocationField.getText().trim();
+                    myLocations = mySchemaLocationField.getText().trim();
                 }
                 else if (event.widget == myPasswordField)
                 {
@@ -147,7 +148,7 @@ public class SchemaDetailsDialog extends TitleAreaDialog
 
         mySchemaLocationField = new Text(contents, SWT.SINGLE | SWT.BORDER);
         mySchemaLocationField.addModifyListener(ml);
-        mySchemaLocationField.setText(getLocation());
+        mySchemaLocationField.setText(getLocations());
         data = new GridData();
         data.horizontalAlignment = GridData.FILL;
         data.grabExcessHorizontalSpace = true;
@@ -218,9 +219,9 @@ public class SchemaDetailsDialog extends TitleAreaDialog
      * 
      * @return the extension
      */
-    public String getLocation()
+    public String getLocations()
     {
-        return myLocation;
+        return myLocations;
     }
 
     /**
@@ -243,9 +244,9 @@ public class SchemaDetailsDialog extends TitleAreaDialog
         return myPassword;
     }
 
-    public void setLocation(String location)
+    public void setLocations(String location)
     {
-        myLocation = location;
+        myLocations = location;
     }
 
 

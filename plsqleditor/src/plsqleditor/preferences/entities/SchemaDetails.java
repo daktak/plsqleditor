@@ -34,6 +34,8 @@ public class SchemaDetails implements Cloneable
     private static final String  CLOSE_SCHEMA_DETAILS = "</SchemaDetails>";
     private static final String  OPEN_NAME            = "<Name>";
     private static final String  CLOSE_NAME           = "</Name>";
+    private static final String  OPEN_LOCATIONS       = "<Locations>";
+    private static final String  CLOSE_LOCATIONS      = "</Locations>";
     private static final String  OPEN_LOCATION        = "<Location>";
     private static final String  CLOSE_LOCATION       = "</Location>";
     private static final String  OPEN_PASSWORD        = "<Password>";
@@ -42,14 +44,14 @@ public class SchemaDetails implements Cloneable
     private static final String  CLOSE_PACKAGES       = "</Packages>";
 
     private String               myName;
-    private String               myLocation;
     private String               myPassword;
+    private List<String>         myLocations;
     private List<PackageDetails> myPackageDetails;
 
-    public SchemaDetails(String name, String location, String password)
+    public SchemaDetails(String name, List<String> locations, String password)
     {
         myName = name;
-        myLocation = location;
+        myLocations = locations;
         myPassword = password;
         myPackageDetails = new ArrayList<PackageDetails>();
     }
@@ -57,22 +59,31 @@ public class SchemaDetails implements Cloneable
     /**
      * This method returns the location.
      * 
-     * @return {@link #myLocation}.
+     * @return {@link #myLocations}.
      */
-    public String getLocation()
+    public List<String> getLocations()
     {
-        return myLocation;
+        return myLocations;
     }
 
+    public String getLocationString()
+    {
+        StringBuffer sb = new StringBuffer();
+        for (String loc : getLocations())
+        {
+            sb.append(loc).append(",");
+        }
+        return sb.toString().substring(0, sb.length() - 1);
+    }
 
     /**
      * This method sets the ...
      * 
      * @param location The location to set.
      */
-    public void setLocation(String location)
+    public void addLocation(String location)
     {
-        myLocation = location;
+        myLocations.add(location);
     }
 
 
@@ -129,14 +140,14 @@ public class SchemaDetails implements Cloneable
 
     public Object clone()
     {
-        SchemaDetails det = new SchemaDetails(myName, myLocation, myPassword);
+        SchemaDetails det = new SchemaDetails(myName, myLocations, myPassword);
         for (PackageDetails pd : myPackageDetails)
         {
             det.addPackage((PackageDetails) pd.clone());
         }
         return det;
     }
-    
+
 
     /**
      * @return
@@ -163,9 +174,14 @@ public class SchemaDetails implements Cloneable
         sb.append(OPEN_NAME);
         sb.append(myName);
         sb.append(CLOSE_NAME);
-        sb.append(OPEN_LOCATION);
-        sb.append(myLocation);
-        sb.append(CLOSE_LOCATION);
+        sb.append(OPEN_LOCATIONS);
+        for (String loc : myLocations)
+        {
+            sb.append(OPEN_LOCATION);
+            sb.append(loc);
+            sb.append(CLOSE_LOCATION);
+        }
+        sb.append(CLOSE_LOCATIONS);
         sb.append(OPEN_PASSWORD);
         sb.append(myPassword);
         sb.append(CLOSE_PASSWORD).append("\n");
@@ -184,13 +200,21 @@ public class SchemaDetails implements Cloneable
         int end = substring.length();
 
         Pattern p = Pattern.compile(OPEN_SCHEMA_DETAILS + OPEN_NAME + "([^<]*?)" + CLOSE_NAME
-                + OPEN_LOCATION + "([^<]*?)" + CLOSE_LOCATION + OPEN_PASSWORD + "([^<]*?)"
+                + OPEN_LOCATIONS + "(.*?)" + CLOSE_LOCATIONS + OPEN_PASSWORD + "([^<]*?)"
                 + CLOSE_PASSWORD + OPEN_PACKAGES + "(.*?)" + CLOSE_PACKAGES + CLOSE_SCHEMA_DETAILS);
         Matcher m = p.matcher(substring);
         if (m.find())
         {
             myName = m.group(1);
-            myLocation = m.group(2);
+            String locations = m.group(2);
+            Pattern locPattern = Pattern.compile(OPEN_LOCATION + "([^<]*?)" + CLOSE_LOCATION);
+            Matcher locMatcher = locPattern.matcher(locations);
+            myLocations = new ArrayList<String>();
+            while (locMatcher.find())
+            {
+                myLocations.add(locMatcher.group(1));
+            }
+
             myPassword = m.group(3);
             String packageDetails = m.group(4);
             int pLocation = 0;
@@ -234,7 +258,7 @@ public class SchemaDetails implements Cloneable
         SchemaDetails rhs = (SchemaDetails) obj;
         return new EqualsBuilder().append(this.myName, rhs.myName).append(this.myPackageDetails,
                                                                           rhs.myPackageDetails)
-                .append(this.myLocation, rhs.myLocation).append(this.myPassword, rhs.myPassword)
+                .append(this.myLocations, rhs.myLocations).append(this.myPassword, rhs.myPassword)
                 .isEquals();
     }
 
@@ -244,7 +268,7 @@ public class SchemaDetails implements Cloneable
     public int hashCode()
     {
         return new HashCodeBuilder(23, 397).append(this.myName).append(this.myPackageDetails)
-                .append(this.myLocation).append(this.myPassword).toHashCode();
+                .append(this.myLocations).append(this.myPassword).toHashCode();
     }
 
     /**
@@ -257,7 +281,7 @@ public class SchemaDetails implements Cloneable
         SchemaDetails rhs = (SchemaDetails) o;
         return new CompareToBuilder().append(this.myName, rhs.myName).append(this.myPackageDetails,
                                                                              rhs.myPackageDetails)
-                .append(this.myLocation, rhs.myLocation).append(this.myPassword, rhs.myPassword)
+                .append(this.myLocations, rhs.myLocations).append(this.myPassword, rhs.myPassword)
                 .toComparison();
     }
 }

@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -111,12 +112,25 @@ public class SchemaMappingPreferencePage extends PreferencePage
             }
         }
 
+        List<String> locations = getLocationsAsList(newLocation);
         // Create the new type and insert it
-        details = new SchemaDetails(newName, newLocation, newPassword);
+        details = new SchemaDetails(newName, locations, newPassword);
         TableItem item = newSchemaDetails(details, i, true);
         mySchemasTable.setFocus();
         mySchemasTable.showItem(item);
         fillPackageDetailsTable();
+    }
+
+    private List<String> getLocationsAsList(String newLocation)
+    {
+        Scanner scanner = new Scanner(newLocation);
+        scanner.useDelimiter(",");
+        List<String> locations = new ArrayList<String>();
+        while (scanner.hasNext())
+        {
+            locations.add(scanner.next());
+        }
+        return locations;
     }
 
     /**
@@ -190,7 +204,7 @@ public class SchemaMappingPreferencePage extends PreferencePage
                         Rectangle rect = item.getBounds(i);
                         if (rect.contains(pt))
                         {
-                            mySchemasTable.setToolTipText(((SchemaDetails)item.getData()).getLocation());
+                            mySchemasTable.setToolTipText(((SchemaDetails)item.getData()).getLocationString());
                             break;
                         }
                         if (!visible && rect.intersects(clientArea))
@@ -359,12 +373,16 @@ public class SchemaMappingPreferencePage extends PreferencePage
         SchemaDetails sd = getSelectedSchemaDetails();
         SchemaDetailsDialog dialog = new SchemaDetailsDialog(getControl().getShell());
         dialog.setName(sd.getName());
-        dialog.setLocation(sd.getLocation());
+        dialog.setLocations(sd.getLocationString());
         dialog.setPassword(sd.getPassword());
         dialog.setNameEnabled(false);
         if (dialog.open() == Window.OK)
         {
-            sd.setLocation(dialog.getLocation());
+            List<String> locations = getLocationsAsList(dialog.getLocations());
+            for (String loc : locations)
+            {
+                sd.addLocation(loc);
+            }
             sd.setPassword(dialog.getPassword());
         }
     }
@@ -537,7 +555,7 @@ public class SchemaMappingPreferencePage extends PreferencePage
         }
 
         item.setText(0, mapping.getName());
-        item.setText(1, mapping.getLocation());
+        item.setText(1, mapping.getLocationString());
         item.setText(2, mapping.getPassword());
         item.setData(mapping);
         if (selected)
@@ -608,7 +626,7 @@ public class SchemaMappingPreferencePage extends PreferencePage
         if (dialog.open() == Window.OK)
         {
             String name = dialog.getName();
-            String location = dialog.getLocation();
+            String location = dialog.getLocations();
             String password = dialog.getPassword();
             addSchemaDetails(name, location, password);
         }

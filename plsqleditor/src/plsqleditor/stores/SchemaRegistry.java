@@ -152,7 +152,7 @@ public class SchemaRegistry
                 int location = 0;
                 while (location < buffer.length())
                 {
-                    SchemaDetails sd = new SchemaDetails("", "", "");
+                    SchemaDetails sd = new SchemaDetails("", new ArrayList<String>(), "");
                     location = sd.readFromBuffer(buffer, location);
                     if (sd.getName().trim().length() > 0)
                     {

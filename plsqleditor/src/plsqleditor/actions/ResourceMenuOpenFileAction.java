@@ -61,14 +61,7 @@ public class ResourceMenuOpenFileAction extends AbstractMenuAction implements IO
                         IFile file = (IFile) selectedFile;
                         FileEditorInput input = new FileEditorInput(file);
                         ITextEditor editor = null;
-                        try
-                        {
-                            editor = (ITextEditor) mySite.getPage().openEditor(input, "plsqleditor.editors.PlSqlEditor");
-                        }
-                        catch (PartInitException e)
-                        {
-                            e.printStackTrace();
-                        }
+                        editor = openEditor(input, editor);
                         executeOperation(file, action.getId(), editor);
                     }
                 }
@@ -81,6 +74,19 @@ public class ResourceMenuOpenFileAction extends AbstractMenuAction implements IO
             }
 
         }
+    }
+
+    private ITextEditor openEditor(FileEditorInput input, ITextEditor editor)
+    {
+        try
+        {
+            editor = (ITextEditor) mySite.getPage().openEditor(input, "plsqleditor.editors.PlSqlEditor");
+        }
+        catch (PartInitException e)
+        {
+            e.printStackTrace();
+        }
+        return editor;
     }
     public void selectionChanged(IAction iaction, ISelection iselection)
     {

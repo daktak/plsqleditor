@@ -1,8 +1,6 @@
 package plsqleditor.actions;
 
 import java.util.ResourceBundle;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -19,7 +17,6 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.db.LoadPackageManager;
 import plsqleditor.db.SQLErrorDetail;
-import plsqleditor.parsers.StringLocationMap;
 
 /**
  * This class
@@ -44,35 +41,21 @@ public class LoadToDatabaseAction extends TextEditorAction
     {
         Shell shell = new Shell();
         ITextEditor editor = getTextEditor();
-        IFileEditorInput input = (IFileEditorInput) editor.getEditorInput(); 
+        IFileEditorInput input = (IFileEditorInput) editor.getEditorInput();
         IFile file = input.getFile();
         String name = file.getName();
-        
+
         IDocument doc = editor.getDocumentProvider().getDocument(input);
         String toLoad = doc.get();
         String packageName = PlsqleditorPlugin.getDefault().getSegments(name, doc).get(0).getName();
-        String separator = System.getProperty("line.separator");
-
-        toLoad = modifyCodeToLoad(toLoad, packageName, separator);
-
         LoadPackageManager.PackageType type = name.contains(".pkb")
                 ? LoadPackageManager.PackageType.Package_Body
                 : LoadPackageManager.PackageType.Package;
         String schema = PlsqleditorPlugin.getDefault().getCurrentSchema();
 
-        // delete all markers in the file
-        int depth = IResource.DEPTH_INFINITE;
-        try
-        {
-            file.deleteMarkers(IMarker.PROBLEM, true, depth);
-        }
-        catch (CoreException e)
-        {
-            e.printStackTrace();
-            // something went wrong
-        }
+        deleteMarkers(file);
+        SQLErrorDetail[] details = myLoadPackageManager.execute(schema, packageName, toLoad, type);
 
-        SQLErrorDetail[] details = execute(toLoad, packageName, type, schema);
         if (details != null && details.length > 0)
         {
             for (SQLErrorDetail detail : details)
@@ -86,33 +69,35 @@ public class LoadToDatabaseAction extends TextEditorAction
         }
     }
 
-    protected SQLErrorDetail[] execute(String toLoad, String packageName, LoadPackageManager.PackageType type, String schema)
+    private void deleteMarkers(IFile file)
     {
-        return myLoadPackageManager.loadFile(schema, packageName, toLoad, type);
+        // delete all markers in the file
+        int depth = IResource.DEPTH_INFINITE;
+        try
+        {
+            file.deleteMarkers(IMarker.PROBLEM, true, depth);
+        }
+        catch (CoreException e)
+        {
+            e.printStackTrace();
+            // something went wrong
+        }
     }
 
-    protected String modifyCodeToLoad(String toLoad, String packageName, String separator)
-    {
-        StringBuffer spacesBuffer = new StringBuffer();
-        for (int i = 0; i < separator.length(); i++)
-        {
-            spacesBuffer.append(' ');
-        }
-        String spaces = spacesBuffer.toString();
-        toLoad = StringLocationMap.replacePlSqlSingleLineComments(toLoad);
-        toLoad = toLoad.replaceAll(separator, spaces);
-        String terminator = "[Ee][Nn][Dd] +" + packageName + ";";
-        int end = toLoad.length();
-        Pattern p = Pattern.compile(terminator);
-        Matcher m = p.matcher(toLoad);
-        while (m.find())
-        {
-            end = m.end();
-        }
-        toLoad = toLoad.substring(0, end);
-        return toLoad;
-    }
-
+    /**
+     * This method adds an error marker to the supplied <code>file</code> based on the information
+     * in the supplied <code>detail</code>.
+     * 
+     * @param file The file to which the error marker will be added.
+     * 
+     * @param doc The document backing the file.
+     * 
+     * @param docOffset The additional raw offset to add to the offset found in the
+     *        <code>detail</code> if the detail's row is 0 or 1. Otherwise the detail's
+     *        column will be used directly.
+     *        
+     * @param detail The location and mesage of the error.
+     */
     protected void addError(IFile file, IDocument doc, int docOffset, SQLErrorDetail detail)
     {
         try
@@ -120,8 +105,12 @@ public class LoadToDatabaseAction extends TextEditorAction
             IMarker marker = file.createMarker(IMarker.PROBLEM);
             if (marker.exists())
             {
-                int offset = detail.getColumn() + docOffset;
-                int line = doc.getLineOfOffset(offset);
+                int line = detail.getRow();
+                if (line <= 1)
+                {
+                    int offset = detail.getColumn() + docOffset;
+                    line = doc.getLineOfOffset(offset);
+                }
                 marker.setAttribute(IMarker.MESSAGE, detail.getText());
                 marker.setAttribute(IMarker.PRIORITY, IMarker.PRIORITY_HIGH);
                 marker.setAttribute(IMarker.LINE_NUMBER, line);

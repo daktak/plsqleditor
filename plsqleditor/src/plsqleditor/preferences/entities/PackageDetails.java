@@ -45,7 +45,7 @@ public class PackageDetails implements Cloneable
     /**
      * This method returns the location.
      * 
-     * @return {@link #myLocation}.
+     * @return {@link #myLocations}.
      */
     public String getLocation()
     {

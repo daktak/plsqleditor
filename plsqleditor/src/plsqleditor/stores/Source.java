@@ -61,7 +61,7 @@ public class Source
      */
     public boolean equals(Object object)
     {
-        if (!(object instanceof PlSqlPackage))
+        if (!(object instanceof Source))
         {
             return false;
         }

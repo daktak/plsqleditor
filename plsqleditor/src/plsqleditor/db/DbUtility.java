@@ -469,4 +469,33 @@ public class DbUtility
         }
         myConnectionPools.clear();
     }
+
+    /**
+     * This method returns the password stored in the registry for a given
+     * schema.
+     * 
+     * @param schema The schema whose password is required.
+     * 
+     * @return The password of the given registry or a blank if there is none stored.
+     */
+    public static String getPasswordForSchema(String schema)
+    {
+        return myRegistry.getPasswordForSchema(schema);
+    }
+
+    /**
+     * This method returns the Oracle SID of the database to which we are currently
+     * talking.
+     * 
+     * @return The current Oracle SID.
+     */
+    public static String getSid()
+    {
+        if (theUrl == null)
+        {
+            return "";
+        }
+        // e.g. jdbc:oracle:thin:@localhost:1521:SID
+        return theUrl.replaceFirst("jdbc\\:oracle\\:\\w+\\:\\@\\w+\\:\\d+\\:(.*)$", "$1");
+    }
 }

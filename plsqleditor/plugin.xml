@@ -3,7 +3,7 @@
 <plugin
    id="plsqleditor"
    name="Toby's PL SQL Editor"
-   version="0.2.7"
+   version="0.2.9"
    provider-name="Toby Zines"
    class="plsqleditor.PlsqleditorPlugin">
 

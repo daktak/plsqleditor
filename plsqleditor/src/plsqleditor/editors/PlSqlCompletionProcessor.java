@@ -36,7 +36,7 @@ import plsqleditor.parsers.Segment;
  */
 public class PlSqlCompletionProcessor implements IContentAssistProcessor
 {
-    private static final String[]           fgProposals;
+    private static final String[]          fgProposals;
     private static final SortedSet<String> ACS;
 
     static
@@ -59,7 +59,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
         fgProposals = ACS.toArray(new String[ACS.size()]);
     }
 
-    protected IContextInformationValidator  fValidator;
+    protected IContextInformationValidator fValidator;
 
     protected static class Validator
             implements
@@ -97,6 +97,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
 
     public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
+        char [] autoCompleteDelimiters = new char [] {' ', '\t', '(', ';'};
         try
         {
             IDocument doc = viewer.getDocument();
@@ -104,8 +105,13 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
             int start = doc.getLineOffset(line);
             int length = documentOffset - start;
             String lineOfText = doc.get(start, length);
-            int lastSpace = lineOfText.lastIndexOf(' ');
-            String currText = lineOfText.substring(lastSpace + 1).toUpperCase();
+            int lastNonUsableCharacter = -1;
+            for (char c : autoCompleteDelimiters)
+            {
+                lastNonUsableCharacter = Math.max(lastNonUsableCharacter, lineOfText.lastIndexOf(c));
+            }
+
+            String currText = lineOfText.substring(lastNonUsableCharacter + 1).toUpperCase();
             List<Segment> completions = new ArrayList<Segment>();
 
             PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
@@ -175,12 +181,15 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
                     }
                 }
                 String schema = plugin.getCurrentSchema();
-                for (String str : plugin.getPackages(schema))
+                if (schema != null)
                 {
-                    if (str.toUpperCase().startsWith(currText))
+                    for (String str : plugin.getPackages(schema))
                     {
-                        completions
-                                .add(new Segment(str, dummyPosition, Segment.SegmentType.Package));
+                        if (str.toUpperCase().startsWith(currText))
+                        {
+                            completions
+                                    .add(new Segment(str, dummyPosition, Segment.SegmentType.Package));
+                        }
                     }
                 }
                 for (Segment segment : thisDocsSegments)
@@ -237,7 +246,11 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
         return null;
     }
 
-    private void checkSegment(int documentOffset, String currText, List<Segment> completions, Segment segment, boolean addLocals)
+    private void checkSegment(int documentOffset,
+                              String currText,
+                              List<Segment> completions,
+                              Segment segment,
+                              boolean addLocals)
     {
         if (segment.getName().toUpperCase().startsWith(currText))
         {
@@ -249,7 +262,10 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
         }
     }
 
-    private void addLocals(int documentOffset, String currText, List<Segment> completions, Segment segment)
+    private void addLocals(int documentOffset,
+                           String currText,
+                           List<Segment> completions,
+                           Segment segment)
     {
         if (segment.contains(documentOffset))
         {
