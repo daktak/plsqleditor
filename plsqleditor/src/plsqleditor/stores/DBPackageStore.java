@@ -58,6 +58,40 @@ public class DBPackageStore
      */
     private static final Position          dummyPosition = null;
 
+	/**
+	 * This SQL string is like a view that shows you all viewable packages
+	 * for a given schema, including ones that are viewable via a synonym.
+	 * Note that to use it in a preparedStatement, you must bind the 
+	 * schemaName 3 times.
+	 * There are two reasons this is a sql-string and not just a view in 
+	 * the database.  First of all, we don't want to depend on any DDL
+	 * statements, and second of all it makes this query faster to have
+	 * the schema name in the where-clause as it is here, which you couldn't
+	 * do with a view.
+	 */
+	private static final String            myViewablePackagesSQL = 
+		"SELECT p.owner  " + // user who can view this package 
+		",p.object_name NAME " + // viewable name of package, i.e. name or synonym name
+		",p.owner       package_owner " + // user who owns the package
+		",p.object_name package_name " + // actual name of package
+		",p.last_ddl_time " + 
+		"FROM all_objects p " + 
+		"WHERE p.object_type = 'PACKAGE' " + 
+		"AND p.owner = UPPER(?) " + 
+		"UNION ALL " + 
+		"SELECT s.owner owner " + 
+		",s.synonym_name NAME " + 
+		",s.table_owner package_owner " + 
+		",s.table_name package_name " + 
+		",p.last_ddl_time " + 
+		"FROM all_synonyms s, all_objects p " +
+		"WHERE p.object_type = 'PACKAGE' " +
+		"AND p.owner <> UPPER(?) " +
+		"AND s.owner IN (UPPER(?), 'PUBLIC') " +
+		"AND s.synonym_name = p.object_name " +
+		"AND s.table_name = p.object_name " +
+		"AND s.table_owner = p.owner";
+
     /**
      * Initializes the DBPackageStore with a database connection. Note that this connection must be
      * kept open throughout the life of DBPackageStore. At the moment there is no support for a
@@ -101,7 +135,7 @@ public class DBPackageStore
 
     /**
      * Utility function to get a list of objects from a SQL query string. Example:
-     * <code>newStrings = getObjectsByVariables("SELECT object_name FROM user_objects WHERE object_name = ?",new String("xxx");</code>
+     * <code>newStrings = getObjectsByVariables("SELECT object_name FROM user_objects WHERE object_name = UPPER(?)",new String("xxx");</code>
      * 
      * @param sql SQL to execute. Only the first column in the SELECT is relevant.
      * @param objects The objects to be used as bind parameter in the WHERE clause.
@@ -158,7 +192,7 @@ public class DBPackageStore
 
     /**
      * Utility function to get a result set from a SQL query string. Exemple:
-     * <code>ResultSet rs = getResultSetByVariables("SELECT object_name FROM user_objects WHERE object_name = ?",new String("xxx");</code>
+     * <code>ResultSet rs = getResultSetByVariables("SELECT object_name FROM user_objects WHERE object_name = UPPER(?)",new String("xxx");</code>
      * 
      * @param sql SQL to execute.
      * @param objects The objects to be used as bind parameter in the where clause.
@@ -297,11 +331,18 @@ public class DBPackageStore
      */
     protected List<Segment> loadSegments(String schemaName, String packageName) throws SQLException
     {
-        String sql = "SELECT p.procedure_name, p.object_name " + "FROM all_procedures p "
-                + "WHERE p.owner = UPPER(?) " + "AND p.object_name = UPPER(?)";
+        String sql = 
+			"SELECT p.procedure_name " +
+			"      ,p.object_name " +
+			"FROM   all_procedures p " +
+			"      , (" + myViewablePackagesSQL + ") pk " +
+			"WHERE  pk.owner IN (UPPER(?), 'PUBLIC') " +
+			"AND    pk.NAME = UPPER(?) " +
+			"AND    p.owner = pk.package_owner " +
+			"AND    p.object_name = pk.package_name";
 
         Timestamp cacheTime = getSysTimestamp();
-        List<String> segmentNameList = getObjectsByVariables(sql, new Object[]{schemaName,
+        List<String> segmentNameList = getObjectsByVariables(sql, new Object[]{schemaName,schemaName,schemaName,schemaName,
                 packageName});
         List<Segment> segmentList = new ArrayList<Segment>();
         for (String segmentName : segmentNameList)
@@ -325,15 +366,25 @@ public class DBPackageStore
     protected Segment getSegmentFromDB(String schemaName, String packageName, String segmentName)
             throws SQLException
     {
-        String sql = "SELECT a.argument_name, a.position, a.in_out, "
-                + "       (CASE WHEN a.type_owner IS NULL THEN a.data_type ELSE a.type_owner || '.'|| a.type_name || '.'|| a.type_subname END) data_type "
-                + "FROM all_arguments a " + "WHERE a.owner = UPPER(?) " + "AND a.package_name = UPPER(?) "
-                + "AND A.OBJECT_NAME = UPPER(?) " + "AND DATA_LEVEL = 0 " + "ORDER BY a.position";
+        String sql = 
+			"SELECT a.argument_name, a.position, a.in_out " +
+			"      ,(CASE WHEN a.type_owner IS NULL THEN a.data_type ELSE a.type_owner || '.'|| a.type_name || '.'|| a.type_subname END) data_type " +
+			"      ,(CASE WHEN pk.owner <> pk.package_owner THEN 'YES' ELSE 'NO' END) is_synonym " +
+			"FROM   all_arguments a " + 
+			"      , (" + myViewablePackagesSQL + ") pk " +
+			"WHERE  pk.owner IN (UPPER(?), 'PUBLIC') " +
+			"AND    pk.NAME = UPPER(?) " +
+			"AND    a.owner = pk.package_owner " + 
+			"AND    a.package_name = pk.package_name " +
+			"AND    a.OBJECT_NAME = UPPER(?) " +
+			"AND    a.DATA_LEVEL = 0 " +
+			"ORDER BY a.position";
+		System.out.println(sql);
         Segment.SegmentType segmentType = Segment.SegmentType.Procedure;
         String segmentReturnType = null;
         Segment segment = null;
 
-        ResultSet rs = getResultSetByVariables(sql, new Object[]{schemaName, packageName,
+        ResultSet rs = getResultSetByVariables(sql, new Object[]{schemaName, schemaName, schemaName, schemaName, packageName,
                 segmentName});
 
         while (rs.next())
@@ -346,8 +397,8 @@ public class DBPackageStore
                     segmentReturnType = rs.getString("DATA_TYPE");
                 }
                 segment = new Segment(segmentName, dummyPosition, segmentType);
-                segment.setReturnType(segmentReturnType); // hopefully shouldn't freak if it's set
-                // to null
+                segment.setReturnType(segmentReturnType); // hopefully shouldn't freak if it's set to null
+				segment.setPublic(rs.getString("IS_SYNONYM").equals("YES"));
             }
             if (rs.getInt("POSITION") > 0)
             {
@@ -373,9 +424,11 @@ public class DBPackageStore
     public List<Segment> getSegments(String schemaName, String packageName, boolean forceUpdate)
             throws SQLException
     {
-        String lastPackageDDLDateSQL = "SELECT last_ddl_time " + "FROM all_objects o "
-                + "WHERE o.owner = UPPER(?) " + "AND o.object_type = 'PACKAGE' "
-                + "AND o.object_name = UPPER(?) ";
+        String lastPackageDDLDateSQL = 
+			"SELECT last_ddl_time " + 
+			"FROM   (" + myViewablePackagesSQL + ") o " + 
+			"WHERE  o.owner IN (UPPER(?),'PUBLIC') " +  
+			"AND    o.name = UPPER(?) ";
 
         List<Segment> segmentList = myPackageToSegmentMap.get(getPackageName(schemaName,
                                                                              packageName));
@@ -388,7 +441,7 @@ public class DBPackageStore
             Timestamp lastCacheTime = myPackageToLastCacheTimeMap.get(getPackageName(schemaName,
                                                                                      packageName));
             List<Timestamp> lastUpdateTime = getObjectsByVariables(lastPackageDDLDateSQL,
-                                                                   new Object[]{schemaName,
+                                                                   new Object[]{schemaName, schemaName, schemaName, schemaName, 
                                                                            packageName},
                                                                    new Timestamp[0]);
             if (lastUpdateTime.size() == 0 || lastUpdateTime.get(0).after(lastCacheTime))
@@ -418,12 +471,16 @@ public class DBPackageStore
     public List<String> getPackages(String schemaName, boolean forceUpdate) throws SQLException
     {
 
-        String allPackagesSQL = "SELECT DISTINCT p.object_name " + "FROM all_procedures p "
-                + "WHERE p.owner = UPPER(?)";
+        String allPackagesSQL = 
+			"SELECT p.name " + // for synonyms, this is the synonym
+			"      ,p.owner " + // for synonyms, this is the synonym-owner, i.e. PUBLIC
+			"FROM (" + myViewablePackagesSQL + ") p ";
 
-        String newPackagesSQL = "SELECT object_name " + "FROM all_objects o "
-                + "WHERE o.owner = UPPER(?) " + "AND o.object_type = 'PACKAGE' "
-                + "AND o.last_ddl_time >= ?";
+        String newPackagesSQL =
+			"SELECT p.name " + // for synonyms, this is the synonym
+			"      ,p.owner " + // for synonyms, this is the synonym-owner, i.e. PUBLIC
+			"FROM (" + myViewablePackagesSQL + ") p " + 
+			"WHERE p.last_ddl_time >= ?";
 
         List<String> packageList = mySchemaToPackageMap.get(schemaName);
         List<String> newPackageList = null;
@@ -433,13 +490,13 @@ public class DBPackageStore
 
         if (packageList == null || forceUpdate)
         {
-            packageList = getObjectsByVariables(allPackagesSQL, new Object[]{schemaName});
+            packageList = getObjectsByVariables(allPackagesSQL, new Object[]{schemaName, schemaName, schemaName});
             mySchemaToPackageMap.put(schemaName, packageList);
             mySchemaToLastCacheTimeMap.put(schemaName, newCacheTime);
         }
         else
         {
-            newPackageList = getObjectsByVariables(newPackagesSQL, new Object[]{schemaName,
+            newPackageList = getObjectsByVariables(newPackagesSQL, new Object[]{schemaName, schemaName, schemaName,
                     mySchemaToLastCacheTimeMap.get(schemaName)});
             if (!newPackageList.isEmpty())
             {
@@ -461,8 +518,13 @@ public class DBPackageStore
     public String getSource(String schemaName, String packageName) throws SQLException
     {
         String packageSpec = "";
-        String sql = "SELECT text " + "FROM all_source s " + "WHERE owner = UPPER(?) "
-                + "AND s.TYPE = 'PACKAGE' " + "AND s.NAME = UPPER(?) " + "ORDER BY s.line ";
+        String sql = 
+			"SELECT text " + 
+			"FROM   all_source s " + 
+			"WHERE  owner IN (UPPER(?),'PUBLIC') " + 
+			"AND    s.TYPE = 'PACKAGE' " + 
+			"AND    s.NAME = UPPER(?) " + 
+			"ORDER BY s.line ";
 
         List<String> lines = getObjectsByVariables(sql, new Object[]{schemaName, packageName});
 
