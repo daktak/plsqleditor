@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?eclipse version="3.0"?>
+<plugin
+   id="plsqleditor"
+   name="Toby's PL SQL Editor"
+   version="0.2.6"
+   provider-name="Toby Zines"
+   class="plsqleditor.PlsqleditorPlugin">
+
+   <runtime>
+      <library name="plsqleditor.jar">
+         <export name="*"/>
+      </library>
+      <library name="libs/commons-lang.jar">
+         <export name="*"/>
+      </library>
+      <library name="libs/ojdbc14.jar">
+         <export name="*"/>
+      </library>
+   </runtime>
+
+   <requires>
+      <import plugin="org.eclipse.ui"/>
+      <import plugin="org.eclipse.core.runtime"/>
+      <import plugin="org.eclipse.jface.text"/>
+      <import plugin="org.eclipse.ui.editors"/>
+      <import plugin="org.eclipse.ui.workbench.texteditor"/>
+      <import plugin="org.eclipse.ui.views"/>
+      <import plugin="org.eclipse.ui.ide"/>
+      <import plugin="org.eclipse.core.resources"/>
+   </requires>
+
+   <extension
+         point="org.eclipse.ui.editors">
+      <editor
+            name="PL-SQL Editor"
+            extensions="pkb,sql,pks,prc,pkh"
+            icon="icons/at.png"
+            contributorClass="plsqleditor.editors.PlSqlActionContributor"
+            class="plsqleditor.editors.PlSqlEditor"
+            id="plsqleditor.editors.PlSqlEditor">
+      </editor>
+   </extension>
+   <extension
+         id="PlSqlDocumentSetupParticipant"
+         name="PL SQL Document Setup"
+         point="org.eclipse.core.filebuffers.documentSetup">
+      <participant
+            class="plsqleditor.editors.PlSqlDocumentSetupParticipant"
+            extensions="pkb,sql,pks,prc,pkh"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.preferencePages">
+      <page
+            class="plsqleditor.preferences.PlSqlPreferencePage"
+            id="plsqleditor.preferences.PlSqlPreferencePage"
+            name="PL/SQL Preferences"/>
+      <page
+            category="plsqleditor.preferences.PlSqlPreferencePage"
+            class="plsqleditor.preferences.SchemaMappingPreferencePage"
+            id="plsqleditor.preferences.SchemaMappingPreferencePage"
+            name="Schema Mapping"/>
+      <page
+            category="plsqleditor.preferences.PlSqlPreferencePage"
+            class="plsqleditor.preferences.DbSetupPreferencePage"
+            id="plsqleditor.preferences.DbSetupPreferencePage"
+            name="Database Connectivity Setup"/>
+   </extension>
+   <extension
+         point="org.eclipse.core.runtime.preferences">
+      <initializer class="plsqleditor.preferences.PreferenceInitializer"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="plsqleditor.contribution1"
+            nameFilter="*.pk*"
+            objectClass="org.eclipse.core.resources.IFile">
+         <menu
+               id="plsqleditor.menu"
+               label="PL/SQL"
+               path="additions">
+            <separator name="group1"/>
+         </menu>
+         <action
+               class="plsqleditor.popup.actions.LoadAction"
+               definitionId="plsqleditor.loadToDatabase"
+               enablesFor="1"
+               icon="icons/transfer.gif"
+               id="plsqleditor.loadAction"
+               label="Load to Database"
+               menubarPath="plsqleditor.menu/group1"/>
+         <action
+               class="plsqleditor.popup.actions.GenerateHeaderAction"
+               enablesFor="+"
+               icon="icons/grrarr.gif"
+               id="pkhgen.genHeader"
+               label="Generate Header"
+               menubarPath="plsqleditor.menu/group1"/>
+         <action
+               class="plsqleditor.popup.actions.RefreshErrorStatusAction"
+               enablesFor="+"
+               icon="icons/togglepresentation.gif"
+               id="plsqleditor.refreshStatus"
+               label="Refresh Error Status"
+               menubarPath="plsqleditor.menu/group1"/>
+      </objectContribution>
+   </extension>
+   <extension
+         point="org.eclipse.ui.commands">
+      <command
+            categoryId="plsql.editor"
+            description="Causes a PL/SQL File lookup to be executed"
+            id="plsql.file.lookup"
+            name="PlSql File Lookup Command"/>
+      <keyBinding
+            commandId="plsql.file.lookup"
+            contextId="plsql.editor"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            keySequence="F3"/>
+      <command
+            categoryId="plsql.editor"
+            description="Causes a file to be loaded to the database"
+            id="plsqleditor.loadToDatabase"
+            name="Load to Database Command"/>
+      <keyBinding
+            commandId="plsqleditor.loadToDatabase"
+            contextId="plsql.editor"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            keySequence="Ctrl+Alt+L"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.actionSets">
+      <actionSet
+            id="plsqleditor.actionSet"
+            label="File Lookup"
+            visible="true">
+         <menu
+               id="plSqlMenu"
+               label="&amp;PlSql Menu"
+               path="additions">
+            <separator name="plsqlGroup"/>
+         </menu>
+         <action
+               class="plsqleditor.actions.LookupFileAction"
+               definitionId="plsql.file.lookup"
+               icon="icons/srch.gif"
+               id="plsqleditor.actions.LookupFileAction"
+               label="&amp;Lookup File Action"
+               menubarPath="plSqlMenu/plsqlGroup"
+               toolbarPath="plsqlGroup"
+               tooltip="Looks up a PL/SQL file location"/>
+      </actionSet>
+   </extension>
+   <extension
+         point="org.eclipse.ui.contexts">
+      <context
+            id="plsql.editor"
+            name="PlSql Editor Context"
+            parentId="org.eclipse.ui.contexts.window"/>
+   </extension>
+
+</plugin>
