@@ -72,7 +72,9 @@ public class FileHoldingEvent extends Event
     }
 
     /**
-     * @param string
+     * This method sets the {@link #myHeaderName}.
+     * 
+     * @param headerName The name of the header.
      */
     public void setHeaderName(String headerName)
     {

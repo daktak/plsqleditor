@@ -1,6 +1,5 @@
 package plsqleditor;
 
-import java.sql.ResultSet;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -36,6 +35,7 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
     public static final String       PLSQL_PARTITIONING = "__plsql_partitioning";
 
     private PlSqlPartitionScanner    fPartitionScanner;
+
     private ColorManager             fColorProvider;
     private PlSqlCodeScanner         fCodeScanner;
     private PackageStore             myPackageStore;
@@ -164,7 +164,9 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
     }
 
     /**
-     * @return
+     * This method getsthe name of the schema of the currently focussed file.
+     * 
+     * @return The name of the current schema.
      */
     public String getCurrentSchema()
     {
@@ -180,32 +182,25 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
         super.initializeImageRegistry(reg);
         String pluginId = "plsqleditor";
 
-        ImageDescriptor desc = imageDescriptorFromPlugin(pluginId,
-                                                         "icons/bullet_ball_glass_red.png");
+        ImageDescriptor desc = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_red.png");
         Image functionImage = desc.createImage();
         reg.put(Segment.SegmentType.Function.toString(), functionImage);
-        Image procedureImage = imageDescriptorFromPlugin(pluginId,
-                                                         "icons/bullet_ball_glass_blue.png")
-                .createImage();
+        Image procedureImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_blue.png").createImage();
         reg.put(Segment.SegmentType.Procedure.toString(), procedureImage);
-        Image fieldImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_green.png")
-                .createImage();
+        Image fieldImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_green.png").createImage();
         reg.put(Segment.SegmentType.Field.toString(), fieldImage);
-        Image typeImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_yellow.png")
-                .createImage();
+        Image typeImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_yellow.png").createImage();
         reg.put(Segment.SegmentType.Type.toString(), typeImage);
-        Image packageImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_yellow.png")
-                .createImage();
+        Image packageImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_yellow.png").createImage();
         reg.put(Segment.SegmentType.Package.toString(), packageImage);
-        Image schemaImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_triangle_green.png")
-                .createImage();
+        Image schemaImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_triangle_green.png").createImage();
         reg.put(Segment.SegmentType.Schema.toString(), schemaImage);
         Image labelImage = imageDescriptorFromPlugin(pluginId, "icons/worker.png").createImage();
         reg.put(Segment.SegmentType.Label.toString(), labelImage);
     }
 
     /**
-     * @return
+     * @return The plugin's single instance of the schema registry.
      */
     public SchemaRegistry getSchemaRegistry()
     {
@@ -219,19 +214,15 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
     /**
      * @param schema
      * @param packageName
-     * @return
+     * @return The file for the associated <code>schema</code> and <code>packageName</code>.
+     * 
+     * @see PackageStore#getFile(String, String)
      */
     public IFile getFile(String schema, String packageName)
     {
         return myPackageStore.getFile(schema, packageName);
     }
 
-    // public RuleBasedScanner getJavaDocScanner()
-    // {
-    // if(fDocScanner == null)
-    // fDocScanner = new JavaDocScanner(fColorProvider);
-    // return fDocScanner;
-    // }
     /**
      * @param project
      */

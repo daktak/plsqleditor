@@ -26,7 +26,6 @@ import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.db.DbUtility;
 import plsqleditor.parsers.ContentOutlineParser;
 import plsqleditor.parsers.Segment;
-import plsqleditor.parsers.ContentOutlineParser.Type;
 import plsqleditor.preferences.entities.PackageDetails;
 import plsqleditor.preferences.entities.SchemaDetails;
 
@@ -198,7 +197,7 @@ public class PackageStore
         {
             String[] packageName = new String[1];
             List<Segment> segments;
-            ContentOutlineParser.Type type = getType(filename);
+            ContentOutlineParser.Type type = ContentOutlineParser.getType(filename);
             PlSqlPackage pkg = myFileToPackageMap.get(filename);
             segments = myParser.parseFile(type, document, packageName);
             if (pkg != null)
@@ -228,14 +227,6 @@ public class PackageStore
             e.printStackTrace();
             return null;
         }
-    }
-
-    private Type getType(String filename)
-    {
-        return filename.contains(".pkb") ? ContentOutlineParser.Type.Package_Body : filename
-                .contains(".pkh")
-                ? ContentOutlineParser.Type.Package
-                : ContentOutlineParser.Type.SqlScript;
     }
 
     public List<Segment> getSegments(IDocument document)
@@ -605,7 +596,7 @@ public class PackageStore
                     {
                         doc = getDoc(file);
                     }
-                    ContentOutlineParser.Type type = getType(filename);
+                    ContentOutlineParser.Type type = ContentOutlineParser.getType(filename);
                     segments = myParser.parseFile(type, doc, discoveredPackageName);
                     myFileToPackageMap.put(filename, pkg);
                     // TODO should check discoveredPackageName[0] is same as packageName
@@ -641,7 +632,7 @@ public class PackageStore
     }
 
     /**
-     * @return
+     * @return The name of the schema for the currently focussed file.
      */
     public String getCurrentSchema()
     {
@@ -651,7 +642,8 @@ public class PackageStore
     /**
      * @param schema
      * @param packageName
-     * @return
+     * @return the file for the associated <code>schema</code> and <code>package</code>, or
+     * null if it cannot be found.
      */
     public IFile getFile(String schema, String packageName)
     {

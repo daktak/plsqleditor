@@ -55,8 +55,6 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
     /**
      * The action has been activated. The argument of the method represents the 'real' action
      * sitting in the workbench UI.
-     * 
-     * @see IWorkbenchWindowActionDelegate#run
      */
     public void run(IAction action)
     {
@@ -207,8 +205,6 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
     /**
      * Selection in the workbench has been changed. We can change the state of the 'real' action
      * here if we want, but this can only happen after the delegate has been created.
-     * 
-     * @see IWorkbenchWindowActionDelegate#selectionChanged
      */
     public void selectionChanged(IAction action, ISelection selection)
     {

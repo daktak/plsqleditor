@@ -37,6 +37,31 @@ public class PackageHeaderParser extends AbstractPlSqlParser
         return ".*;.*";
     }
 
+    /**
+     * This method parses a section of the text from the <code>document</code> starting from the next line out of the
+     * supplied <code>file</code>. It assumes that the next line read from here is the
+     * <code>currentLineOffset + 1</code>. It adds the discovered segments to the list of <code>segments</code>.
+     * The section of text being parsed is a body section. This method assumes that the body part may contain
+     * documentation and implementation of procedures, functions, types and fields.
+     * 
+     * @param currentLineOffset
+     *            The index of the line from the beginning of the <code>document</code> that the last line of text
+     *            obtained from the <code>file</code> corresponds to. The next call to
+     *            {@link BufferedReader#readLine()} will read the line located in the <code>document</code> at
+     *            <code>currentLineOffset + 1</code>.
+     * 
+     * @param document
+     *            The document from which the <code>file</code> was obtained.
+     * 
+     * @param file
+     *            The buffered reader from which we are parsing the text.
+     * 
+     * @param segments
+     *            The list of segments to which the next parsed tokens will be added.
+     * 
+     * @param packageName
+     *            The name of the package.
+     */
     protected int parseBody(int currentLineOffset,
                             IDocument document,
                             BufferedReader file,
@@ -74,8 +99,7 @@ public class PackageHeaderParser extends AbstractPlSqlParser
                     isInComment = false;
                 }
             }
-            else if (!line.equals(tmpLine = line
-                    .replaceFirst(".*(PROCEDURE|FUNCTION)( +)([^( ]+).*", "$1$2$3")))
+            else if (!line.equals(tmpLine = line.replaceFirst(".*(PROCEDURE|FUNCTION)( +)([^( ]+).*", "$1$2$3")))
             {
                 int offset = document.getLineOffset(currentLineOffset - 1);
                 offset += line.indexOf(tmpLine);
@@ -83,8 +107,7 @@ public class PackageHeaderParser extends AbstractPlSqlParser
                 segments.add(currentSegment);
                 isGrabbingParameters = grabParameters(line, currentSegment);
             }
-            else if (!line.equals(tmpLine = line
-                    .replaceFirst(".*(PROCEDURE|FUNCTION)( +\\w+) *;.*", "$1$2")))
+            else if (!line.equals(tmpLine = line.replaceFirst(".*(PROCEDURE|FUNCTION)( +\\w+) *;.*", "$1$2")))
             {
                 int offset = document.getLineOffset(currentLineOffset - 1);
                 offset += line.indexOf(tmpLine);

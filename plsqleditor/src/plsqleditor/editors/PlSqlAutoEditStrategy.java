@@ -26,20 +26,22 @@ import plsqleditor.preferences.PreferenceConstants;
  */
 public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
 {
-    private List<AutoIndentMap> myAutoIndentMappings;
-    private List<AutoIndentMap> mySecondaryAutoIndentMappings;
-    private String[]            myUpperCasings = PlSqlCompletionProcessor.getFgProposals();
+    private List<AutoIndentMap>  myAutoIndentMappings;
+    private List<AutoIndentMap>  mySecondaryAutoIndentMappings;
+    private String[]             myUpperCasings = PlSqlCompletionProcessor.getFgProposals();
 
     /**
-     * This field represents the last word that was uppercased (prior to being uppercased).
-     * This is in case we need to un-uppercase it because it turns out to be part of another word.
+     * This field represents the last word that was uppercased (prior to being
+     * uppercased). This is in case we need to un-uppercase it because it turns
+     * out to be part of another word.
      */
-    private String              myLastUppercasedWord;
+    private String               myLastUppercasedWord;
     /**
-     * This field represents the last offset of the last uppercased word, so that if the
-     * index is different, we won't uppercase/lowercase the wrong word.
+     * This field represents the last offset of the last uppercased word, so
+     * that if the index is different, we won't uppercase/lowercase the wrong
+     * word.
      */
-    private int                 myLastUppercasedOffset;
+    private int                  myLastUppercasedOffset;
     private ArrayList<Character> myUpperCaseDelimiters;
 
     static class AutoIndentMap
@@ -113,12 +115,14 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         myAutoIndentMappings.add(new AutoIndentMap("CASE", "END CASE"));
 
         mySecondaryAutoIndentMappings = new ArrayList<AutoIndentMap>();
-        // mySecondaryAutoIndentMappings.add(new AutoIndentMap("WHEN", "END CASE"));
+        // mySecondaryAutoIndentMappings.add(new AutoIndentMap("WHEN", "END
+        // CASE"));
         mySecondaryAutoIndentMappings.add(new AutoIndentMap("EXCEPTION", "END"));
         mySecondaryAutoIndentMappings.add(new AutoIndentMap("ELSIF", "ELSE"));
         mySecondaryAutoIndentMappings.add(new AutoIndentMap("ELSIF", "END IF"));
         mySecondaryAutoIndentMappings.add(new AutoIndentMap("ELSE", "END IF"));
-        // mySecondaryAutoIndentMappings.add(new AutoIndentMap("WHEN", "END CASE"));
+        // mySecondaryAutoIndentMappings.add(new AutoIndentMap("WHEN", "END
+        // CASE"));
         myUpperCaseDelimiters = new ArrayList<Character>();
         for (char c : PlSqlCompletionProcessor.autoCompleteDelimiters)
         {
@@ -241,7 +245,8 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
             }
             if (c.length == 0 && c.text != null)
             {
-                if (c.text.length() == 1 && myLastUppercasedWord != null && (myLastUppercasedOffset == c.offset - 1))
+                if (c.text.length() == 1 && myLastUppercasedWord != null
+                        && (myLastUppercasedOffset == c.offset - 1))
                 {
                     if (Character.isJavaIdentifierPart(c.text.charAt(0)))
                     {
@@ -324,20 +329,27 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
     }
 
     /**
-     * This method gets the start (open) and end (close) count of an open/close pair within a
-     * document between a <code>start</code> and <code>end</code> point.
+     * This method gets the start (open) and end (close) count of an open/close
+     * pair within a document between a <code>start</code> and
+     * <code>end</code> point.
      * 
-     * @param openStr The starting string.
+     * @param openStr
+     *            The starting string.
      * 
-     * @param closeStr The ending string.
+     * @param closeStr
+     *            The ending string.
      * 
-     * @param document The document containing these strings.
+     * @param document
+     *            The document containing these strings.
      * 
-     * @param start The starting offset in the document.
+     * @param start
+     *            The starting offset in the document.
      * 
-     * @param end The endin offset in the document.
+     * @param end
+     *            The endin offset in the document.
      * 
-     * @param ignoreEnds Ignore any discovered endings.
+     * @param ignoreEnds
+     *            Ignore any discovered endings.
      * 
      * @return The number of start/end pairs.
      * 
@@ -545,14 +557,18 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
     }
 
     /**
-     * This method indicates whether the supplied <code>txt</code> ends with a valid line
-     * delimiter for the supplied document <code>d</code>.
+     * This method indicates whether the supplied <code>txt</code> ends with a
+     * valid line delimiter for the supplied document <code>d</code>.
      * 
-     * @param d The document from which to obtain valid line delimiters.
+     * @param d
+     *            The document from which to obtain valid line delimiters.
      * 
-     * @param txt The text whose end is being checked for end of line delimiters.
+     * @param txt
+     *            The text whose end is being checked for end of line
+     *            delimiters.
      * 
-     * @return <code>true</code> if <code>txt</code> ends with a line delimiter.
+     * @return <code>true</code> if <code>txt</code> ends with a line
+     *         delimiter.
      */
     private boolean endsWithDelimiter(IDocument d, String txt)
     {
@@ -726,7 +742,8 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                 if (indLine == -1) indLine = line;
                 buf.append(getIndentOfLine(document, indLine));
             }
-            // take care of an open bracket (with no close) on the previous line.
+            // take care of an open bracket (with no close) on the previous
+            // line.
             else if (command.offset < docLength && prevLine.contains("(")
                     && !prevLine.contains(")"))
             {
