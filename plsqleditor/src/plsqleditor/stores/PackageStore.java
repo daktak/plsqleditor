@@ -150,6 +150,10 @@ public class PackageStore
             schema = new PlSqlSchema(schemaName, new Source(null, Source.Type.File));
             mySchemaNameToSchemaMap.put(schema.getName(), schema);
         }
+        if (packageName == null)
+        {
+            packageName = "scratch";
+        }
         PlSqlPackage pkg = schema.getPackage(packageName);
         if (!filename.contains(".pkb"))
         {
@@ -576,8 +580,9 @@ public class PackageStore
             {
                 if (filename.contains("_") && filename.contains("."))
                 {
-                    schemaName = filename.substring(0, filename.indexOf('_'));
-                    packageName = filename.substring(filename.indexOf('_') + 1, filename
+                    int underscoreIndex = filename.indexOf('_');
+                    schemaName = filename.substring(0, underscoreIndex);
+                    packageName = filename.substring(underscoreIndex + 1, filename
                             .lastIndexOf('.'));
                 }
                 // TODO need to do something where the schema name is not in the file name

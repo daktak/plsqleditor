@@ -157,18 +157,21 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                 if (map.getCloseStringLastChar().equalsIgnoreCase(c.text))
                 {
                     int length = map.getTruncatedCloseString().length();
-                    try
+                    if (c.offset >= length)
                     {
-                        String endStr = d.get(c.offset - length, length);
-                        if (endStr.equalsIgnoreCase(map.getTruncatedCloseString()))
+                        try
                         {
-                            smartInsertAfterEnd(map.getOpenString(), map.getCloseString(), d, c);
-                            break;
+                            String endStr = d.get(c.offset - length, length);
+                            if (endStr.equalsIgnoreCase(map.getTruncatedCloseString()))
+                            {
+                                smartInsertAfterEnd(map.getOpenString(), map.getCloseString(), d, c);
+                                break;
+                            }
                         }
-                    }
-                    catch (BadLocationException e)
-                    {
-                        e.printStackTrace();
+                        catch (BadLocationException e)
+                        {
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -204,7 +207,7 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                 {
                     int length = toUpperCase.length() - 1;
                     String lastChar = toUpperCase.substring(toUpperCase.length() - 1);
-                    if (c.text.equalsIgnoreCase(lastChar))
+                    if (c.text.equalsIgnoreCase(lastChar) && c.offset > length + 1)
                     {
                         String endStr = d.get(c.offset - length, length);
                         String preChar = d.get(c.offset - (length + 1), 1);

@@ -32,9 +32,12 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 
 import plsqleditor.PlsqleditorPlugin;
+import plsqleditor.actions.ExecuteScratchSqlAction;
 import plsqleditor.actions.GenerateHeaderAction;
 import plsqleditor.actions.LoadToDatabaseAction;
+import plsqleditor.actions.LowerCaseAction;
 import plsqleditor.actions.RefreshErrorStatusAction;
+import plsqleditor.actions.UpperCaseAction;
 
 public class PlSqlEditor extends TextEditor
 {
@@ -44,6 +47,13 @@ public class PlSqlEditor extends TextEditor
     private static final String PLSQLEDITOR_REFRESH_ERROR_STATUS_ID = PLSQLEDITOR_REFRESH_ERROR_STATUS_DEF_ID + ".action";
     private static final String PLSQLEDITOR_GENERATEHEADER_DEF_ID = "plsqleditor.generateHeader";
     private static final String PLSQLEDITOR_GENERATEHEADER_ID = PLSQLEDITOR_GENERATEHEADER_DEF_ID + ".action";
+    private static final String PLSQLEDITOR_EXECUTE_SQL_DEF_ID = "plsql.file.executeSql";
+    private static final String PLSQLEDITOR_EXECUTE_SQL_ID = PLSQLEDITOR_EXECUTE_SQL_DEF_ID + ".action";
+    private static final String PLSQLEDITOR_LOWERCASE_DEF_ID = "plsqleditor.lowerCase";
+    private static final String PLSQLEDITOR_LOWERCASE_ID = PLSQLEDITOR_LOWERCASE_DEF_ID + ".action";
+    private static final String PLSQLEDITOR_UPPERCASE_DEF_ID = "plsqleditor.upperCase";
+    private static final String PLSQLEDITOR_UPPERCASE_ID = PLSQLEDITOR_UPPERCASE_DEF_ID + ".action";
+    
     
     private PlSqlContentOutlinePage fOutlinePage;
     private ProjectionSupport       fProjectionSupport;
@@ -145,6 +155,18 @@ public class PlSqlEditor extends TextEditor
         a = new GenerateHeaderAction(PlSqlEditorMessages.getResourceBundle(),PLSQLEDITOR_GENERATEHEADER_ID + ".",this);
         a.setActionDefinitionId(PLSQLEDITOR_GENERATEHEADER_DEF_ID);
         setAction(PLSQLEDITOR_GENERATEHEADER_ID, a);
+        
+        a = new ExecuteScratchSqlAction(PlSqlEditorMessages.getResourceBundle(),PLSQLEDITOR_EXECUTE_SQL_ID + ".",this);
+        a.setActionDefinitionId(PLSQLEDITOR_EXECUTE_SQL_DEF_ID);
+        setAction(PLSQLEDITOR_EXECUTE_SQL_ID, a);
+        
+        a = new LowerCaseAction(PlSqlEditorMessages.getResourceBundle(),PLSQLEDITOR_LOWERCASE_ID + ".",this);
+        a.setActionDefinitionId(PLSQLEDITOR_LOWERCASE_DEF_ID);
+        setAction(PLSQLEDITOR_LOWERCASE_ID, a);
+
+        a = new UpperCaseAction(PlSqlEditorMessages.getResourceBundle(),PLSQLEDITOR_UPPERCASE_ID + ".",this);
+        a.setActionDefinitionId(PLSQLEDITOR_UPPERCASE_DEF_ID);
+        setAction(PLSQLEDITOR_UPPERCASE_ID, a);
     }
 
     public void doRevertToSaved()
@@ -192,6 +214,9 @@ public class PlSqlEditor extends TextEditor
         addAction(menu, PLSQLEDITOR_LOADTODATABASE_ID);
         addAction(menu, PLSQLEDITOR_REFRESH_ERROR_STATUS_ID);
         addAction(menu, PLSQLEDITOR_GENERATEHEADER_ID);
+        addAction(menu, PLSQLEDITOR_EXECUTE_SQL_ID);
+        addAction(menu, PLSQLEDITOR_LOWERCASE_ID);
+        addAction(menu, PLSQLEDITOR_UPPERCASE_ID);
     }
 
     public Object getAdapter(Class required)

@@ -69,9 +69,14 @@ public class LoadToDatabaseAction extends TextEditorAction
         }
     }
 
+    /**
+     * This method deletes the markers from the supplied <code>file</code>.
+     * 
+     * @param file The file whose markers will all be deleted.
+     */
     private void deleteMarkers(IFile file)
     {
-        // delete all markers in the file
+        // delete ALL markers in the file
         int depth = IResource.DEPTH_INFINITE;
         try
         {
@@ -80,7 +85,6 @@ public class LoadToDatabaseAction extends TextEditorAction
         catch (CoreException e)
         {
             e.printStackTrace();
-            // something went wrong
         }
     }
 

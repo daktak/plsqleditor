@@ -71,4 +71,16 @@ public class StringLocationMap
         }
         return sb.toString();
     }
+    
+    public static String replaceNewLines(String toFix)
+    {
+        String separator = System.getProperty("line.separator");
+        StringBuffer spacesBuffer = new StringBuffer();
+        for (int i = 0; i < separator.length(); i++)
+        {
+            spacesBuffer.append(' ');
+        }
+        String spaces = spacesBuffer.toString();
+        return toFix.replaceAll(separator, spaces);
+    }
 }

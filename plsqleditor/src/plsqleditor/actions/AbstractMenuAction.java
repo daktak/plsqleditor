@@ -42,7 +42,6 @@ public abstract class AbstractMenuAction implements IActionDelegate
         {
             IFileEditorInput fileEditorInput = (IFileEditorInput) editorInput;
             IFile ifile = fileEditorInput.getFile();
-
             executeOperation(ifile, action.getId(), myEditor);
         }
     }

@@ -49,7 +49,7 @@ public class Segment implements Comparable
             StringBuffer sb = new StringBuffer();
             if (overrideParameterSettings || isShowingParameterNames())
             {
-                sb.append(myParameter);
+                sb.append(String.valueOf(myParameter).toLowerCase());
             }
             if (overrideParameterSettings || isShowingInOut())
             {
@@ -187,7 +187,7 @@ public class Segment implements Comparable
                                       boolean isShowingReturnType,
                                       boolean overrideParameterSettings)
     {
-        return myName
+        return myName.toLowerCase()
                 + (isShowingParameterList
                         ? getParameterListAsString(overrideParameterSettings)
                         : "")

@@ -3,7 +3,7 @@
 <plugin
    id="plsqleditor"
    name="Toby's PL SQL Editor"
-   version="0.2.11"
+   version="0.2.12"
    provider-name="Toby Zines"
    class="plsqleditor.PlsqleditorPlugin">
 
@@ -147,12 +147,39 @@
             contextId="plsql.editor"
             keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
             keySequence="Ctrl+Alt+R"/>
+      <command
+            categoryId="plsql.editor"
+            id="plsql.file.executeSql"
+            name="Execute Sql"/>
+      <keyBinding
+            commandId="plsql.file.executeSql"
+            contextId="plsql.editor"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            keySequence="Ctrl+Alt+E"/>
+      <command
+            categoryId="plsql.editor"
+            id="plsqleditor.lowerCase"
+            name="Lower Case"/>
+      <keyBinding
+            commandId="plsqleditor.lowerCase"
+            contextId="plsql.editor"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            keySequence="Ctrl+Alt+O"/>
+      <command
+            categoryId="plsql.editor"
+            id="plsqleditor.upperCase"
+            name="Upper Case"/>
+      <keyBinding
+            commandId="plsqleditor.upperCase"
+            contextId="plsql.editor"
+            keyConfigurationId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            keySequence="Ctrl+Alt+U"/>
    </extension>
    <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
             id="plsqleditor.actionSet"
-            label="File Lookup"
+            label="PL/SQL Action Set"
             visible="true">
          <menu
                id="plSqlMenu"
@@ -169,6 +196,34 @@
                menubarPath="plSqlMenu/plsqlGroup"
                toolbarPath="plsqlGroup"
                tooltip="Looks up a PL/SQL file location"/>
+         <action
+               class="plsqleditor.actions.WorkBenchWindowAction"
+               definitionId="plsql.file.executeSql"
+               icon="icons/forward.gif"
+               id="plsql.file.executeSql.action"
+               label="&amp;Execute Sql"
+               menubarPath="plSqlMenu/plsqlGroup"
+               style="push"
+               toolbarPath="plsqlGroup"
+               tooltip="Executes a selected PL/SQL block"/>
+         <action
+               class="plsqleditor.actions.WorkBenchWindowAction"
+               definitionId="plsqleditor.lowerCase"
+               icon="icons/Down.gif"
+               id="plsqleditor.lowerCase.action"
+               label="Lower Case"
+               menubarPath="plSqlMenu/plsqlGroup"
+               style="push"
+               toolbarPath="plsqlGroup"/>
+         <action
+               class="plsqleditor.actions.WorkBenchWindowAction"
+               definitionId="plsqleditor.upperCase"
+               icon="icons/Up.gif"
+               id="plsqleditor.upperCase.action"
+               label="Upper Case"
+               menubarPath="plSqlMenu/plsqlGroup"
+               style="push"
+               toolbarPath="plsqlGroup"/>
       </actionSet>
    </extension>
    <extension

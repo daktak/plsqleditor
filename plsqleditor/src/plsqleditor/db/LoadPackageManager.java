@@ -33,7 +33,7 @@ public class LoadPackageManager
 {
     public enum PackageType
     {
-        Package_Body, Package
+        Package_Body, Package, Sql
     }
 
     private SQLErrorDetail[] mySQLErrors = new SQLErrorDetail[0];
@@ -81,24 +81,17 @@ public class LoadPackageManager
         }
         else
         {
-            String separator = System.getProperty("line.separator");
-            toLoad = modifyCodeToLoad(toLoad, packageName, separator);
-            details = loadFile(schema, packageName, toLoad, type);
+            toLoad = modifyCodeToLoad(toLoad, packageName);
+            details = loadCode(schema, packageName, toLoad, type);
         }
 
         return details;
     }
 
-    protected String modifyCodeToLoad(String toLoad, String packageName, String separator)
+    protected String modifyCodeToLoad(String toLoad, String packageName)
     {
-        StringBuffer spacesBuffer = new StringBuffer();
-        for (int i = 0; i < separator.length(); i++)
-        {
-            spacesBuffer.append(' ');
-        }
-        String spaces = spacesBuffer.toString();
         toLoad = StringLocationMap.replacePlSqlSingleLineComments(toLoad);
-        toLoad = toLoad.replaceAll(separator, spaces);
+        toLoad = StringLocationMap.replaceNewLines(toLoad);
         String terminator = "[Ee][Nn][Dd] +" + packageName + ";";
         int end = toLoad.length();
         Pattern p = Pattern.compile(terminator);
@@ -111,7 +104,7 @@ public class LoadPackageManager
         return toLoad;
     }
 
-    public SQLErrorDetail[] loadFile(String schemaName,
+    public SQLErrorDetail[] loadCode(String schemaName,
                                      String packageName,
                                      String toLoad,
                                      PackageType type)
@@ -120,7 +113,7 @@ public class LoadPackageManager
         try
         {
             c = DbUtility.getConnection(schemaName);
-            return loadFile(c, packageName, toLoad, type);
+            return loadCode(c, packageName, toLoad, type);
         }
         finally
         {
@@ -144,7 +137,7 @@ public class LoadPackageManager
      * 
      * @return The list of errors from the compile, or null if there were none.
      */
-    private SQLErrorDetail[] loadFile(Connection c,
+    private SQLErrorDetail[] loadCode(Connection c,
                                       String packageName,
                                       String toLoad,
                                       LoadPackageManager.PackageType type)
@@ -155,10 +148,13 @@ public class LoadPackageManager
             s = c.createStatement();
             s.execute(toLoad);
 
-            String warning = getErrorStatus(c, s, packageName, type);
-            if (warning != null)
+            if (type != PackageType.Sql)
             {
-                return getSQLErrors();
+                String warning = getErrorStatus(c, s, packageName, type);
+                if (warning != null)
+                {
+                    return getSQLErrors();
+                }
             }
             return null;
         }
@@ -166,7 +162,7 @@ public class LoadPackageManager
         {
             DbUtility.printErrors(e);
             DbUtility.close(s);
-            final String msg = "Failed to load package " + packageName + ": " + e;
+            final String msg = "Failed to execute" + packageName + " code: " + e.getMessage();
             return new SQLErrorDetail[]{new SQLErrorDetail(0, 0, msg)};
         }
     }
