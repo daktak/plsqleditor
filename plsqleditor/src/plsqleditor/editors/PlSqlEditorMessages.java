@@ -18,6 +18,15 @@ import java.util.ResourceBundle;
  */
 public class PlSqlEditorMessages
 {
+    private static final String   RESOURCE_BUNDLE;
+    private static final ResourceBundle fgResourceBundle;
+
+    static
+    {
+        RESOURCE_BUNDLE  = PlSqlEditorMessages.class.getName();
+        fgResourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE);
+    }
+    
     private PlSqlEditorMessages()
     {
         //
@@ -51,8 +60,4 @@ public class PlSqlEditorMessages
     {
         return fgResourceBundle;
     }
-
-    private static final String   RESOURCE_BUNDLE  = PlSqlEditorMessages.class.getName();
-    private static ResourceBundle fgResourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE);
-
 }

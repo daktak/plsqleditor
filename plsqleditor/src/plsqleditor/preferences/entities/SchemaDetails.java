@@ -1,6 +1,3 @@
-/**
- * 
- */
 package plsqleditor.preferences.entities;
 
 import java.util.ArrayList;
@@ -19,14 +16,11 @@ import org.eclipse.ui.internal.WorkbenchImages;
 
 
 /**
- * This class
+ * This class represents a schema and the details it contains.
  * 
  * @author Toby Zines
  * 
  * @version $Id$
- * 
- * Created on 4/03/2005
- * 
  */
 public class SchemaDetails implements Cloneable
 {
@@ -83,7 +77,10 @@ public class SchemaDetails implements Cloneable
      */
     public void addLocation(String location)
     {
-        myLocations.add(location);
+        if (!myLocations.contains(location))
+        {
+            myLocations.add(location);
+        }
     }
 
 

@@ -22,7 +22,45 @@ import java.util.logging.Logger;
  */
 public class SqlPlusProcessExecutor
 {
+    /**
+     * This class
+     * 
+     * @author Toby Zines
+     * 
+     * @version $Id$
+     * 
+     * Created on 21/03/2005
+     * 
+     */
+    public class NegativeResponseFoundException extends Exception
+    {
+
+        /**
+         * This field represents the serial version uid.
+         */
+        private static final long serialVersionUID = 3978144339853783345L;
+
+        /**
+         * @param message
+         */
+        public NegativeResponseFoundException(String message)
+        {
+            super(message);
+        }
+
+        /**
+         * @param message
+         * @param cause
+         */
+        public NegativeResponseFoundException(String message, Throwable cause)
+        {
+            super(message, cause);
+        }
+    }
+
+
     private static final int REREAD_DELAY = 500;
+
     /**
      * This interface represents a function to check a positive response from a series of lines
      * output from the sqlplus processor.
@@ -38,11 +76,26 @@ public class SqlPlusProcessExecutor
     {
 
         /**
-         * @param thisLine
-         * @return
+         * This method returns true if a positive response is found in the supplied
+         * <code>line</code>.
+         * 
+         * @param line The line being checked for a positive response.
+         * 
+         * @return <code>true</code> if the supplied <code>line</code> contains a positive
+         *         response.
          */
-        boolean positiveResponse(String thisLine);
+        boolean positiveResponse(String line);
 
+        /**
+         * This method returns true if a negative response is found in the supplied
+         * <code>line</code>.
+         * 
+         * @param line The line being checked for a negative response.
+         * 
+         * @return <code>true</code> if the supplied <code>line</code> contains a negative
+         *         response.
+         */
+        boolean negativeResponse(String line);
     }
 
 
@@ -93,35 +146,20 @@ public class SqlPlusProcessExecutor
     }
 
     /**
-     * This method provides ping functionality via the O/S's native ping application.
-     * <p>
-     * A ping timeout and success criteria may be specified to configure how the call to ping is
-     * performed and how the results are interpreted. The success criteria specifies the number of
-     * successful pings before a timeout period is reached. If the timeout is reached or too many
-     * pings are unresponsive then a failure result is returned.
-     * <p>
-     * The success or failure of the operation may be determined by a call to getResult() and the
-     * text returned from the ping may be retrieved by a call to getResultText(). This method also
-     * gathers timing statistics that may be examined by calls to getApplicationDuration() and
-     * getPingProcessDuration().
+     * This method provides
      * 
-     * @param ipAddress The IP address to ping. The IP address must be a fully qualified, 4 octet
-     *            address. Hostnames are not accepted.
-     * @param pingTimeout The length of time to give the ping system call to self terminate before
-     *            killing the process.
-     * @param successThreshold The minimum number of successful pings that are required for a
-     *            successful result.
-     * @throws CannotCompleteException
      * @throws CannotCompleteException
      */
     public void execute(String codeToLoad) throws CannotCompleteException
     {
         String systemCall = constructSystemCall(myExecutable, mySchema, myPassword, mySid);
-        BufferedReader br = executeSystemCall(systemCall);
-
+        BufferedWriter bw = null;
         try
         {
-            this.setValid(parseResponse(codeToLoad, br));
+            BufferedReader br = executeSystemCall(systemCall);
+            bw = new BufferedWriter(new OutputStreamWriter(getProcess()
+                    .getOutputStream()));
+            this.setValid(parseResponse(codeToLoad, br, bw));
         }
         finally
         {
@@ -130,7 +168,7 @@ public class SqlPlusProcessExecutor
                 logger.fine("Tidying up system process call");
             }
 
-            releaseProcess();
+            releaseProcess(bw);
         }
     }
 
@@ -139,9 +177,26 @@ public class SqlPlusProcessExecutor
      * 
      * @param myProcess A non-null Process that may or may not be running.
      */
-    private void releaseProcess()
+    private void releaseProcess(BufferedWriter bw)
     {
         Process p = this.getProcess();
+        if (p != null && processIsAlive(p))
+        {
+            try
+            {
+                if (bw != null)
+                {
+                    bw.write("exit");
+                    bw.newLine();
+                    bw.flush();
+                    waitN(200);
+                }
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
         if (p != null && processIsAlive(p))
         {
             p.destroy();
@@ -150,42 +205,65 @@ public class SqlPlusProcessExecutor
     }
 
     /**
+     * This is a private method that executes a wait, synchronising on this object and ignoring the
+     * interrupted exception.
+     * 
+     * @param waitTime The number of milliseconds to wait.
+     */
+    private synchronized void waitN(int waitTime)
+    {
+        try
+        {
+            wait(waitTime);
+        }
+        catch (InterruptedException e)
+        {
+            // do nothing
+        }
+    }
+
+    /**
      * This method executes a given command line as a system call.
      * 
      * @param systemCall The command line to run
-     * @return The Process created by the system call.
-     * @throws CannotCompleteException
+     * 
+     * @return The BufferedReader reading from the input of the process created.
+     * 
+     * @throws CannotCompleteException when the process dies or an IOException is caught.
      */
     private BufferedReader executeSystemCall(String systemCall) throws CannotCompleteException
     {
         if (logger.isLoggable(Level.FINE))
         {
-            logger.fine("Entered executeSystemCall.");
+            logger.fine("Entered executeSystemCall(" + systemCall + " )");
         }
 
         BufferedReader in = null;
+        boolean isStartedUp = false;
+        int resultTextIndex[] = {0};
+        setResultText(new StringBuffer());
+        StringBuffer resultText = getResultText();
         Runtime r = Runtime.getRuntime();
+        MatchExpression expression = new MatchExpression()
+        {
+            public boolean positiveResponse(String line)
+            {
+                return matchPositiveStartupResponse(line);
+            }
+
+            public boolean negativeResponse(String line)
+            {
+                return line.contains("ERROR:");
+            }
+        };
         try
         {
-            MatchExpression expression = new MatchExpression()
-            {
-                public boolean positiveResponse(String thisLine)
-                {
-                    return matchPositiveStartupResponse(thisLine);
-                }
-            };
-
             this.setProcess(r.exec(systemCall));
             this.setProcessStartTime(new Date());
             long timeoutDate = calculateTimeoutDate();
-            boolean isStartedUp = false;
-            setResultText(new StringBuffer());
-            StringBuffer resultText = getResultText();
-            int resultTextIndex[] = {0};
             in = new BufferedReader(new InputStreamReader(this.getProcess().getInputStream()));
 
-            while (processIsAlive(this.getProcess()) && (new Date()).getTime() < timeoutDate
-                    && !isStartedUp)
+            while (isStillReading(isStartedUp, timeoutDate))
             {
                 isStartedUp = readNext(in, resultText, resultTextIndex, expression);
                 if (isStartedUp)
@@ -193,40 +271,34 @@ public class SqlPlusProcessExecutor
                     break;
                 }
             }
-
         }
         catch (IOException e)
         {
             logger.warning("exception: " + e);
             throw new CannotCompleteException(e.getMessage(), e);
         }
-        catch (InterruptedException e)
+        catch (NegativeResponseFoundException e)
         {
-            throw new CannotCompleteException(e.getMessage());
+            final String msg = "Caught a negative response while trying "
+                    + "to start up the sqlplus session: " + e.getMessage();
+            logger.warning(msg);
+            throw new CannotCompleteException(msg, e);
+        }
+        finally
+        {
+            System.out.println(resultText);
         }
 
-        if (this.getProcess() == null)
+        if (this.getProcess() == null || !isStartedUp)
         {
             logger.warning("Exec failed for system call '" + systemCall + "'.");
             throw new CannotCompleteException("Exec failed for system call '" + systemCall + "'.");
         }
 
-        // If there is an exception from here on then a reference to the process
-        // would be lost but it would keep running.
-        // Therefore a try/catch block is required to prevent runtime exceptions
-        // from causing a runaway process.
-        try
+        logger.info("SqlPlus process completed startup at " + new Date());
+        if (logger.isLoggable(Level.FINE))
         {
-            logger.info("SqlPlus process completed startup at " + new Date());
-            if (logger.isLoggable(Level.FINE))
-            {
-                logger.fine("Leaving executeSystemCall normally.");
-            }
-        }
-        catch (RuntimeException e)
-        {
-            releaseProcess();
-            throw e;
+            logger.fine("Leaving executeSystemCall normally.");
         }
         return in;
     }
@@ -242,11 +314,17 @@ public class SqlPlusProcessExecutor
     }
 
     /**
-     * Given a particular IP address this method constructs a native ping call. As this method is
-     * O/S dependant it may be overridden by subclasses. The subclass can then define a native ping
-     * call specific to the O/S. By default this method performs a ping under Solaris 9.
+     * Given a particular <code>executable</code>, <code>schema</code>, <code>password</code>
+     * and <code>sid</code>, this method creates a string that will be used as the executable.
      * 
-     * @param ipAddress
+     * @param executable
+     * 
+     * @param schema
+     * 
+     * @param password
+     * 
+     * @param sid
+     * 
      * @return
      */
     protected String constructSystemCall(String executable,
@@ -279,7 +357,8 @@ public class SqlPlusProcessExecutor
      * @return
      * @throws CannotCompleteException
      */
-    private boolean parseResponse(String input, BufferedReader in) throws CannotCompleteException
+    private boolean parseResponse(String input, BufferedReader in, BufferedWriter out)
+            throws CannotCompleteException
     {
         if (logger.isLoggable(Level.FINE))
         {
@@ -295,18 +374,19 @@ public class SqlPlusProcessExecutor
             {
                 return matchPositiveResponse(thisLine);
             }
+
+            public boolean negativeResponse(String line)
+            {
+                return false;
+            }
         };
         try
         {
-            BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(getProcess()
-                    .getOutputStream()));
-            bw.write(input);
-            bw.flush();
+            out.write(input);
+            out.flush();
             long timeoutDate = calculateTimeoutDate();
             int resultTextIndex[] = {0};
-            while (processIsAlive(this.getProcess())
-            // Quit looping after the timeout has expired or the response is ok
-                    && (new Date()).getTime() < timeoutDate && !isPositiveResponse)
+            while (isStillReading(isPositiveResponse, timeoutDate))
             {
                 // If the buffer is not ready: sleep then continue
                 if (!(isPositiveResponse = readNext(in, resultText, resultTextIndex, expression)))
@@ -316,7 +396,7 @@ public class SqlPlusProcessExecutor
                 // Min num of successes reached so stop looping
                 if (isPositiveResponse)
                 {
-                    releaseProcess();
+                    releaseProcess(out);
                     in.close();
                     if (logger.isLoggable(Level.FINE))
                     {
@@ -332,13 +412,10 @@ public class SqlPlusProcessExecutor
                 {
                     logger.fine("Waiting 1 second for call to finish.");
                 }
-                synchronized (this)
-                {
-                    wait(REREAD_DELAY);
-                }
+                waitN(REREAD_DELAY);
             }
             // Kill process if not already dead
-            releaseProcess();
+            releaseProcess(out);
             // If the process ended of its own accord then ensure the
             // approximate end date is recorded for timing purposes.
             if (this.getPingProcessEndTime() == null)
@@ -361,28 +438,83 @@ public class SqlPlusProcessExecutor
         {
             throw new CannotCompleteException(e.getMessage());
         }
-        catch (InterruptedException e)
+        catch (NegativeResponseFoundException e)
         {
-            throw new CannotCompleteException(e.getMessage());
+            e.printStackTrace();
+            // should never happen because this readNext has a MatchExpression
+            // that always returns false.
+            return false;
+        }
+        finally
+        {
+            System.out.println(resultText);
         }
     }
 
-    private synchronized boolean readNext(BufferedReader in,
+    /**
+     * This method checks whether we should still be reading from a loop.
+     * 
+     * @param breakAnyway if this is <code>true</code>, we will return <code>false</code>,
+     *            indicating that we should break regardless of other circumstances.
+     * 
+     * @param timeoutDate The time after which we should no longer read.
+     * 
+     * @return <code>true</code> if we should re-enter a read loop and <code>false</code>
+     *         otherwise.
+     */
+    private boolean isStillReading(boolean breakAnyway, long timeoutDate)
+    {
+        return processIsAlive(this.getProcess())
+        // Quit looping after the timeout has expired or the response is ok
+                && (new Date()).getTime() < timeoutDate && !breakAnyway;
+    }
+
+    /**
+     * This method reads the next available bytes from the supplied <code>input</code> reader and
+     * if there is any new data, stores it in the <code>resultText</code> and checks it against
+     * the <code>matcher</code> to see if any termination conditions are met. If they are, the
+     * method returns in the case of {@link MatchExpression#positiveResponse(String)} or throws an
+     * exception in the case of {@link MatchExpression#negativeResponse(String)}. The current
+     * location from which to parse the <code>resultText</code> is stored and updated in the
+     * <code>resultTextIndex</code>.
+     * <p>
+     * This method is non blocking, but will wait for a period of {@link #REREAD_DELAY} milliseconds
+     * before returning from an attempt to read no data.
+     * 
+     * @param input The input from which this method is reading the next.
+     * 
+     * @param resultText The full text that has been read from the input.
+     * 
+     * @param resultTextIndex The current index of the <code>resultText</code> that has already
+     *            been parsed.
+     * 
+     * @param matcher The expression matcher that checks for termination conditions in the
+     *            <code>resultText</code>.
+     * 
+     * @return <code>true</code> if the <code>matcher</code> finds a positive response and
+     *         <code>false</code> otherwise.
+     * 
+     * @throws IOException When reading the input fails.
+     * 
+     * @throws NegativeResponseFoundException When the <code>matcher</code> matches a negative
+     *             response.
+     */
+    private synchronized boolean readNext(BufferedReader input,
                                           StringBuffer resultText,
                                           int[] resultTextIndex,
-                                          MatchExpression match) throws IOException,
-            InterruptedException
+                                          MatchExpression matcher) throws IOException,
+            NegativeResponseFoundException
     {
-        if (!in.ready())
+        if (!input.ready())
         {
-            this.wait(REREAD_DELAY);
+            this.waitN(REREAD_DELAY);
             return false;
         }
 
         // Read as much as possible from the buffer (non-blocking)
-        while (in.ready())
+        while (input.ready())
         {
-            int i = in.read();
+            int i = input.read();
             if (i == -1)
             {
                 break;
@@ -399,10 +531,15 @@ public class SqlPlusProcessExecutor
 
             // Do match on the line and increment if a positive response
             // is found
-            if (match.positiveResponse(thisLine))
+            if (matcher.positiveResponse(thisLine))
             {
                 System.out.println("Positive Response on " + thisLine);
                 return true;
+            }
+            if (matcher.negativeResponse(thisLine))
+            {
+                throw new NegativeResponseFoundException("The line [" + thisLine
+                        + "] contains a negative response");
             }
 
             indexOfCr = resultText.toString().indexOf('\n', resultTextIndex[0]);
@@ -411,7 +548,10 @@ public class SqlPlusProcessExecutor
     }
 
     /**
-     * @return
+     * This method determines the timeout date of the current request by checking the 
+     * process start time against the {@link #SQLPLUS_TIMEOUT} (times 1000 for milliseconds).
+     * 
+     * @return The time after which no more reading should be done for this call.
      */
     private long calculateTimeoutDate()
     {
@@ -520,7 +660,7 @@ public class SqlPlusProcessExecutor
 
 
     /**
-     * This method sets the ...
+     * This method sets the status of the result of this execution.
      * 
      * @param result The result to set.
      */

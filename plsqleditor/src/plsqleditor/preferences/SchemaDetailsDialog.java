@@ -35,7 +35,7 @@ public class SchemaDetailsDialog extends TitleAreaDialog
     protected String myName          = "";  //$NON-NLS-1$
     protected String myPassword      = "";  //$NON-NLS-1$
     // This field represents the locations for this schema in a comma separated list.
-    protected String myLocations      = "";  //$NON-NLS-1$
+    protected String myLocations     = "";  //$NON-NLS-1$
 
     protected Text   mySchemaNameField;
     protected Text   mySchemaLocationField;
@@ -165,7 +165,7 @@ public class SchemaDetailsDialog extends TitleAreaDialog
         myPasswordField = new Text(contents, SWT.SINGLE | SWT.BORDER);
         myPasswordField.addModifyListener(ml);
         myPasswordField.setText(getPassword());
-        
+
         data = new GridData();
         data.horizontalAlignment = GridData.FILL;
         data.grabExcessHorizontalSpace = true;
@@ -187,13 +187,10 @@ public class SchemaDetailsDialog extends TitleAreaDialog
     }
 
     /**
-     * Validate the user input for a file type
+     * This method determines whether the data in the schema details is valid.
      */
     boolean validateDataEntered()
     {
-        // We need kernel api to validate the extension or a myName
-
-        // check for empty name and extension
         if (myName.length() == 0)
         {
             setErrorMessage("Schema Name is empty");
@@ -215,9 +212,9 @@ public class SchemaDetailsDialog extends TitleAreaDialog
     }
 
     /**
-     * Get the location.
+     * This method gets the location list string from the object.
      * 
-     * @return the extension
+     * @return The comma separated list of locations where this schema may contain packages.
      */
     public String getLocations()
     {
@@ -225,9 +222,9 @@ public class SchemaDetailsDialog extends TitleAreaDialog
     }
 
     /**
-     * Get the location.
+     * This method gets the name of the schema.
      * 
-     * @return the location
+     * @return the name of the schema.
      */
     public String getName()
     {
@@ -244,18 +241,32 @@ public class SchemaDetailsDialog extends TitleAreaDialog
         return myPassword;
     }
 
-    public void setLocations(String location)
+    /**
+     * This method sets the location list string on the object.
+     * 
+     * @param locations The comma separated list of locations where this schema may contain
+     *            packages.
+     */
+    public void setLocations(String locations)
     {
-        myLocations = location;
+        myLocations = locations;
     }
 
-
+    /**
+     * This method sets the name of the schema.
+     * 
+     * @param name The name of the schema.
+     */
     public void setName(String name)
     {
         myName = name;
     }
 
-
+    /**
+     * This method sets the password for the schema for oracle logon purposes.
+     * 
+     * @param password The schema's password.
+     */
     public void setPassword(String password)
     {
         myPassword = password;

@@ -47,7 +47,7 @@ public class LoadToDatabaseAction extends TextEditorAction
 
         IDocument doc = editor.getDocumentProvider().getDocument(input);
         String toLoad = doc.get();
-        String packageName = PlsqleditorPlugin.getDefault().getSegments(name, doc).get(0).getName();
+        String packageName = PlsqleditorPlugin.getDefault().getSegments(file, name, doc).get(0).getName();
         LoadPackageManager.PackageType type = name.contains(".pkb")
                 ? LoadPackageManager.PackageType.Package_Body
                 : LoadPackageManager.PackageType.Package;

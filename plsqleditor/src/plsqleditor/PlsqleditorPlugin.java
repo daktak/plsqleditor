@@ -152,9 +152,9 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
         return myPackageStore.getSegments(schema, packageName);
     }
 
-    public List<Segment> getSegments(String filename, IDocument document)
+    public List<Segment> getSegments(IFile file, String filename, IDocument document)
     {
-        return myPackageStore.getSegments(filename, document);
+        return myPackageStore.getSegments(file, filename, document);
     }
 
     public List<Segment> getSegments(IDocument document)

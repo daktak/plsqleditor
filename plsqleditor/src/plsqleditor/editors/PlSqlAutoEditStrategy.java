@@ -40,6 +40,7 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
      * index is different, we won't uppercase/lowercase the wrong word.
      */
     private int                 myLastUppercasedOffset;
+    private ArrayList<Character> myUpperCaseDelimiters;
 
     static class AutoIndentMap
     {
@@ -118,6 +119,11 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         mySecondaryAutoIndentMappings.add(new AutoIndentMap("ELSIF", "END IF"));
         mySecondaryAutoIndentMappings.add(new AutoIndentMap("ELSE", "END IF"));
         // mySecondaryAutoIndentMappings.add(new AutoIndentMap("WHEN", "END CASE"));
+        myUpperCaseDelimiters = new ArrayList<Character>();
+        for (char c : PlSqlCompletionProcessor.autoCompleteDelimiters)
+        {
+            myUpperCaseDelimiters.add(c);
+        }
     }
 
     public void customizeDocumentCommand(IDocument d, DocumentCommand c)
@@ -169,17 +175,23 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         }
         if (c.length != 0)
         {
-            // already processed indenting, now to do quick upper case
+            // already processed indenting, or cut and paste job
+            // do quick upper case if it is not a cut and paste job
             for (String toUpperCase : myUpperCasings)
             {
                 if (c.text.length() > toUpperCase.length())
                 {
-                    String toCheck = c.text.substring(c.text.length() - toUpperCase.length());
-                    if (toCheck.toUpperCase().equals(toUpperCase))
+                    int index = c.text.length() - toUpperCase.length();
+                    char preStringCharacter = c.text.substring(index - 1, index).charAt(0);
+                    if (myUpperCaseDelimiters.contains(preStringCharacter))
                     {
-                        c.text = c.text.replaceAll(toCheck, toUpperCase);
-                        myLastUppercasedWord = toCheck;
-                        myLastUppercasedOffset = c.offset;
+                        String toCheck = c.text.substring(index);
+                        if (toCheck.toUpperCase().equals(toUpperCase))
+                        {
+                            c.text = c.text.replaceAll(toCheck, toUpperCase);
+                            myLastUppercasedWord = toCheck;
+                            myLastUppercasedOffset = c.offset;
+                        }
                     }
                 }
             }

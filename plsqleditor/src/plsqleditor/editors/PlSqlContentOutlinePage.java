@@ -27,6 +27,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
@@ -101,7 +102,9 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
         protected void parse(IDocument document)
         {
             List<Segment> segments;
-            segments = PlsqleditorPlugin.getDefault().getSegments(fTextEditor.getEditorInput().getName(), document);
+            IFileEditorInput input = (IFileEditorInput) fTextEditor.getEditorInput();
+            
+            segments = PlsqleditorPlugin.getDefault().getSegments(input.getFile(), input.getName(), document);
             SortedSet<Segment> sortedSegments = new TreeSet<Segment>();
             sortedSegments.addAll(segments);
             for (Segment segment : sortedSegments)
@@ -252,6 +255,7 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
 
     public void setInput(Object input)
     {
+        // this object is a FileEditorInput (in previous runs)
         fInput = input;
         update();
     }

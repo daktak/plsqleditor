@@ -24,6 +24,9 @@ import plsqleditor.parsers.Segment;
  * workbench and shown in the UI. When the user tries to use the action, this delegate will be
  * created and execution will be delegated to it.
  * 
+ * TODO This class may do a getSegments too often (every time a lookup is performed)
+ * This could be more efficient.
+ * 
  * @see IWorkbenchWindowActionDelegate
  */
 public class LookupFileAction implements IWorkbenchWindowActionDelegate
@@ -72,7 +75,8 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
             if (part instanceof PlSqlEditor)
             {
                 PlSqlEditor editor = (PlSqlEditor) part;
-                IDocument doc = editor.getDocumentProvider().getDocument(part.getEditorInput());
+                FileEditorInput input = (FileEditorInput) part.getEditorInput();
+                IDocument doc = editor.getDocumentProvider().getDocument(input);
 
                 int line = doc.getLineOfOffset(documentOffset);
                 int start = doc.getLineOffset(line);
@@ -123,7 +127,7 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
                 }
                 else
                 {
-                    List<Segment> segments = plugin.getSegments(editor.getEditorInput().getName(), doc);
+                    List<Segment> segments = plugin.getSegments(input.getFile(), input.getName(), doc);
                     navigateToSegment(part, identifier, segments);
                 }
             }
@@ -189,7 +193,7 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
                 }
                 else // openLocType == OpenLocationType.Method
                 {
-                    List<Segment> segments = plugin.getSegments(file.getName(),((PlSqlEditor) epart).getDocumentProvider().getDocument(epart.getEditorInput()));
+                    List<Segment> segments = plugin.getSegments(file, file.getName(),((PlSqlEditor) epart).getDocumentProvider().getDocument(epart.getEditorInput()));
                     navigateToSegment(epart, identifier, segments);
                 }
             }

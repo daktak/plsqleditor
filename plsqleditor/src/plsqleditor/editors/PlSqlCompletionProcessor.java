@@ -36,6 +36,8 @@ import plsqleditor.parsers.Segment;
  */
 public class PlSqlCompletionProcessor implements IContentAssistProcessor
 {
+    public static char [] autoCompleteDelimiters = new char [] {' ', '\t', '(', ';'};
+
     private static final String[]          fgProposals;
     private static final SortedSet<String> ACS;
 
@@ -97,7 +99,6 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
 
     public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset)
     {
-        char [] autoCompleteDelimiters = new char [] {' ', '\t', '(', ';'};
         try
         {
             IDocument doc = viewer.getDocument();

@@ -496,6 +496,6 @@ public class DbUtility
             return "";
         }
         // e.g. jdbc:oracle:thin:@localhost:1521:SID
-        return theUrl.replaceFirst("jdbc\\:oracle\\:\\w+\\:\\@\\w+\\:\\d+\\:(.*)$", "$1");
+        return theUrl.replaceFirst("jdbc\\:oracle\\:\\w+\\:\\@\\[^:]+\\:\\d+\\:(.*)$", "$1");
     }
 }

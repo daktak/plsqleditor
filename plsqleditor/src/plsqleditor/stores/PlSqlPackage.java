@@ -28,6 +28,11 @@ public class PlSqlPackage
     private List<Segment> mySegments;
     private Source        mySource;
     private PlSqlSchema   mySchema;
+    /**
+     * This field represents the modification timestamp of the file from which the last segment 
+     * modification to this object came.
+     */
+    private long          myLatestChange = -2;
 
     public PlSqlPackage(PlSqlSchema owner, String name, Source type)
     {
@@ -100,9 +105,13 @@ public class PlSqlPackage
      * 
      * @param segments The segments to set.
      */
-    public void setSegments(List<Segment> segments)
+    public void setSegments(List<Segment> segments, long timestamp)
     {
         mySegments = segments;
+        if (timestamp > myLatestChange)
+        {
+            myLatestChange = timestamp;
+        }
     }
 
 
@@ -116,8 +125,9 @@ public class PlSqlPackage
         return mySource;
     }
 
-    public boolean add(Segment segment)
+    public boolean add(Segment segment, long timestamp)
     {
+        myLatestChange = timestamp;
         return mySegments.add(segment);
     }
 
@@ -135,17 +145,28 @@ public class PlSqlPackage
     {
         return mySchema;
     }
-    
+
 
     /**
-     * This method sets the schema.  It should only ever get called by a schema when
-     * this object is being added to it.
-     *
+     * This method sets the schema. It should only ever get called by a schema when this object is
+     * being added to it.
+     * 
      * @param schema The schema to set.
      */
     void setSchema(PlSqlSchema schema)
     {
         mySchema = schema;
     }
+
+    /**
+     * This method returns the latestChange.
+     * 
+     * @return {@link #myLatestChange}.
+     */
+    public long getLatestChange()
+    {
+        return myLatestChange;
+    }
     
+
 }

@@ -25,6 +25,7 @@ public class PlSqlSchema
 
     public PlSqlSchema(String name, Source source)
     {
+        assert (name != null) : "Name is null";
         myName = name;
         if (source != null)
         {
@@ -95,7 +96,10 @@ public class PlSqlSchema
                     break;
                 }
             }
-            mySources.remove(toRemove);
+            if (toRemove != null)
+            {
+                mySources.remove(toRemove);
+            }
         }
     }
 

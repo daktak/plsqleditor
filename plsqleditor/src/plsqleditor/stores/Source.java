@@ -66,7 +66,7 @@ public class Source
             return false;
         }
         Source rhs = (Source) object;
-        return new EqualsBuilder().append(this.mySource, rhs.mySource).append(this.myType,
+        return new EqualsBuilder().append(String.valueOf(this.mySource), String.valueOf(rhs.mySource)).append(this.myType,
                                                                               rhs.myType)
                 .isEquals();
     }
@@ -76,7 +76,7 @@ public class Source
      */
     public int hashCode()
     {
-        return new HashCodeBuilder(23, 397).append(this.mySource).append(this.myType).toHashCode();
+        return new HashCodeBuilder(23, 397).append(String.valueOf(this.mySource)).append(this.myType).toHashCode();
     }
 
     /**
@@ -87,7 +87,7 @@ public class Source
     public int compareTo(Object o)
     {
         Source rhs = (Source) o;
-        return new CompareToBuilder().append(this.mySource, rhs.mySource).append(this.myType,
+        return new CompareToBuilder().append(String.valueOf(this.mySource), String.valueOf(rhs.mySource)).append(this.myType,
                                                                                  rhs.myType)
                 .toComparison();
     }

@@ -138,7 +138,11 @@ public class PackageStore
      * 
      * @param segments
      */
-    public void storeSegments(String schemaName, String filename, String packageName, List<Segment> segments)
+    public void storeSegments(String schemaName,
+                              IFile file,
+                              String filename,
+                              String packageName,
+                              List<Segment> segments)
     {
         PlSqlSchema schema = mySchemaNameToSchemaMap.get(schemaName);
         if (schema == null)
@@ -158,7 +162,7 @@ public class PackageStore
             {
                 if (!pkg.contains(s))
                 {
-                    pkg.add(s);
+                    pkg.add(s, file == null ? IResource.NULL_STAMP : file.getModificationStamp());
                 }
             }
         }
@@ -169,22 +173,11 @@ public class PackageStore
                 pkg = new PlSqlPackage(schema, packageName, new Source(new Path(filename),
                         Source.Type.File));
             }
-            pkg.setSegments(segments);
+            pkg.setSegments(segments, file == null ? IResource.NULL_STAMP : file
+                    .getModificationStamp());
         }
         schema.addPackage(pkg);
         myFileToPackageMap.put(filename, pkg);
-    }
-
-    /**
-     * This method stores the segments of a particular package within the current schema.
-     * 
-     * @param packageName The name of the package that this is linked to.
-     * 
-     * @param segments
-     */
-    public void storeSegments(String filename, String packageName, List<Segment> segments)
-    {
-        storeSegments(myCurrentSchemaName, filename, packageName, segments);
     }
 
     /**
@@ -195,7 +188,7 @@ public class PackageStore
      * 
      * @return the list of segments from the document.
      */
-    public List<Segment> getSegments(String filename, IDocument document)
+    public List<Segment> getSegments(IFile file, String filename, IDocument document)
     {
         try
         {
@@ -206,11 +199,23 @@ public class PackageStore
             segments = myParser.parseFile(type, document, packageName);
             if (pkg != null)
             {
-                storeSegments(pkg.getSchema().getName(), filename, pkg.getName(), segments);
+                storeSegments(pkg.getSchema().getName(), file, filename, pkg.getName(), segments);
             }
             else
             {
-                storeSegments(filename, packageName[0], segments);
+                if (myCurrentSchemaName == null)
+                {
+                    if (filename.contains("_"))
+                    {
+                        setCurrentSchema(filename.substring(0, filename.indexOf('_')));
+                    }
+                    else
+                    {
+                        setCurrentSchema("unknown");
+                    }
+                }
+                // uses myCurrentSchemaName
+                storeSegments(getCurrentSchema(), file, filename, packageName[0], segments);
             }
             return segments;
         }
@@ -238,8 +243,8 @@ public class PackageStore
             segments = myParser.parseFile(ContentOutlineParser.Type.Package_Body,
                                           document,
                                           packageName);
-            String fileNameDummy = getCurrentSchema() + packageName[0] + ".pkb";
-            storeSegments(fileNameDummy, packageName[0], segments);
+            String fileNameDummy = getCurrentSchema() + "_" + packageName[0] + ".pkb";
+            storeSegments(getCurrentSchema(), null, fileNameDummy, packageName[0], segments);
             return segments;
         }
         catch (IOException e)
@@ -294,9 +299,10 @@ public class PackageStore
                                     IFile[] files = root.findFilesForLocation(fullPath);
                                     if (files.length > 0 && files[0].exists())
                                     {
-                                        segments = getSegments(location.toString(),
+                                        segments = getSegments(files[0],
+                                                               location.toString(),
                                                                getDoc(files[0]));
-                                        p.setSegments(segments);
+                                        p.setSegments(segments, files[0].getModificationStamp());
                                         break;
                                     }
                                 }
@@ -321,7 +327,7 @@ public class PackageStore
                         }
                     }
                 }
-                pkg.setSegments(segments);
+                pkg.setSegments(segments, IResource.NULL_STAMP);
             }
             finally
             {
@@ -354,10 +360,10 @@ public class PackageStore
      * @param packageName
      */
     private PlSqlPackage addPackage(String schemaName,
-                                     IPath schemaLocation,
-                                     String packageName,
-                                     String filename,
-                                     boolean updateRegistry)
+                                    IPath schemaLocation,
+                                    String packageName,
+                                    String filename,
+                                    boolean updateRegistry)
     {
         PlSqlSchema schema = loadSchemaLocation(schemaName, schemaLocation);
         PlSqlPackage pkg;
@@ -556,6 +562,14 @@ public class PackageStore
         List<Segment> segments = pkg == null ? null : pkg.getSegments();
         if (segments == null || segments.size() == 0 || force)
         {
+            if (segments != null && segments.size() > 0)
+            {
+                long timeStamp = file.getModificationStamp();
+                if (pkg.getLatestChange() >= timeStamp)
+                {
+                    return;
+                }
+            }
             String schemaName = null;
             String packageName = null;
             if (pkg == null)
@@ -566,6 +580,7 @@ public class PackageStore
                     packageName = filename.substring(filename.indexOf('_') + 1, filename
                             .lastIndexOf('.'));
                 }
+                // TODO need to do something where the schema name is not in the file name
             }
             else
             {
@@ -576,7 +591,7 @@ public class PackageStore
             {
                 pkg = addPackage(schemaName, schemaLocation, packageName, filename, true);
                 String oldSchemaName = myCurrentSchemaName;
-    
+
                 setCurrentSchema(schemaName);
                 try
                 {
@@ -589,7 +604,7 @@ public class PackageStore
                     segments = myParser.parseFile(type, doc, discoveredPackageName);
                     myFileToPackageMap.put(filename, pkg);
                     // TODO should check discoveredPackageName[0] is same as packageName
-                    storeSegments(filename, packageName, segments);
+                    storeSegments(getCurrentSchema(), file, filename, packageName, segments);
                     if (updateRegistry)
                     {
                         myRegistry.saveSchemaMappings(false);
