@@ -1,0 +1,20 @@
+
+conceptually break up lines into one long block of text (but leave as separate lines)
+
+logic:
+
+loop through each character.
+
+if (offsetInLine > LINE_LENGTH)
+{
+  start a new line;
+  currentLine = new StringBuffer(LINE_LENGTH);
+  currentLine.append(padSpaces);
+  offsetInLine = padSpaces.length();
+  if (isInComment)
+  {
+    currentLine.append(COMMMENT_PAD);
+    offsetInLine += COMMENT_PAD;
+  }
+  
+}

@@ -237,6 +237,7 @@ public class SqlPlusProcessExecutor
         {
             logger.fine("Entered executeSystemCall(" + systemCall + " )");
         }
+        System.out.println("Executed " + systemCall);
 
         BufferedReader in = null;
         boolean isStartedUp = false;

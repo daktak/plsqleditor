@@ -8,8 +8,6 @@ import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
-import plsqleditor.db.LoadPackageManager;
-
 /**
  * This class
  * 
@@ -22,8 +20,6 @@ import plsqleditor.db.LoadPackageManager;
  */
 public class SelectedTextAction extends TextEditorAction
 {
-    protected LoadPackageManager myLoadPackageManager = new LoadPackageManager();
-
     public SelectedTextAction(ResourceBundle bundle, String prefix, ITextEditor editor)
     {
         super(bundle, prefix, editor);

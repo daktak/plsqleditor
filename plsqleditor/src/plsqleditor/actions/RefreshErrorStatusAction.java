@@ -22,7 +22,7 @@ public class RefreshErrorStatusAction extends LoadToDatabaseAction
                                        LoadPackageManager.PackageType type,
                                        String schema)
     {
-        return myLoadPackageManager.getErrorDetails(schema, packageName, type);
+        return theLoadPackageManager.getErrorDetails(schema, packageName, type);
     }
 
     protected String modifyCodeToLoad(String toLoad, String packageName, String separator)

@@ -1,5 +1,6 @@
 package plsqleditor;
 
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;

@@ -30,7 +30,7 @@ import plsqleditor.db.SQLErrorDetail;
  */
 public class LoadToDatabaseAction extends TextEditorAction
 {
-    protected LoadPackageManager myLoadPackageManager = new LoadPackageManager();
+    protected LoadPackageManager theLoadPackageManager = LoadPackageManager.instance();
 
     public LoadToDatabaseAction(ResourceBundle bundle, String prefix, ITextEditor editor)
     {
@@ -54,7 +54,7 @@ public class LoadToDatabaseAction extends TextEditorAction
         String schema = PlsqleditorPlugin.getDefault().getCurrentSchema();
 
         deleteMarkers(file);
-        SQLErrorDetail[] details = myLoadPackageManager.execute(schema, packageName, toLoad, type);
+        SQLErrorDetail[] details = theLoadPackageManager.execute(schema, packageName, toLoad, type);
 
         if (details != null && details.length > 0)
         {

@@ -64,7 +64,8 @@ public class DbUtility
     }
 
     /**
-     * This method initialises the connection pool being used to talk to the database.
+     * This method initialises the connection pool being used to talk to the
+     * database.
      */
     private static void initDbaConnectionPool()
     {
@@ -126,7 +127,8 @@ public class DbUtility
     }
 
     /**
-     * This method initialises the connection pool being used to talk to the database.
+     * This method initialises the connection pool being used to talk to the
+     * database.
      */
     private static void initConnectionPool(String schemaName)
     {
@@ -185,6 +187,24 @@ public class DbUtility
         }
     }
 
+    public static void commit(String schema) throws SQLException
+    {
+        Connection c = getConnection(schema);
+        if (c != null)
+        {
+            c.commit();
+        }
+    }
+
+    public static void rollback(String schema) throws SQLException
+    {
+        Connection c = getConnection(schema);
+        if (c != null)
+        {
+            c.rollback();
+        }
+    }
+
     /**
      * @param schemaName
      * @param c
@@ -195,16 +215,19 @@ public class DbUtility
     }
 
     /**
-     * This method gets a set of Strings from the database, based on the first column of a resultset
-     * returned based on the provided <code>sql</code> query. The first column must be a string.
+     * This method gets a set of Strings from the database, based on the first
+     * column of a resultset returned based on the provided <code>sql</code>
+     * query. The first column must be a string.
      * 
-     * @param sql The query that will yield a resultset.
+     * @param sql
+     *            The query that will yield a resultset.
      * 
-     * @param isAddingEmptyValue This indicates whether an empty string should be added to the
+     * @param isAddingEmptyValue
+     *            This indicates whether an empty string should be added to the
      *            return value. If so, it will be the first entry.
      * 
-     * @return The array of strings obtained from the first column of the data returned from the
-     *         database based on the <code>sql</code> query.
+     * @return The array of strings obtained from the first column of the data
+     *         returned from the database based on the <code>sql</code> query.
      */
     public static String[] getObjects(String schema, String sql, Boolean isAddingEmptyValue)
     {
@@ -232,16 +255,19 @@ public class DbUtility
     }
 
     /**
-     * This method gets a set of Strings from the database, based on the first column of a resultset
-     * returned based on the provided <code>sql</code> query. The first column must be a string.
+     * This method gets a set of Strings from the database, based on the first
+     * column of a resultset returned based on the provided <code>sql</code>
+     * query. The first column must be a string.
      * 
-     * @param sql The statement that will yield a resultset.
+     * @param sql
+     *            The statement that will yield a resultset.
      * 
-     * @param isAddingEmptyValue This indicates whether an empty string should be added to the
+     * @param isAddingEmptyValue
+     *            This indicates whether an empty string should be added to the
      *            return value. If so, it will be the first entry.
      * 
-     * @return The array of strings obtained from the first column of the data returned from the
-     *         database based on the <code>sql</code> query.
+     * @return The array of strings obtained from the first column of the data
+     *         returned from the database based on the <code>sql</code> query.
      */
     public static String[] getObjects(PreparedStatement sql, Boolean isAddingEmptyValue)
     {
@@ -274,15 +300,18 @@ public class DbUtility
 
 
     /**
-     * This method gets a set of Strings from the database, based on the first column of a resultset
-     * returned based on the provided <code>sql</code> query. The first column must be a string.
+     * This method gets a set of Strings from the database, based on the first
+     * column of a resultset returned based on the provided <code>sql</code>
+     * query. The first column must be a string.
      * 
-     * @param sql The query that will yield a resultset.
+     * @param sql
+     *            The query that will yield a resultset.
      * 
-     * @param extraValues The extra values to set on the sql string.
+     * @param extraValues
+     *            The extra values to set on the sql string.
      * 
-     * @return The array of strings arrays obtained from the columns of the data returned from the
-     *         database based on the <code>sql</code> query.
+     * @return The array of strings arrays obtained from the columns of the data
+     *         returned from the database based on the <code>sql</code> query.
      */
     public static String[][] getObjects(String schema, String sql, Object[] extraValues)
     {
@@ -310,15 +339,18 @@ public class DbUtility
     }
 
     /**
-     * This method gets a set of Strings from the database, based on the first column of a resultset
-     * returned based on the provided <code>sql</code> query. The first column must be a string.
+     * This method gets a set of Strings from the database, based on the first
+     * column of a resultset returned based on the provided <code>sql</code>
+     * query. The first column must be a string.
      * 
-     * @param sql The query that will yield a resultset.
+     * @param sql
+     *            The query that will yield a resultset.
      * 
-     * @param extraValues The extra values to set on the sql string.
+     * @param extraValues
+     *            The extra values to set on the sql string.
      * 
-     * @return The array of strings arrays obtained from the columns of the data returned from the
-     *         database based on the <code>sql</code> query.
+     * @return The array of strings arrays obtained from the columns of the data
+     *         returned from the database based on the <code>sql</code> query.
      */
     public static String[][] getObjects(PreparedStatement sql, Object[] extraValues)
     {
@@ -363,7 +395,8 @@ public class DbUtility
     /**
      * This method closes a statement if it is not null, ignoring any errors.
      * 
-     * @param s The statement to close.
+     * @param s
+     *            The statement to close.
      */
     public static void close(Statement s)
     {
@@ -383,7 +416,8 @@ public class DbUtility
     /**
      * This method closes a statement if it is not null, ignoring any errors.
      * 
-     * @param s The statement to close.
+     * @param s
+     *            The statement to close.
      */
     public static void close(ResultSet rs)
     {
@@ -474,9 +508,11 @@ public class DbUtility
      * This method returns the password stored in the registry for a given
      * schema.
      * 
-     * @param schema The schema whose password is required.
+     * @param schema
+     *            The schema whose password is required.
      * 
-     * @return The password of the given registry or a blank if there is none stored.
+     * @return The password of the given registry or a blank if there is none
+     *         stored.
      */
     public static String getPasswordForSchema(String schema)
     {
@@ -484,8 +520,54 @@ public class DbUtility
     }
 
     /**
-     * This method returns the Oracle SID of the database to which we are currently
-     * talking.
+     * This method loads a file into the database, returning any errors it
+     * found.
+     * 
+     * @param c
+     *            The connection to use to load the database.
+     * 
+     * @param packageName
+     *            The name of the package being loaded, for error purposes.
+     * 
+     * @param toLoad
+     *            The text representation of the entire package.
+     * 
+     * @param type
+     *            The type of thing being loaded. (package/package body etc).
+     * 
+     * @return The list of errors from the compile, or null if there were none.
+     * @throws SQLException
+     */
+    public static ResultSetWrapper loadCode(String schemaName, String toLoad) throws SQLException
+    {
+        Connection c = null;
+        Statement s = null;
+        ResultSetWrapper toReturn = null;
+        try
+        {
+            c = getConnection(schemaName);
+            s = c.createStatement();
+            s.execute(toLoad);
+
+            ResultSet rs = s.getResultSet();
+            if (rs != null)
+            {
+                toReturn = new ResultSetWrapper(rs, c, schemaName);
+            }
+        }
+        catch (SQLException e)
+        {
+            DbUtility.printErrors(e);
+            DbUtility.close(s);
+            DbUtility.free(schemaName, c);
+            throw e;
+        }
+        return toReturn;
+    }
+
+    /**
+     * This method returns the Oracle SID of the database to which we are
+     * currently talking.
      * 
      * @return The current Oracle SID.
      */
@@ -495,7 +577,7 @@ public class DbUtility
         {
             return "";
         }
-        // e.g. jdbc:oracle:thin:@localhost:1521:SID
-        return theUrl.replaceFirst("jdbc\\:oracle\\:\\w+\\:\\@\\[^:]+\\:\\d+\\:(.*)$", "$1");
+        // e.g. jdbc:oracle:thin:@aalsun108:1521:SID
+        return theUrl.replaceFirst("jdbc\\:oracle\\:\\w+\\:\\@[^:]+\\:\\d+\\:(.*)$", "$1");
     }
 }

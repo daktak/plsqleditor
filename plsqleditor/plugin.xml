@@ -3,7 +3,7 @@
 <plugin
    id="plsqleditor"
    name="Toby's PL SQL Editor"
-   version="0.2.12"
+   version="0.2.13"
    provider-name="Toby Zines"
    class="plsqleditor.PlsqleditorPlugin">
 
@@ -232,6 +232,28 @@
             id="plsql.editor"
             name="PlSql Editor Context"
             parentId="org.eclipse.ui.contexts.window"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.views">
+      <category
+            id="plsql.editor"
+            name="Sql Database Output"/>
+      <view
+            category="plsql.editor"
+            class="plsqleditor.views.ScratchPadView"
+            icon="icons/sample.gif"
+            id="plsqleditor.views.ScratchPadView"
+            name="Sql Output"/>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension targetID="org.eclipse.ui.resourcePerspective">
+         <view
+               id="plsqleditor.views.ScratchPadView"
+               ratio="0.5"
+               relationship="bottom"
+               relative="org.eclipse.ui.views.TaskList"/>
+      </perspectiveExtension>
    </extension>
 
 </plugin>

@@ -7,7 +7,9 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,23 +38,37 @@ public class LoadPackageManager
         Package_Body, Package, Sql
     }
 
-    private SQLErrorDetail[] mySQLErrors = new SQLErrorDetail[0];
+    private SQLErrorDetail[]              mySQLErrors = new SQLErrorDetail[0];
+    private static LoadPackageManager     theInstance;
+    private Map<String, ResultSetWrapper> myResultSetWrapperMap;
+
 
     /**
-     * This constructor creates the SQLErrorManager, passing in the textPane that will be hilited
-     * when errors occur, and the {@link #nextError()} and {@link #previousError()} calls are made.
+     * This constructor creates the SQLErrorManager, passing in the textPane
+     * that will be hilited when errors occur, and the {@link #nextError()} and
+     * {@link #previousError()} calls are made.
      * 
      * @param textPane
      */
-    public LoadPackageManager()
+    private LoadPackageManager()
     {
         //
+        myResultSetWrapperMap = new HashMap<String, ResultSetWrapper>();
     }
 
-    public SQLErrorDetail[] execute(String schema,
-                                    String packageName,
-                                    String toLoad,
-                                    PackageType type)
+    public synchronized static LoadPackageManager instance()
+    {
+        if (theInstance == null)
+        {
+            theInstance = new LoadPackageManager();
+        }
+        return theInstance;
+    }
+
+    public synchronized SQLErrorDetail[] execute(String schema,
+                                                 String packageName,
+                                                 String toLoad,
+                                                 PackageType type)
     {
         SQLErrorDetail[] details = null;
         PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
@@ -75,7 +91,8 @@ public class LoadPackageManager
             }
             catch (CannotCompleteException e)
             {
-                final String msg = "Failed to execute sqlplus for package " + packageName + ": " + e;
+                final String msg = "Failed to execute sqlplus for package " + packageName + ": "
+                        + e;
                 details = new SQLErrorDetail[]{new SQLErrorDetail(0, 0, msg)};
             }
         }
@@ -104,10 +121,10 @@ public class LoadPackageManager
         return toLoad;
     }
 
-    public SQLErrorDetail[] loadCode(String schemaName,
-                                     String packageName,
-                                     String toLoad,
-                                     PackageType type)
+    public synchronized SQLErrorDetail[] loadCode(String schemaName,
+                                                  String packageName,
+                                                  String toLoad,
+                                                  PackageType type)
     {
         Connection c = null;
         try
@@ -125,15 +142,20 @@ public class LoadPackageManager
     }
 
     /**
-     * This method loads a file into the database, returning any errors it found.
+     * This method loads a file into the database, returning any errors it
+     * found.
      * 
-     * @param c The connection to use to load the database.
+     * @param c
+     *            The connection to use to load the database.
      * 
-     * @param packageName The name of the package being loaded, for error purposes.
+     * @param packageName
+     *            The name of the package being loaded, for error purposes.
      * 
-     * @param toLoad The text representation of the entire package.
+     * @param toLoad
+     *            The text representation of the entire package.
      * 
-     * @param type The type of thing being loaded. (package/package body etc).
+     * @param type
+     *            The type of thing being loaded. (package/package body etc).
      * 
      * @return The list of errors from the compile, or null if there were none.
      */
@@ -153,7 +175,7 @@ public class LoadPackageManager
                 String warning = getErrorStatus(c, s, packageName, type);
                 if (warning != null)
                 {
-                    return getSQLErrors();
+                    return mySQLErrors;
                 }
             }
             return null;
@@ -167,19 +189,41 @@ public class LoadPackageManager
         }
     }
 
+    public synchronized ResultSetWrapper loadCode(String schemaName, String toLoad) throws SQLException
+    {
+        ResultSetWrapper rw = DbUtility.loadCode(schemaName, toLoad);
+        ResultSetWrapper oldRw = myResultSetWrapperMap.get(schemaName);
+        if (oldRw != null)
+        {
+            oldRw.close();
+        }
+        myResultSetWrapperMap.put(schemaName, rw);
+        return rw;
+    }
+    
+    public ResultSetWrapper getResultSetWrapper(String schemaName)
+    {
+        return myResultSetWrapperMap.get(schemaName);
+    }
+
     /**
-     * This method gets the error status of the statement <code>s</code>. If there have been
-     * warnings, the error details will be initialised with the new errors, and the first warning
-     * message will be returned to indicate something is wrong.
+     * This method gets the error status of the statement <code>s</code>. If
+     * there have been warnings, the error details will be initialised with the
+     * new errors, and the first warning message will be returned to indicate
+     * something is wrong.
      * 
-     * @param s The statement whose warning status is being checked.
+     * @param s
+     *            The statement whose warning status is being checked.
      * 
-     * @param packageName The name of the package/package body that was just created in the
-     *            statement <code>s</code>.
+     * @param packageName
+     *            The name of the package/package body that was just created in
+     *            the statement <code>s</code>.
      * 
-     * @param packageType The type of package errors we are searching for on failure.
+     * @param packageType
+     *            The type of package errors we are searching for on failure.
      * 
-     * @return The message from the first warning, or null if there were no warnings.
+     * @return The message from the first warning, or null if there were no
+     *         warnings.
      */
     private String getErrorStatus(Connection c,
                                   Statement s,
@@ -229,15 +273,19 @@ public class LoadPackageManager
     }
 
     /**
-     * This method gets the error details from the statement that attempted to create/replace the
-     * procedure/function of type <code>procType</code> and name <code>procName</code>.
+     * This method gets the error details from the statement that attempted to
+     * create/replace the procedure/function of type <code>procType</code> and
+     * name <code>procName</code>.
      * 
-     * @param s The statement to use to retrieve the errors.
+     * @param s
+     *            The statement to use to retrieve the errors.
      * 
-     * @param packageName The name of the package or package body that was compiled, but caused
-     *            warnings.
+     * @param packageName
+     *            The name of the package or package body that was compiled, but
+     *            caused warnings.
      * 
-     * @param errorType the type of the errors to look for.
+     * @param errorType
+     *            the type of the errors to look for.
      * 
      * @return The list of error details concerning the compile problems.
      */
@@ -290,15 +338,5 @@ public class LoadPackageManager
         // detail.getColumn() -= 24;
         // }
         // }
-    }
-
-    /**
-     * This method returns the sQLErrors.
-     * 
-     * @return {@link #mySQLErrors}.
-     */
-    public SQLErrorDetail[] getSQLErrors()
-    {
-        return mySQLErrors;
     }
 }

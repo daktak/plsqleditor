@@ -1,5 +1,6 @@
 package plsqleditor.actions;
 
+import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -7,11 +8,11 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.db.LoadPackageManager;
-import plsqleditor.db.SQLErrorDetail;
 import plsqleditor.parsers.StringLocationMap;
 
 /**
@@ -19,14 +20,15 @@ import plsqleditor.parsers.StringLocationMap;
  * 
  * @author Toby Zines
  * 
- * @version $Id$
+ * @version $Id: ExecuteScratchSqlAction.java,v 1.1 2005/03/24 02:12:55 tobyz
+ *          Exp $
  * 
  * Created on 15/03/2005
  * 
  */
 public class ExecuteScratchSqlAction extends SelectedTextAction
 {
-    protected LoadPackageManager myLoadPackageManager = new LoadPackageManager();
+    protected LoadPackageManager theLoadPackageManager = LoadPackageManager.instance();
 
     public ExecuteScratchSqlAction(ResourceBundle bundle, String prefix, ITextEditor editor)
     {
@@ -50,12 +52,21 @@ public class ExecuteScratchSqlAction extends SelectedTextAction
         }
         toLoad = StringLocationMap.replacePlSqlSingleLineComments(toLoad);
         toLoad = StringLocationMap.replaceNewLines(toLoad);
-        SQLErrorDetail [] errors = myLoadPackageManager.loadCode(schema, "scratch", toLoad, LoadPackageManager.PackageType.Sql);
-        if (errors != null)
+        // SQLErrorDetail [] errors = theLoadPackageManager.loadCode(schema,
+        // "scratch", toLoad, LoadPackageManager.PackageType.Sql);
+        // if (errors != null)
+        // {
+        // MessageDialog.openInformation(shell,
+        // "Toby's PL SQL Editor",
+        // errors[0].getText());
+        // }
+        try
         {
-            MessageDialog.openInformation(shell,
-                                          "Toby's PL SQL Editor",
-                                          errors[0].getText());
+            theLoadPackageManager.loadCode(schema, toLoad);
+        }
+        catch (SQLException e)
+        {
+            MessageDialog.openInformation(shell, "Toby's PL SQL Editor", e.getMessage());
         }
     }
 }
