@@ -47,7 +47,7 @@ public class SchemaDetailsDialog extends TitleAreaDialog
     /**
      * Constructs a new file extension dialog.
      * 
-     * @param parentShell the parent shell
+     * @param parentShell the myParent shell
      */
     public SchemaDetailsDialog(Shell parentShell)
     {
@@ -71,7 +71,7 @@ public class SchemaDetailsDialog extends TitleAreaDialog
      * 
      * Subclasses should overide.
      * 
-     * @param parent the parent composite to contain the dialog area
+     * @param parent the myParent composite to contain the dialog area
      * @return the dialog area control
      */
     protected Control createDialogArea(Composite parent)

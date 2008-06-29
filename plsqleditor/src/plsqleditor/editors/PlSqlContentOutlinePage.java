@@ -6,6 +6,7 @@
 package plsqleditor.editors;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -27,14 +28,16 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.views.contentoutline.ContentOutlinePage;
 
 import plsqleditor.PlsqleditorPlugin;
-import plsqleditor.parsers.ContentOutlineParser;
+import plsqleditor.parsers.PackageSegment;
 import plsqleditor.parsers.Segment;
+import plsqleditor.parsers.SegmentType;
 
 /**
  * This class
@@ -54,9 +57,6 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
      */
     public class PlSqlContentLabelProvider extends LabelProvider implements IBaseLabelProvider
     {
-
-//        private static final int IMAGE_HEIGHT = 8;
-
         /**
          * @param display
          * 
@@ -74,7 +74,10 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
             if (element instanceof Segment)
             {
                 Segment segment = (Segment) element;
-                return PlsqleditorPlugin.getDefault().getImageRegistry().get(segment.getType().toString());
+                // FIX for feature 1387684  
+                // need private identifiers
+                String key = segment.getImageKey();
+                return PlsqleditorPlugin.getDefault().getImageRegistry().get(key);
             }
             return null;
         }
@@ -85,38 +88,74 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
     protected IDocumentProvider fDocumentProvider;
     protected ITextEditor       fTextEditor;
 
-    ContentOutlineParser        myParser = new ContentOutlineParser();
-
     class ContentProvider implements ITreeContentProvider
     {
-        protected static final String SEGMENTS = "__java_segments";
-        protected IPositionUpdater    fPositionUpdater;
-        protected List<Segment>       fContent;
+        protected static final String SEGMENTS = "__plsql_segments";
+        protected IPositionUpdater    myPositionUpdater;
+        protected List                mySegments;
 
         protected ContentProvider()
         {
-            fPositionUpdater = new DefaultPositionUpdater(SEGMENTS);
-            fContent = new ArrayList<Segment>(10);
+            myPositionUpdater = new DefaultPositionUpdater(SEGMENTS);
+            mySegments = new ArrayList(10);
         }
 
         protected void parse(IDocument document)
         {
-            List<Segment> segments;
-            IFileEditorInput input = (IFileEditorInput) fTextEditor.getEditorInput();
-            
-            segments = PlsqleditorPlugin.getDefault().getSegments(input.getFile(), input.getName(), document);
-            SortedSet<Segment> sortedSegments = new TreeSet<Segment>();
-            sortedSegments.addAll(segments);
-            for (Segment segment : sortedSegments)
+            parse(document, false);
+        }
+
+        protected void parse(IDocument document, boolean isPriorToSetFocus)
+        {
+            List segments;
+            IEditorInput dfltInput = fTextEditor.getEditorInput();
+            // FIX for bug 1306379 getting class cast exception on
+            // show annotation view
+            if (dfltInput instanceof IFileEditorInput)
             {
+                IFileEditorInput input = (IFileEditorInput) dfltInput;
+                segments = PlsqleditorPlugin.getDefault().getSegments(input.getFile(),
+                                                                      document,
+                                                                      isPriorToSetFocus);
+                mySegments.addAll(sortAndFilterSegments(segments, document));
+            }
+            else
+            {
+                // FIX for bug 1306379 getting class cast exception on
+                // show annotation view
+                System.out.println("Received unprocessable input type [" + dfltInput
+                        + "] doing nothing");
+            }
+        }
+
+        private List sortAndFilterSegments(List segments, IDocument document)
+        {
+            SortedSet sortedSegments = new TreeSet();
+            sortedSegments.addAll(segments);
+            List segmentsToReturn = new ArrayList();
+            for (Iterator it = sortedSegments.iterator(); it.hasNext();)
+            {
+                Segment segment = (Segment) it.next();
                 try
                 {
-                    document.addPosition(SEGMENTS, segment.getPosition());
-                    fContent.add(segment);
-                    // fContent.add(new Segment(MessageFormat
-                    // .format(PlSqlEditorMessages
-                    // .getString("OutlinePage.segment.title_pattern"),
-                    // new Object[]{new Integer(offset)}), p));
+                    if (segment.getType() != SegmentType.Code)
+                    {
+                        document.addPosition(SEGMENTS, segment.getPosition());
+                        if (segment instanceof PackageSegment)
+                        {
+                            PackageSegment pkgSegment = (PackageSegment) segment;
+                            PackageSegment clone = (PackageSegment) pkgSegment.clone();
+                            List containedSegments = clone.getContainedSegments();
+                            List sortedContainedSegments = sortAndFilterSegments(clone.getContainedSegments(), document);
+                            containedSegments.clear();
+                            containedSegments.addAll(sortedContainedSegments);
+                            segmentsToReturn.add(clone);
+                        }
+                        else
+                        {
+                            segmentsToReturn.add(segment);
+                        }
+                    }
                 }
                 catch (BadPositionCategoryException _ex)
                 {
@@ -127,6 +166,7 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
                     //
                 }
             }
+            return segmentsToReturn;
         }
 
         public void inputChanged(Viewer viewer, Object oldInput, Object newInput)
@@ -144,28 +184,28 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
                     {
                         //
                     }
-                    document.removePositionUpdater(fPositionUpdater);
+                    document.removePositionUpdater(myPositionUpdater);
                 }
             }
-            fContent.clear();
+            mySegments.clear();
             if (newInput != null)
             {
                 IDocument document = fDocumentProvider.getDocument(newInput);
                 if (document != null)
                 {
                     document.addPositionCategory(SEGMENTS);
-                    document.addPositionUpdater(fPositionUpdater);
-                    parse(document);
+                    document.addPositionUpdater(myPositionUpdater);
+                    parse(document, true);
                 }
             }
         }
 
         public void dispose()
         {
-            if (fContent != null)
+            if (mySegments != null)
             {
-                fContent.clear();
-                fContent = null;
+                mySegments.clear();
+                mySegments = null;
             }
         }
 
@@ -176,19 +216,40 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
 
         public Object[] getElements(Object element)
         {
-            return fContent.toArray();
+            if (element instanceof PackageSegment)
+            {
+                PackageSegment pkgSegment = (PackageSegment) element;
+                return pkgSegment.getContainedSegments().toArray();
+            }
+            else if (element == fInput)
+            {
+                return mySegments.toArray();
+            }
+            else
+            {
+                return new Object[0];
+            }
         }
 
         public boolean hasChildren(Object element)
         {
-            return element == fInput;
+            return element == fInput || element instanceof PackageSegment;
         }
 
         public Object getParent(Object element)
         {
             if (element instanceof Segment)
             {
-                return fInput;
+                Segment segment = (Segment) element;
+                Object parent = segment.getParent();
+                if (parent == null)
+                {
+                    return fInput;
+                }
+                else 
+                {
+                    return parent;
+                }
             }
             else
             {
@@ -200,7 +261,12 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
         {
             if (element == fInput)
             {
-                return fContent.toArray();
+                return mySegments.toArray();
+            }
+            else if (element instanceof PackageSegment)
+            {
+                PackageSegment pkgSegment = (PackageSegment) element;
+                return pkgSegment.getContainedSegments().toArray(); 
             }
             else
             {
@@ -226,6 +292,8 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
         if (fInput != null)
         {
             viewer.setInput(fInput);
+            // Fix to cause all outlines to have the tree opened at all times
+            viewer.expandAll();
         }
     }
 

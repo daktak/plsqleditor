@@ -13,26 +13,13 @@ import org.eclipse.core.runtime.IPath;
  */
 public class Source
 {
-    /**
-     * This enum represents the type of the source of a schema/package/function etc.
-     * 
-     * @version $Id$
-     */
-    public enum Type
-    {
-        /** This indicates the source is a file. */
-        File,
-        /** This indicates the sources is the database. */
-        Database
-    }
+    private IPath           mySource;
+    private PersistenceType myPersistenceType;
 
-    private IPath mySource;
-    private Type   myType;
-
-    public Source(IPath source, Type type)
+    public Source(IPath source, PersistenceType sourceType)
     {
         mySource = source;
-        myType = type;
+        myPersistenceType = sourceType;
     }
 
     /**
@@ -49,11 +36,11 @@ public class Source
     /**
      * This method returns the type.
      * 
-     * @return {@link #myType}.
+     * @return {@link #myPersistenceType}.
      */
-    public Type getType()
+    public PersistenceType getType()
     {
-        return myType;
+        return myPersistenceType;
     }
 
     /**
@@ -66,9 +53,9 @@ public class Source
             return false;
         }
         Source rhs = (Source) object;
-        return new EqualsBuilder().append(String.valueOf(this.mySource), String.valueOf(rhs.mySource)).append(this.myType,
-                                                                              rhs.myType)
-                .isEquals();
+        return new EqualsBuilder().append(String.valueOf(this.mySource),
+                                          String.valueOf(rhs.mySource))
+                .append(this.myPersistenceType, rhs.myPersistenceType).isEquals();
     }
 
     /**
@@ -76,7 +63,8 @@ public class Source
      */
     public int hashCode()
     {
-        return new HashCodeBuilder(23, 397).append(String.valueOf(this.mySource)).append(this.myType).toHashCode();
+        return new HashCodeBuilder(23, 397).append(String.valueOf(this.mySource))
+                .append(this.myPersistenceType).toHashCode();
     }
 
     /**
@@ -87,8 +75,8 @@ public class Source
     public int compareTo(Object o)
     {
         Source rhs = (Source) o;
-        return new CompareToBuilder().append(String.valueOf(this.mySource), String.valueOf(rhs.mySource)).append(this.myType,
-                                                                                 rhs.myType)
-                .toComparison();
+        return new CompareToBuilder().append(String.valueOf(this.mySource),
+                                             String.valueOf(rhs.mySource))
+                .append(this.myPersistenceType, rhs.myPersistenceType).toComparison();
     }
 }

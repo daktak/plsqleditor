@@ -1,12 +1,18 @@
 package plsqleditor;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.SortedSet;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
-import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
@@ -18,29 +24,36 @@ import plsqleditor.db.DbUtility;
 import plsqleditor.editors.ColorManager;
 import plsqleditor.editors.PlSqlCodeScanner;
 import plsqleditor.editors.PlSqlPartitionScanner;
+import plsqleditor.objects.ElementChangedEvent;
+import plsqleditor.objects.IElementChangedListener;
+import plsqleditor.objects.PlSqlModelManager;
 import plsqleditor.parsers.Segment;
+import plsqleditor.parsers.SegmentType;
 import plsqleditor.stores.PackageStore;
 import plsqleditor.stores.SchemaRegistry;
+import plsqleditor.stores.TableStore;
 
 /**
- * The main plugin class to be used in the desktop.
+ * The main myPluginRef class to be used in the desktop.
  */
 public class PlsqleditorPlugin extends AbstractUIPlugin
 {
+    public static String             theId              = "plsqleditor";
     // The shared instance.
     private static PlsqleditorPlugin plugin;
     // Resource bundle.
     private ResourceBundle           resourceBundle;
-
     public static final String       PLSQL_PARTITIONING = "__plsql_partitioning";
-
     private PlSqlPartitionScanner    fPartitionScanner;
-
     private ColorManager             fColorProvider;
     private PlSqlCodeScanner         fCodeScanner;
-    private PackageStore             myPackageStore;
-    private SchemaRegistry           theSchemaRegistry;
+    private Map                      myPackageStores    = new HashMap();
+    private Map                      myTableStores      = new HashMap();
+    private Map                      mySchemaRegistries = new HashMap();
     private IProject                 myProject;
+    private Object                   myCurrentDoc;
+    private List                     myCurrentSegments;
+    private IFile myCurrentFile;
 
     public PlsqleditorPlugin()
     {
@@ -53,8 +66,23 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
     public void start(BundleContext context) throws Exception
     {
         super.start(context);
-        DbUtility.init(getPreferenceStore(), getSchemaRegistry());
-        myPackageStore = new PackageStore(getPreferenceStore(), getSchemaRegistry());
+        DbUtility.init(getPreferenceStore());
+    }
+
+    /**
+     * This method gets the table store. It will create a new one if one does not currently exist.
+     */
+    public TableStore getTableStore(IResource resource)
+    {
+        IProject project = resource.getProject();
+        String projectName = project.getName();
+        TableStore store = (TableStore) myTableStores.get(projectName);
+        if (store == null)
+        {
+            store = new TableStore(project);
+            myTableStores.put(projectName, store);
+        }
+        return store;
     }
 
     /**
@@ -62,8 +90,17 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
      */
     public void stop(BundleContext context) throws Exception
     {
+        try
+        {
+            DbUtility.close();
+            //PlSqlModelManager.getPlSqlModelManager().shutdown();
+        }
+        finally
+        {
+            // ensure we call super.stop as the last thing
+            super.stop(context);
+        }
         super.stop(context);
-        DbUtility.close();
         plugin = null;
         resourceBundle = null;
     }
@@ -77,7 +114,7 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
     }
 
     /**
-     * Returns the string from the plugin's resource bundle, or 'key' if not found.
+     * Returns the string from the myPluginRef's resource bundle, or 'key' if not found.
      */
     public static String getResourceString(String key)
     {
@@ -93,7 +130,7 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
     }
 
     /**
-     * Returns the plugin's resource bundle,
+     * Returns the myPluginRef's resource bundle,
      */
     public ResourceBundle getResourceBundle()
     {
@@ -133,94 +170,180 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
         return fColorProvider;
     }
 
-    public List<String> getSchemas()
+    public SortedSet getSchemas(IResource resource)
     {
-        return myPackageStore.getSchemas();
+        return getPackageStore(resource).getSchemas();
     }
+
 
     public void loadPackageFile(IFile file, IDocument doc, boolean force)
     {
-        myPackageStore.loadPackageFile(file, doc, force, true);
+        getPackageStore(file).loadPackageFile(file, doc, force, true);
     }
 
-    public List<String> getPackages(String schema)
+    public List getPackages(String schema, boolean isExpectingPublicSchemas)
     {
-        return myPackageStore.getPackages(schema);
+        return getPackageStore(getProject()).getPackages(schema, isExpectingPublicSchemas);
     }
 
-    public List<Segment> getSegments(String schema, String packageName)
+    public List getSegments(String schema, String packageName)
     {
-        return myPackageStore.getSegments(schema, packageName);
-    }
-
-    public List<Segment> getSegments(IFile file, String filename, IDocument document)
-    {
-        return myPackageStore.getSegments(file, filename, document);
-    }
-
-    public List<Segment> getSegments(IDocument document)
-    {
-        return myPackageStore.getSegments(document);
+        return getPackageStore(getProject()).getSegments(schema, packageName);
     }
 
     /**
-     * This method getsthe name of the schema of the currently focussed file.
+     * N.B. This method can be called before a setFocus has set the correct schema name.
+     * @param file
+     * @param filename
+     * @param document
+     * @return
+     */
+    public List getSegments(IFile file, IDocument document, boolean isPriorToSetFocus)
+    {
+        List segments = getPackageStore(file).getSegments(file, document, isPriorToSetFocus);
+        if (document == myCurrentDoc) // || (file != null &&
+        // file.getName().equals(myCurrentFileName)))
+        {
+            myCurrentSegments = segments;
+        }
+        return segments;
+    }
+
+    /**
+     * This method gets the name of the schema of the currently focussed file.
      * 
      * @return The name of the current schema.
      */
     public String getCurrentSchema()
     {
-        return myPackageStore.getCurrentSchema();
+        return getPackageStore(getProject()).getCurrentSchema();
     }
 
     /**
      * @see org.eclipse.ui.plugin.AbstractUIPlugin#initializeImageRegistry(org.eclipse.jface.resource.ImageRegistry)
      */
-    @Override
     protected void initializeImageRegistry(ImageRegistry reg)
     {
         super.initializeImageRegistry(reg);
         String pluginId = "plsqleditor";
-
-        ImageDescriptor desc = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_red.png");
-        Image functionImage = desc.createImage();
-        reg.put(Segment.SegmentType.Function.toString(), functionImage);
+        
+        Image functionImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_red.png").createImage();
+        reg.put(SegmentType.Function.toString() + Segment.PUBLIC, functionImage);
+        Image functionImagePrivate = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_red_private.png").createImage();
+        reg.put(SegmentType.Function.toString() + Segment.PRIVATE, functionImagePrivate);
         Image procedureImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_blue.png").createImage();
-        reg.put(Segment.SegmentType.Procedure.toString(), procedureImage);
+        reg.put(SegmentType.Procedure.toString() + Segment.PUBLIC, procedureImage);
+        Image procedureImagePrivate = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_blue_private.png").createImage();
+        reg.put(SegmentType.Procedure.toString() + Segment.PRIVATE, procedureImagePrivate);
         Image fieldImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_green.png").createImage();
-        reg.put(Segment.SegmentType.Field.toString(), fieldImage);
+        reg.put(SegmentType.Field.toString() + Segment.PUBLIC, fieldImage);
+        Image fieldImagePrivate = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_green_private.png").createImage();
+        reg.put(SegmentType.Field.toString() + Segment.PRIVATE, fieldImagePrivate);
+        reg.put(SegmentType.Constant.toString() + Segment.PUBLIC, fieldImage);
+        reg.put(SegmentType.Constant.toString() + Segment.PRIVATE, fieldImagePrivate);
         Image typeImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_yellow.png").createImage();
-        reg.put(Segment.SegmentType.Type.toString(), typeImage);
-        Image packageImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_yellow.png").createImage();
-        reg.put(Segment.SegmentType.Package.toString(), packageImage);
+        reg.put(SegmentType.Type.toString() + Segment.PUBLIC, typeImage);
+        Image typeImagePrivate = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_yellow_private.png").createImage();
+        reg.put(SegmentType.Type.toString() + Segment.PRIVATE, typeImagePrivate);
+        reg.put(SegmentType.SubType.toString() + Segment.PUBLIC, typeImage);
+        reg.put(SegmentType.SubType.toString() + Segment.PRIVATE, typeImagePrivate);
+        Image cursorImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_blue.png").createImage();
+        reg.put(SegmentType.Cursor.toString() + Segment.PUBLIC, cursorImage);
+        //Image cursorImagePrivate = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_blue_private.png").createImage();
+        reg.put(SegmentType.Cursor.toString() + Segment.PRIVATE, cursorImage);
+        Image packageImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_yellow_header.png").createImage();
+        reg.put(SegmentType.Package.toString() + Segment.PUBLIC, packageImage);
+        //Image packageImagePrivate = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_yellow_header_private.png").createImage();
+        reg.put(SegmentType.Package.toString() + Segment.PRIVATE, packageImage);
+        Image packageBodyImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_yellow_body.png").createImage();
+        reg.put(SegmentType.Package_Body.toString() + Segment.PUBLIC, packageBodyImage);
+        //Image packageBodyImagePrivate = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_yellow_body_private.png").createImage();
+        reg.put(SegmentType.Package_Body.toString() + Segment.PRIVATE, packageBodyImage);
         Image schemaImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_triangle_green.png").createImage();
-        reg.put(Segment.SegmentType.Schema.toString(), schemaImage);
+        reg.put(SegmentType.Schema.toString() + Segment.PUBLIC, schemaImage);
+        //Image schemaImagePrivate = imageDescriptorFromPlugin(pluginId, "icons/bullet_triangle_green_private.png").createImage();
+        reg.put(SegmentType.Schema.toString() + Segment.PRIVATE, schemaImage);
         Image labelImage = imageDescriptorFromPlugin(pluginId, "icons/worker.png").createImage();
-        reg.put(Segment.SegmentType.Label.toString(), labelImage);
+        reg.put(SegmentType.Label.toString() + Segment.PUBLIC, labelImage);
+        //Image labelImagePrivate = imageDescriptorFromPlugin(pluginId, "icons/worker_private.png").createImage();
+        reg.put(SegmentType.Label.toString() + Segment.PRIVATE, labelImage);
+        Image tableImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_blue.png").createImage();
+        reg.put(SegmentType.Table.toString() + Segment.PUBLIC, tableImage);
+        //Image tableImagePrivate = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_blue_private.png").createImage();
+        reg.put(SegmentType.Table.toString() + Segment.PRIVATE, tableImage);
+        Image columnImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_red.png").createImage();
+        reg.put(SegmentType.Column.toString() + Segment.PUBLIC, columnImage);
+        //Image columnImagePrivate = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_red_private.png").createImage();
+        reg.put(SegmentType.Column.toString() + Segment.PRIVATE, columnImage);
+        Image pragmaImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_red.png").createImage();
+        reg.put(SegmentType.Pragma.toString() + Segment.PUBLIC, pragmaImage);
+        reg.put(SegmentType.Pragma.toString() + Segment.PRIVATE, pragmaImage);
+        
+        Image schemaFunctionImage = imageDescriptorFromPlugin(pluginId, "icons/func.png").createImage();
+        reg.put("Schema" + SegmentType.Function.toString(), schemaFunctionImage);
+        Image schemaProcedureImage = imageDescriptorFromPlugin(pluginId, "icons/proc.png").createImage();
+        reg.put("Schema" + SegmentType.Procedure.toString(), schemaProcedureImage);
+        Image schemaFieldImage = imageDescriptorFromPlugin(pluginId, "icons/const.png").createImage();
+        reg.put("Schema" + SegmentType.Field.toString(), schemaFieldImage);
+        reg.put("Schema" + SegmentType.Constant.toString(), schemaFieldImage);
+        Image schemaTypeImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_ball_glass_yellow.png").createImage();
+        reg.put("Schema" + SegmentType.Type.toString(), schemaTypeImage);
+        reg.put("Schema" + SegmentType.SubType.toString(), schemaTypeImage);
+        Image schemaPackageImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_yellow.png").createImage();
+        reg.put("Schema" + SegmentType.Package.toString(), schemaPackageImage);
+        Image schemaSchemaImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_triangle_green.png").createImage();
+        reg.put("Schema" + SegmentType.Schema.toString(), schemaSchemaImage);
+        Image schemaLabelImage = imageDescriptorFromPlugin(pluginId, "icons/worker.png").createImage();
+        reg.put("Schema" + SegmentType.Label.toString(), schemaLabelImage);
+        Image schemaTableImage = imageDescriptorFromPlugin(pluginId, "icons/table.png").createImage();
+        reg.put("Schema" + SegmentType.Table.toString(), schemaTableImage);
+        Image schemaColumnImage = imageDescriptorFromPlugin(pluginId, "icons/bullet_square_red.png").createImage();
+        reg.put("Schema" + SegmentType.Column.toString(), schemaColumnImage);
+
     }
 
     /**
-     * @return The plugin's single instance of the schema registry.
+     * @return The myPluginRef's single instance of the schema registry.
      */
-    public SchemaRegistry getSchemaRegistry()
+    public SchemaRegistry getSchemaRegistry(IResource resource)
     {
-        if (theSchemaRegistry == null)
+        String projectName = resource.getProject().getName();
+        SchemaRegistry sr = (SchemaRegistry) mySchemaRegistries.get(projectName);
+        if (sr == null)
         {
-            theSchemaRegistry = new SchemaRegistry(getStateLocation());
+            sr = new SchemaRegistry(projectName, getStateLocation());
+            mySchemaRegistries.put(projectName, sr);
         }
-        return theSchemaRegistry;
+        return sr;
+    }
+
+    /**
+     * @return The myPluginRef's single instance of the schema registry.
+     */
+    public PackageStore getPackageStore(IResource resource)
+    {
+        IProject project = resource.getProject();
+        String projectName = project.getName();
+        PackageStore packageStore = (PackageStore) myPackageStores.get(projectName);
+        if (packageStore == null)
+        {
+            SchemaRegistry sr = getSchemaRegistry(resource);
+            packageStore = new PackageStore(project, getPreferenceStore(), sr);
+            myPackageStores.put(projectName, packageStore);
+        }
+        return packageStore;
     }
 
     /**
      * @param schema
      * @param packageName
-     * @return The file for the associated <code>schema</code> and <code>packageName</code>.
+     * @return The files for the associated <code>schema</code> and <code>packageName</code>.
      * 
-     * @see PackageStore#getFile(String, String)
+     * @see PackageStore#getFiles(String, String)
      */
-    public IFile getFile(String schema, String packageName)
+    public IFile [] getFiles(String schema, String packageName)
     {
-        return myPackageStore.getFile(schema, packageName);
+        return getPackageStore(getProject()).getFiles(schema, packageName);
     }
 
     /**
@@ -234,5 +357,136 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
     public IProject getProject()
     {
         return myProject;
+    }
+
+    /**
+     * @return The list of segments that are obtained from the current document.
+     */
+    public List getCurrentSegments(IDocument doc)
+    {
+        if (doc == null)
+        {
+            return myCurrentSegments;
+        }
+        if (myCurrentDoc != doc)
+        {
+            myCurrentDoc = doc;
+            myCurrentSegments = getSegments(myCurrentFile, doc, false);
+        }
+        return myCurrentSegments;
+    }
+
+    /**
+     * @return {@link #myCurrentFileName}.
+     */
+    public String getCurrentFileName()
+    {
+        if (myCurrentFile != null)
+        {
+            return myCurrentFile.getName();
+        }
+        return null;
+    }
+
+    /**
+     * Adds the given listener for changes to Java elements. Has no effect if an identical listener is already
+     * registered.
+     * 
+     * This listener will only be notified during the POST_CHANGE resource change notification and any reconcile
+     * operation (POST_RECONCILE). For finer control of the notification, use
+     * <code>addElementChangedListener(IElementChangedListener,int)</code>, which allows to specify a different
+     * eventMask.
+     * 
+     * @param listener the listener
+     * @see ElementChangedEvent
+     */
+    public static void addElementChangedListener(IElementChangedListener listener)
+    {
+        addElementChangedListener(listener, ElementChangedEvent.POST_CHANGE | ElementChangedEvent.POST_RECONCILE);
+    }
+
+    /**
+     * Adds the given listener for changes to Java elements. Has no effect if an identical listener is already
+     * registered. After completion of this method, the given listener will be registered for exactly the specified
+     * events. If they were previously registered for other events, they will be deregistered.
+     * <p>
+     * Once registered, a listener starts receiving notification of changes to java elements in the model. The listener
+     * continues to receive notifications until it is replaced or removed.
+     * </p>
+     * <p>
+     * Listeners can listen for several types of event as defined in <code>ElementChangeEvent</code>. Clients are
+     * free to register for any number of event types however if they register for more than one, it is their
+     * responsibility to ensure they correctly handle the case where the same java element change shows up in multiple
+     * notifications. Clients are guaranteed to receive only the events for which they are registered.
+     * </p>
+     * 
+     * @param listener the listener
+     * @param eventMask the bit-wise OR of all event types of interest to the listener
+     * @see IElementChangedListener
+     * @see ElementChangedEvent
+     * @see #removeElementChangedListener(IElementChangedListener)
+     * @since 2.0
+     */
+    public static void addElementChangedListener(IElementChangedListener listener, int eventMask)
+    {
+        PlSqlModelManager.getPlSqlModelManager().deltaState.addElementChangedListener(listener, eventMask);
+    }
+
+    /**
+     * Adds the given listener for POST_CHANGE resource change events to the Java core. The listener is guarantied to be
+     * notified of the POST_CHANGE resource change event before the Java core starts processing the resource change
+     * event itself.
+     * <p>
+     * Has no effect if an identical listener is already registered.
+     * </p>
+     * 
+     * @param listener the listener
+     * @see #removePreProcessingResourceChangedListener(IResourceChangeListener)
+     * @since 3.0
+     */
+    public static void addPreProcessingResourceChangedListener(IResourceChangeListener listener)
+    {
+        PlSqlModelManager.getPlSqlModelManager().deltaState.addPreResourceChangedListener(listener);
+    }
+
+    public PlSqlModelManager getPlSqlModelManager()
+    {
+        return PlSqlModelManager.getPlSqlModelManager();
+    }
+
+    /**
+     * Removes the given element changed listener. Has no affect if an identical listener is not registered.
+     * 
+     * @param listener the listener
+     */
+    public static void removeElementChangedListener(IElementChangedListener listener)
+    {
+        PlSqlModelManager.getPlSqlModelManager().deltaState.removeElementChangedListener(listener);
+    }
+
+    /**
+     * Removes the given pre-processing resource changed listener.
+     * <p>
+     * Has no affect if an identical listener is not registered.
+     * 
+     * @param listener the listener
+     */
+    public static void removePreProcessingResourceChangedListener(IResourceChangeListener listener)
+    {
+        PlSqlModelManager.getPlSqlModelManager().deltaState.removePreResourceChangedListener(listener);
+    }
+
+    public static void log(String msg, Exception e)
+    {
+        if (msg == null)
+        {
+            msg = "";
+        }
+        getDefault().getLog().log(new Status(IStatus.INFO, getDefault().getBundle().getSymbolicName(), IStatus.OK, msg, e));
+    }
+
+    public void setCurrentFile(IFile file)
+    {
+        myCurrentFile = file;
     }
 }

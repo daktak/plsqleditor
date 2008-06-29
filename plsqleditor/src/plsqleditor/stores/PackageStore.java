@@ -6,8 +6,13 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedMap;
+import java.util.SortedSet;
+import java.util.TreeMap;
+import java.util.TreeSet;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -25,14 +30,18 @@ import org.eclipse.jface.text.IDocument;
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.db.DbUtility;
 import plsqleditor.parsers.ContentOutlineParser;
+import plsqleditor.parsers.PackageSegment;
+import plsqleditor.parsers.ParseType;
+import plsqleditor.parsers.PlSqlParserManager;
 import plsqleditor.parsers.Segment;
 import plsqleditor.preferences.entities.PackageDetails;
+import plsqleditor.preferences.entities.PackageLocation;
 import plsqleditor.preferences.entities.SchemaDetails;
 
 /**
- * This class represents a store of all the schema, package and segment (function, procedure field)
- * information about the pl-sql files in the project. Currently it does not query the database for
- * extra information.
+ * This class represents a store of all the schema, package and segment
+ * (function, procedure field) information about the pl-sql files in the
+ * project. Currently it does not query the database for extra information.
  * 
  * @author Toby Zines
  */
@@ -41,58 +50,72 @@ public class PackageStore
             SchemaRegistry.RegistryUpdateListener,
             DbUtility.DbPrefsUpdateListener
 {
-    private String                    myCurrentSchemaName;
-    private ContentOutlineParser      myParser;
-    private DBPackageStore            myDbPackageStore;
+    private String               myCurrentSchemaName;
+    private ContentOutlineParser myParser;
+    private DBPackageStore       myDbPackageStore;
 
     /**
-     * This field maps a schema name to a PlSqlSchema it represents. This schema will in turn
-     * contain all the loaded packages.
+     * This field maps a schema name to a PlSqlSchema it represents. This schema
+     * will in turn contain all the loaded packages.
      */
-    private Map<String, PlSqlSchema>  mySchemaNameToSchemaMap;
+    private SortedMap            mySchemaNameToSchemaMap;
 
     /**
-     * This field maps an IFile name to the PlSql package backing it.
+     * This field maps an IFile <b>name</b> to the PlSql package backing it.
      */
-    private Map<String, PlSqlPackage> myFileToPackageMap;
+    private Map                  myFileNameToPackageMap;
 
-    private SchemaRegistry            myRegistry;
+    private SchemaRegistry       myRegistry;
+    private IProject             myProject;
 
-    public PackageStore(IPreferenceStore prefs, SchemaRegistry registry)
+    public PackageStore(IProject project, IPreferenceStore prefs, SchemaRegistry registry)
     {
+        myProject = project;
         myRegistry = registry;
         myParser = new ContentOutlineParser();
         initMappings();
-        initDbPackageStore();
+        initDbPackageStore(project);
         myRegistry.addListener(this);
         DbUtility.addListener(this);
     }
 
     private void initMappings()
     {
-        mySchemaNameToSchemaMap = new HashMap<String, PlSqlSchema>();
-        myFileToPackageMap = new HashMap<String, PlSqlPackage>();
-        for (SchemaDetails sd : myRegistry.getSchemaMappings())
+        mySchemaNameToSchemaMap = new TreeMap();
+        myFileNameToPackageMap = new HashMap();
+        SchemaDetails[] sds = myRegistry.getSchemaMappings();
+        for (int i = 0; i < sds.length; i++)
         {
+            SchemaDetails sd = sds[i];
             String schema = sd.getName();
-            for (String strLoc : sd.getLocations())
+
+            for (Iterator it = sd.getLocations().iterator(); it.hasNext();)
             {
+                String strLoc = (String) it.next();
                 IPath loc = new Path(strLoc);
                 // this is in case there are no packages
                 loadSchemaLocation(schema, loc);
-                for (PackageDetails pd : sd.getPackages())
+                PackageDetails[] pds = sd.getPackages();
+                for (int j = 0; j < pds.length; j++)
                 {
-                    addPackage(schema, loc, pd.getName(), pd.getLocation(), false);
+                    PackageDetails pd = pds[j];
+                    PackageLocation[] pkgLocs = pd.getLocations();
+                    for (int k = 0; k < pkgLocs.length; k++)
+                    {
+                        PackageLocation pkgLoc = pkgLocs[k];
+                        addPackage(schema, loc, pd.getName(), pkgLoc.getLocation(), pkgLoc
+                                .getParseType(), false, true);
+                    }
                 }
             }
         }
     }
 
-    private void initDbPackageStore()
+    private void initDbPackageStore(IProject project)
     {
         try
         {
-            myDbPackageStore = new DBPackageStore(DbUtility.getDbaConnectionPool());
+            myDbPackageStore = new DBPackageStore(DbUtility.getDbaConnectionPool(project));
         }
         catch (IllegalStateException e)
         {
@@ -105,21 +128,19 @@ public class PackageStore
      * 
      * @return The list of currently known schema names.
      */
-    public List<String> getSchemas()
+    public SortedSet getSchemas()
     {
-        List<String> list = new ArrayList<String>();
-        list.addAll(mySchemaNameToSchemaMap.keySet());
+        SortedSet set = new TreeSet();
+
         if (myDbPackageStore != null)
         {
             try
             {
-                for (String schema : myDbPackageStore.getSchemas())
+                for (Iterator it = myDbPackageStore.getSchemas().iterator(); it.hasNext();)
                 {
+                    String schema = (String) it.next();
                     String lowerSchema = schema.toLowerCase();
-                    if (!list.contains(lowerSchema))
-                    {
-                        list.add(lowerSchema);
-                    }
+                    set.add(lowerSchema);
                 }
             }
             catch (SQLException e)
@@ -127,26 +148,39 @@ public class PackageStore
                 e.printStackTrace();
             }
         }
-        return list;
+        if (set == null)
+        {
+            set = new TreeSet();
+        }
+        set.addAll(mySchemaNameToSchemaMap.keySet());
+        return set;
     }
 
     /**
-     * This method stores the segments of a particular package within the current schema.
+     * This method stores the segments of a particular package within the
+     * current schema.
+     * 
+     * @param schemaName The name of the schema to use to find the schema within
+     *            which to store the supplied segments.
+     * 
+     * @param file The file to use to create a new schema and schema name if the
+     *            schema cannot be found using the supplied
+     *            <code>schemaName</code>, and to determine the filename,
+     *            which is used to determine the type (pkb or pkh).
      * 
      * @param packageName The name of the package that this is linked to.
      * 
-     * @param segments
+     * @param segments The list of {@link Segment} objects to store in the
+     *            current schema.
      */
-    public void storeSegments(String schemaName,
-                              IFile file,
-                              String filename,
-                              String packageName,
-                              List<Segment> segments)
+    private void storeSegments(String schemaName, IFile file, String packageName, List segments)
     {
-        PlSqlSchema schema = mySchemaNameToSchemaMap.get(schemaName);
+        PlSqlSchema schema = getSchema(schemaName);
+        String filename = file.getName();
         if (schema == null)
         {
-            schema = new PlSqlSchema(schemaName, new Source(null, Source.Type.File));
+            IPath schemaLocation = file.getProjectRelativePath().removeLastSegments(1);
+            schema = new PlSqlSchema(schemaName, new Source(schemaLocation, PersistenceType.File));
             mySchemaNameToSchemaMap.put(schema.getName(), schema);
         }
         if (packageName == null)
@@ -154,71 +188,70 @@ public class PackageStore
             packageName = "scratch";
         }
         PlSqlPackage pkg = schema.getPackage(packageName);
-        if (!filename.contains(".pkb"))
+        ParseType parseType = PlSqlParserManager.getType(file);
+
+        if (pkg == null)
         {
-            if (pkg == null)
-            {
-                pkg = new PlSqlPackage(schema, packageName, new Source(new Path(filename),
-                        Source.Type.File));
-            }
-            for (Segment s : segments)
-            {
-                if (!pkg.contains(s))
-                {
-                    pkg.add(s, file == null ? IResource.NULL_STAMP : file.getModificationStamp());
-                }
-            }
+            pkg = addPackage(schema.getName(),
+                             null/* doesn't matter, already exists */,
+                             packageName,
+                             filename,
+                             parseType,
+                             true,
+                             parseType != ParseType.Package_Body ? true : false);
         }
-        else
-        {
-            if (pkg == null)
-            {
-                pkg = new PlSqlPackage(schema, packageName, new Source(new Path(filename),
-                        Source.Type.File));
-            }
-            pkg.setSegments(segments, file == null ? IResource.NULL_STAMP : file
-                    .getModificationStamp());
-        }
-        schema.addPackage(pkg);
-        myFileToPackageMap.put(filename, pkg);
+        pkg.reconcile(segments, parseType, file == null ? IResource.NULL_STAMP : file
+                .getModificationStamp());
+        myRegistry.saveSchemaMappings(false);
     }
 
     /**
-     * This method gets the segments from a particular document, storing them along the way under
-     * the current schema. It assumes that the current schema has been set correctly.
+     * This method gets the segments from a particular document, storing them
+     * along the way under the current schema. It assumes that the current
+     * schema has been set correctly.
      * 
      * @param document
      * 
-     * @return the list of segments from the document.
+     * @return the list of {@link Segment}s from the document.
      */
-    public List<Segment> getSegments(IFile file, String filename, IDocument document)
+    public List getSegments(IFile file, IDocument document, boolean isPriorToSetFocus)
     {
+        String filename = file.getName();
         try
         {
             String[] packageName = new String[1];
-            List<Segment> segments;
-            ContentOutlineParser.Type type = ContentOutlineParser.getType(filename);
-            PlSqlPackage pkg = myFileToPackageMap.get(filename);
+            List segments;
+            ParseType type = PlSqlParserManager.getType(file);
+            PlSqlPackage pkg = (PlSqlPackage) myFileNameToPackageMap.get(filename);
             segments = myParser.parseFile(type, document, packageName);
             if (pkg != null)
             {
-                storeSegments(pkg.getSchema().getName(), file, filename, pkg.getName(), segments);
+                storeSegments(pkg.getSchema().getName(), file, pkg.getName(), segments);
             }
             else
             {
+                if (isPriorToSetFocus)
+                {
+                    myCurrentSchemaName = findSchemaNameForFile(file);
+                }
                 if (myCurrentSchemaName == null)
                 {
-                    if (filename.contains("_"))
+                    if (filename.indexOf("_") != -1)
                     {
                         setCurrentSchema(filename.substring(0, filename.indexOf('_')));
                     }
                     else
                     {
-                        setCurrentSchema("unknown");
+                        String schemaName = findSchemaNameForFile(file);
+                        if (schemaName == null)
+                        {
+                            schemaName = findSchemaNameFromFolder(file);
+                        }
+                        setCurrentSchema(schemaName != null ? schemaName : "unknown");
                     }
                 }
                 // uses myCurrentSchemaName
-                storeSegments(getCurrentSchema(), file, filename, packageName[0], segments);
+                storeSegments(getCurrentSchema(), file, packageName[0], segments);
             }
             return segments;
         }
@@ -229,110 +262,175 @@ public class PackageStore
         }
     }
 
-    public List<Segment> getSegments(IDocument document)
+    /**
+     * Get schema from Schema details schema locations according to the file
+     * location
+     * 
+     * @param file
+     * @return
+     */
+    private String findSchemaNameFromFolder(IFile file)
     {
-        try
+        SchemaDetails[] schemaDetails = myRegistry.getSchemaMappings();
+        List schemaLocations = null;
+        IPath schemaLocation = file.getProjectRelativePath().removeLastSegments(1);
+        for (int i = 0; i < schemaDetails.length; i++)
         {
-            String[] packageName = new String[1];
-            List<Segment> segments;
-            segments = myParser.parseFile(ContentOutlineParser.Type.Package_Body,
-                                          document,
-                                          packageName);
-            String fileNameDummy = getCurrentSchema() + "_" + packageName[0] + ".pkb";
-            storeSegments(getCurrentSchema(), null, fileNameDummy, packageName[0], segments);
-            return segments;
+            schemaLocations = schemaDetails[i].getLocations();
+            for (Iterator it = schemaLocations.iterator(); it.hasNext();)
+            {
+                String location = (String) it.next();
+                if (location.equals(schemaLocation.toString()))
+                {
+                    return schemaDetails[i].getName();
+                }
+            }
         }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-            return null;
-        }
+        return findSchemaNameForFile(file);
     }
 
-    public List<Segment> getSegments(String schemaName, String packageName)
+    /**
+     * This method gets the name of the schema associated with the supplied
+     * <code>file</code>.
+     * 
+     * @param file The file whose preexisting schema we are looking for.
+     * 
+     * @return The already defined schema of the associated file, or null if it
+     *         is not already defined.
+     */
+    public String findSchemaNameForFile(IFile file)
+    {
+        IPath parent = file.getParent().getFullPath();
+        for (Iterator it = mySchemaNameToSchemaMap.values().iterator(); it.hasNext();)
+        {
+            PlSqlSchema schema = (PlSqlSchema) it.next();
+            Source[] sources = schema.getSources();
+            for (int i = 0; i < sources.length; i++)
+            {
+                Source source = sources[i];
+                IPath path = source.getSource();
+                if (path != null && path.equals(parent))
+                {
+                    return schema.getName();
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * This method gets the segments for the names schema and package. In
+     * general this will be used on files that aren't currently open (or do not
+     * need to be open).
+     * 
+     * @param schemaName The name of the schema whose owned package's segments
+     *            are sought.
+     * 
+     * @param packageName The name of the package within the specified
+     *            <code>schemaName</code> whose segments are sought.
+     * 
+     * @return The list of {@link Segment}s for the particular schema and
+     *         package.
+     */
+    public List getSegments(String schemaName, String packageName)
     {
         schemaName = schemaName == null ? myCurrentSchemaName : schemaName;
-        PlSqlSchema schema = mySchemaNameToSchemaMap.get(schemaName);
+        PlSqlSchema schema = getSchema(schemaName);
         if (schema == null)
         {
-            schema = new PlSqlSchema(schemaName, new Source(new Path(""), Source.Type.File));
+            schema = new PlSqlSchema(schemaName, new Source(new Path(""), PersistenceType.File));
             mySchemaNameToSchemaMap.put(schema.getName(), schema);
         }
         PlSqlPackage pkg = schema.getPackage(packageName);
+        List segments = null;
         if (pkg == null)
         {
-            pkg = new PlSqlPackage(schema, packageName, new Source(new Path(""), Source.Type.File));
-            schema.addPackage(pkg);
+            // this line of code seems to cause the bug where we see another non
+            // package object appear as a package....
+            // TODO remove this, and if required add appropriate actual desired
+            // functionality (that this was trying to do)
+            // pkg = new PlSqlPackage(schema, packageName, new Source(new
+            // Path(""), SourceType.File));
+            // schema.addPackage(pkg);
         }
-        List<Segment> segments = pkg.getSegments();
-        if (segments == null || segments.size() == 0)
+        else
         {
-            String oldSchema = myCurrentSchemaName;
-            myCurrentSchemaName = schema.getName();
-            try
+            segments = pkg.getSegments();
+            if (segments == null || segments.size() == 0)
             {
-                PlSqlPackage p = schema.getPackage(packageName);
-                if (p != null)
+                String oldSchema = myCurrentSchemaName;
+                myCurrentSchemaName = schema.getName();
+                try
                 {
-                    segments = p.getSegments();
-                    if (segments == null || segments.size() == 0)
+                    PlSqlPackage p = schema.getPackage(packageName);
+                    if (p != null)
                     {
-                        IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
-                        IProject project = PlsqleditorPlugin.getDefault().getProject();
-                        // note, could return list from here, but this ignores files updated
-                        // by other users and injected into the work space.
-                        if (p.getSourceType().getType() == Source.Type.File)
+                        segments = p.getSegments();
+                        if (segments == null || segments.size() == 0)
                         {
-                            IPath location = p.getSourceType().getSource();
-                            if (location.toString().trim().length() > 0)
+                            IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
+                            IProject project = PlsqleditorPlugin.getDefault().getProject();
+                            // note, could return list from here, but this
+                            // ignores files updated
+                            // by other users and injected into the work space.
+                            Source primarySource = p.getPrimarySource();
+                            if (primarySource.getType() == PersistenceType.File)
                             {
-                                for (Source source : schema.getSources())
+                                IPath location = primarySource.getSource();
+                                if (location.toString().trim().length() > 0)
                                 {
-                                    IPath schemaLocation = source.getSource();
-                                    IPath fullPath = project.getLocation().append(schemaLocation)
-                                            .append(location);
-                                    IFile[] files = root.findFilesForLocation(fullPath);
-                                    if (files.length > 0 && files[0].exists())
+                                    Source[] sources = schema.getSources();
+                                    for (int i = 0; i < sources.length; i++)
                                     {
-                                        segments = getSegments(files[0],
-                                                               location.toString(),
-                                                               getDoc(files[0]));
-                                        p.setSegments(segments, files[0].getModificationStamp());
-                                        break;
+                                        Source source = sources[i];
+                                        IPath schemaLocation = source.getSource();
+                                        IPath fullPath = project.getLocation()
+                                                .append(schemaLocation).append(location);
+                                        IFile[] files = root.findFilesForLocation(fullPath);
+                                        if (files.length > 0 && files[0].exists())
+                                        {
+                                            segments = getSegments(files[0],
+                                                                   getDoc(files[0]),
+                                                                   false);
+                                            p
+                                                    .setSegments(segments, files[0]
+                                                            .getModificationStamp());
+                                            break;
+                                        }
                                     }
                                 }
                             }
-                        }
-                        if (segments == null || segments.size() == 0)
-                        {
-                            getPackages(schemaName);
-                            segments = p.getSegments();
-                            if (segments == null)
+                            if (segments == null || segments.size() == 0)
                             {
-                                segments = new ArrayList<Segment>();
+                                getPackages(schemaName, false);
+                                segments = p.getSegments();
+                                if (segments == null)
+                                {
+                                    segments = new ArrayList();
+                                }
+                            }
+                        }
+                        else
+                        {
+                            List newSegments = p.getSegments();
+                            if (newSegments != null)
+                            {
+                                segments.addAll(newSegments);
                             }
                         }
                     }
-                    else
-                    {
-                        List<Segment> newSegments = p.getSegments();
-                        if (newSegments != null)
-                        {
-                            segments.addAll(newSegments);
-                        }
-                    }
+                    pkg.setSegments(segments, IResource.NULL_STAMP);
                 }
-                pkg.setSegments(segments, IResource.NULL_STAMP);
+                finally
+                {
+                    myCurrentSchemaName = oldSchema;
+                }
+                // find file, open it and store segments
             }
-            finally
-            {
-                myCurrentSchemaName = oldSchema;
-            }
-            // find file, open it and store segments
         }
         if (segments == null)
         {
-            segments = new ArrayList<Segment>();
+            segments = new ArrayList();
         }
         if (segments.size() == 0 && myDbPackageStore != null)
         {
@@ -349,94 +447,202 @@ public class PackageStore
     }
 
     /**
-     * This method
+     * This method gets a {@link PlSqlSchema} schema for the supplied name, or
+     * null if it is not present.
+     * 
+     * @param schemaName The name of the schema desired
+     * 
+     * @return a {@link PlSqlSchema} schema for the supplied name, or null if it
+     *         is not present.
+     */
+    public PlSqlSchema getSchema(String schemaName)
+    {
+        return (PlSqlSchema) mySchemaNameToSchemaMap.get(schemaName);
+    }
+
+    /**
+     * This method adds a package to a schema that may or may not already exist.
      * 
      * @param schemaName
+     * @param schemaLocation
      * @param packageName
+     * @param filename
+     * @param updateRegistry
+     * @param isNonPkbFileThatRequiresAdditionAnyway
+     * @return
      */
     private PlSqlPackage addPackage(String schemaName,
                                     IPath schemaLocation,
                                     String packageName,
                                     String filename,
-                                    boolean updateRegistry)
+                                    ParseType parseType,
+                                    boolean updateRegistry,
+                                    boolean isNonPkbFileThatRequiresAdditionAnyway)
     {
         PlSqlSchema schema = loadSchemaLocation(schemaName, schemaLocation);
-        PlSqlPackage pkg;
-        if (filename.contains(".pkb"))
-        {
-            pkg = new PlSqlPackage(schema, packageName, new Source(new Path(filename),
-                    Source.Type.File));
-            schema.addPackage(pkg);
-        }
-        else if ((pkg = schema.getPackage(packageName)) == null)
-        {
-            pkg = new PlSqlPackage(schema, packageName, new Source(new Path(filename),
-                    Source.Type.File));
-            schema.addPackage(pkg);
-        }
+        PlSqlPackage pkg = schema.getPackage(packageName);
 
+        if (pkg != null)
+        {
+            pkg.addSource(new Source(new Path(filename), PersistenceType.File), parseType);
+        }
+        else if (parseType == ParseType.Package_Body || isNonPkbFileThatRequiresAdditionAnyway)
+        {
+            pkg = new PlSqlPackage(schema, packageName, new Source(new Path(filename),
+                    PersistenceType.File), parseType);
+            schema.addPackage(pkg);
+        }
+        addFilenametoPackageMap(filename, pkg);
 
         if (updateRegistry)
         {
-            List<String> locations = new ArrayList<String>();
-            for (Source src : schema.getSources())
+            List locations = new ArrayList();
+            Source[] sources = schema.getSources();
+            for (int i = 0; i < sources.length; i++)
             {
-                locations.add(src.getSource().toString());
+                Source src = sources[i];
+                if (src != null && src.getSource() != null)
+                {
+                    locations.add(src.getSource().toString());
+                }
             }
             SchemaDetails sd = new SchemaDetails(schemaName, locations, "");
             SchemaDetails[] all = myRegistry.getSchemaMappings();
-            List<SchemaDetails> list = new ArrayList<SchemaDetails>();
+            List list = new ArrayList();
             int index = -1;
-            int i = 0;
-            for (SchemaDetails sdi : all)
+            for (int j = 0; j < all.length; j++)
             {
+                SchemaDetails sdi = all[j];
                 list.add(sdi);
+                PlSqlSchema oldSchema = getSchema(sdi.getName());
                 if (sdi.getName().equals(sd.getName()))
                 {
-                    index = i;
+                    index = j;
                 }
-                i++;
+                // else
+                // {
+                // sources = oldSchema.getSources();
+                // for (int i = 0; i < sources.length; i++)
+                // {
+                // Source src = sources[i];
+                // if (src != null && src.getSource() != null)
+                // {
+                // sdi.addLocation(src.getSource().toString());
+                // }
+                // }
+                // }
+                PackageDetails[] pds = sdi.getPackages();
+
+                // remove any packages that have been removed by changeSchemaFor
+                for (int i = 0; i < pds.length; i++)
+                {
+                    PackageDetails pd = pds[i];
+                    String pName = pd.getName();
+                    if (oldSchema.getPackage(pName) == null)
+                    {
+                        sdi.removePackage(pd);
+                    }
+                }
             }
             if (index != -1)
             {
-                sd = list.get(index);
+                sd = (SchemaDetails) list.get(index);
+                for (Iterator it = locations.iterator(); it.hasNext();)
+                {
+                    String location = (String) it.next();
+                    sd.addLocation(location);
+                }
             }
             else
             {
                 list.add(sd);
-                myRegistry.setSchemaMappings(list.toArray(new SchemaDetails[list.size()]));
+                myRegistry.setSchemaMappings((SchemaDetails[]) list.toArray(new SchemaDetails[list
+                        .size()]));
             }
-            sd.addPackage(new PackageDetails(packageName, filename));
+            if (sd.addPackage(new PackageDetails(packageName, filename, parseType)))
+            {
+                myRegistry.setUpdated(true);
+            }
         }
         return pkg;
     }
 
+    /**
+     * This method adds a filename to package mapping. If the filename is a
+     * package body filename, the corresponding header filename mapping is
+     * provided too.
+     * 
+     * This is a fix for Bug 1418292 - Cannot load pkh file that is not in
+     * default directory
+     * 
+     * @param filename The name of the file to add to the mapping from.
+     * 
+     * @param pkg The package to add the mapping to.
+     */
+    private void addFilenametoPackageMap(String filename, PlSqlPackage pkg)
+    {
+        PlSqlPackage previous = (PlSqlPackage) myFileNameToPackageMap.remove(filename);
+        if (previous != null)
+        {
+            // do nothing
+        }
+        myFileNameToPackageMap.put(filename, pkg);
+        if (filename.endsWith(".pkb"))
+        {
+            String headerName = filename.replaceFirst("\\.pkb", ".pkh");
+            previous = (PlSqlPackage) myFileNameToPackageMap.remove(headerName);
+            if (previous != null)
+            {
+                // do nothing atm
+            }
+            myFileNameToPackageMap.put(headerName, pkg);
+        }
+    }
+
+    /**
+     * This method finds or creates a particular schema identified by the
+     * <code>schemaName</code> and adds the specified
+     * <code>schemaLocation</code> to its list of sources.
+     * 
+     * @param schemaName The name of the schema under which to store any loaded
+     *            packages.
+     * 
+     * @param schemaLocation The location to look up new package files.
+     * 
+     * @return The schema that has had extra packages loaded into it.
+     */
     private PlSqlSchema loadSchemaLocation(String schemaName, IPath schemaLocation)
     {
-        PlSqlSchema schema = mySchemaNameToSchemaMap.get(schemaName);
-        Source src = new Source(schemaLocation, Source.Type.File);
+        PlSqlSchema schema = (PlSqlSchema) mySchemaNameToSchemaMap.get(schemaName);
+        Source src = null;
+        if (schemaLocation != null)
+        {
+            src = new Source(schemaLocation, PersistenceType.File);
+        }
         if (schema == null)
         {
             schema = new PlSqlSchema(schemaName, src);
             mySchemaNameToSchemaMap.put(schema.getName(), schema);
         }
-        else
+        else if (src != null)
         {
             schema.addSource(src);
         }
         return schema;
     }
 
-    public List<String> getPackages(String schemaName)
+    public List getPackages(String schemaName, boolean isExpectingPublicSchemas)
     {
-        PlSqlSchema schema = mySchemaNameToSchemaMap.get(schemaName);
-        List<String> list = new ArrayList<String>();
+        PlSqlSchema schema = (PlSqlSchema) mySchemaNameToSchemaMap.get(schemaName);
+        List list = new ArrayList();
         if (schema != null)
         {
             IWorkspaceRoot root = ResourcesPlugin.getWorkspace().getRoot();
             IProject project = PlsqleditorPlugin.getDefault().getProject();
-            for (Source source : schema.getSources())
+            Source[] sources = schema.getSources();
+            for (int i = 0; i < sources.length; i++)
             {
+                Source source = sources[i];
                 IPath schemaLocation = source.getSource();
                 if (schemaLocation != null)
                 {
@@ -463,8 +669,9 @@ public class PackageStore
                     }
                 }
             }
-            for (PlSqlPackage pkg : schema.getPackages().values())
+            for (Iterator it = schema.getPackages().values().iterator(); it.hasNext();)
             {
+                PlSqlPackage pkg = (PlSqlPackage) it.next();
                 if (pkg.getName() == null)
                 {
                     System.out.println("Null pkg name - BAD");
@@ -479,9 +686,11 @@ public class PackageStore
         {
             try
             {
-                List<String> extraPackages = myDbPackageStore.getPackages(schemaName);
-                for (String pkg : extraPackages)
+                SortedSet extraPackages = myDbPackageStore.getPackages(schemaName,
+                                                                       isExpectingPublicSchemas);
+                for (Iterator it = extraPackages.iterator(); it.hasNext();)
                 {
+                    String pkg = (String) it.next();
                     String lowerPkg = pkg.toLowerCase();
                     if (!list.contains(lowerPkg))
                     {
@@ -500,12 +709,15 @@ public class PackageStore
     private void loadPackageFile(IContainer[] containers) throws CoreException
     {
         IResource[] resources = containers[0].members();
-        for (IResource file : resources)
+        for (int i = 0; i < resources.length; i++)
         {
+            IResource file = resources[i];
             if (file instanceof IFile)
             {
                 IFile ifile = (IFile) file;
-                if (file.getName().endsWith(".pkb") || file.getName().endsWith(".pkh"))
+                ParseType type = PlSqlParserManager.getType(ifile);
+                if (type != null
+                        && (type == ParseType.Package || type == ParseType.Package_Body || type == ParseType.Package_Header_And_Body))
                 {
                     loadPackageFile(ifile, null, false, false);
                 }
@@ -553,15 +765,25 @@ public class PackageStore
     {
         IPath schemaLocation = file.getProjectRelativePath().removeLastSegments(1);
         String filename = file.getName();
-        PlSqlPackage pkg = myFileToPackageMap.get(filename);
-        List<Segment> segments = pkg == null ? null : pkg.getSegments();
-        if (segments == null || segments.size() == 0 || force)
+        PlSqlPackage pkg = (PlSqlPackage) myFileNameToPackageMap.get(filename);
+        List segments = pkg == null ? null : pkg.getSegments();
+
+        ParseType parseType = PlSqlParserManager.getType(file);
+
+        // fix for 1441828 - Package constants not shown in completion proposals
+        boolean isTypeAlreadyStored = true;
+        if (pkg != null)
         {
-            if (segments != null && segments.size() > 0)
+            isTypeAlreadyStored = pkg.isTypeStored(parseType);
+        }
+        if (segments == null || segments.size() == 0 || force || !isTypeAlreadyStored)
+        {
+            if (segments != null && segments.size() > 0 && isTypeAlreadyStored)
             {
                 long timeStamp = file.getModificationStamp();
-                if (pkg.getLatestChange() >= timeStamp)
+                if (pkg.getLatestChangeForType(parseType) >= timeStamp)
                 {
+                    setCurrentSchema(pkg.getSchema().getName());
                     return;
                 }
             }
@@ -569,14 +791,15 @@ public class PackageStore
             String packageName = null;
             if (pkg == null)
             {
-                if (filename.contains("_") && filename.contains("."))
+                if (filename.indexOf("_") != -1 && filename.indexOf(".") != -1)
                 {
                     int underscoreIndex = filename.indexOf('_');
                     schemaName = filename.substring(0, underscoreIndex);
-                    packageName = filename.substring(underscoreIndex + 1, filename
-                            .lastIndexOf('.'));
+                    packageName = filename
+                            .substring(underscoreIndex + 1, filename.lastIndexOf('.'));
                 }
-                // TODO need to do something where the schema name is not in the file name
+                // TODO need to do something where the schema name is not in the
+                // file name
             }
             else
             {
@@ -585,7 +808,13 @@ public class PackageStore
             }
             if (schemaName != null)
             {
-                pkg = addPackage(schemaName, schemaLocation, packageName, filename, true);
+                pkg = addPackage(schemaName,
+                                 schemaLocation,
+                                 packageName,
+                                 filename,
+                                 parseType,
+                                 true,
+                                 false);
                 String oldSchemaName = myCurrentSchemaName;
 
                 setCurrentSchema(schemaName);
@@ -596,15 +825,11 @@ public class PackageStore
                     {
                         doc = getDoc(file);
                     }
-                    ContentOutlineParser.Type type = ContentOutlineParser.getType(filename);
-                    segments = myParser.parseFile(type, doc, discoveredPackageName);
-                    myFileToPackageMap.put(filename, pkg);
-                    // TODO should check discoveredPackageName[0] is same as packageName
-                    storeSegments(getCurrentSchema(), file, filename, packageName, segments);
-                    if (updateRegistry)
-                    {
-                        myRegistry.saveSchemaMappings(false);
-                    }
+                    segments = myParser.parseFile(parseType, doc, discoveredPackageName);
+                    addFilenametoPackageMap(filename, pkg);
+                    // TODO should check discoveredPackageName[0] is same as
+                    // packageName
+                    storeSegments(getCurrentSchema(), file, packageName, segments);
                 }
                 catch (IOException e)
                 {
@@ -617,8 +842,112 @@ public class PackageStore
                         setCurrentSchema(oldSchemaName);
                     }
                 }
+                if (updateRegistry)
+                {
+                    myRegistry.saveSchemaMappings(false);
+                }
             }
         }
+// TODO put this into the next release (properly)
+//        String segmentIdentifiedSchemaName = getSchemaNameFromSegments(segments);
+//        if (segmentIdentifiedSchemaName != null && !segmentIdentifiedSchemaName.equals(pkg.getSchema().getName()))
+//        {
+//        	changeSchemaFor(file, doc, segmentIdentifiedSchemaName, pkg.getName());
+//        }
+    }
+
+    /**
+     * This method gets the schema name from the list of segments
+     * loaded from a particular (pl)sql file. The schema name will
+     * be in the contained PackageSegment in the list if the header
+     * of the file contained an @schema annotation that indicated the
+     * schema.
+     * 
+     * @param segments The segments to search through for the schema name.
+     * 
+     * @return The schema name located in the segements, if one is there.
+     */
+    private String getSchemaNameFromSegments(List segments) 
+    {
+		for (Iterator iter = segments.iterator(); iter.hasNext();) 
+		{
+			Segment segment = (Segment) iter.next();
+			if (segment instanceof PackageSegment)
+			{
+				PackageSegment ps = (PackageSegment) segment;
+				return ps.getSchemaName();
+			}
+		}
+		return null;
+	}
+
+	/**
+     * This method changes the schema for a particular file (or sets it if there
+     * is currently no schema).
+     * 
+     * @param filename
+     * @param newSchemaName
+     * @param newPackageName
+     */
+    public void changeSchemaFor(IFile file,
+                                IDocument doc,
+                                String newSchemaName,
+                                String newPackageName)
+    {
+        String schemaName = getCurrentSchema();
+        PlSqlSchema schema = getSchema(schemaName);
+
+        String filename = file.getName();
+        PlSqlPackage pkg = (PlSqlPackage) myFileNameToPackageMap.remove(filename);
+        schema.removePackage(pkg);
+
+        // the pkh file will have been added too
+        PlSqlPackage headerPkg = (PlSqlPackage) myFileNameToPackageMap.remove(filename
+                .replaceFirst("\\.pkb", ".pkh"));
+        if (headerPkg != null)
+        {
+            schema.removePackage(headerPkg);
+        }
+        if (schema.size() == 0)
+        {
+            mySchemaNameToSchemaMap.remove(schemaName);
+            SchemaDetails[] details = myRegistry.getSchemaMappings();
+            List l = new ArrayList();
+            for (int i = 0; i < details.length; i++)
+            {
+                SchemaDetails detail = details[i];
+                if (!detail.getName().equals(schemaName))
+                {
+                    l.add(detail);
+                }
+            }
+            details = (SchemaDetails[]) l.toArray(new SchemaDetails[l.size()]);
+            myRegistry.setSchemaMappings(details);
+        }
+
+        IPath schemaLocation = file.getProjectRelativePath().removeLastSegments(1);
+        Source newSource = new Source(schemaLocation, PersistenceType.File);
+
+        PlSqlSchema newSchema = getSchema(newSchemaName);
+        if (newSchema == null)
+        {
+            newSchema = new PlSqlSchema(newSchemaName, newSource);
+            mySchemaNameToSchemaMap.put(newSchemaName, newSchema);
+        }
+        else
+        {
+            newSchema.addSource(newSource);
+        }
+
+        ParseType parseType = PlSqlParserManager.getType(file);
+
+        pkg = new PlSqlPackage(newSchema, newPackageName, new Source(new Path(filename),
+                PersistenceType.File), parseType);
+        newSchema.addPackage(pkg);
+        addFilenametoPackageMap(filename, pkg);
+        setCurrentSchema(newSchemaName);
+        myRegistry.setUpdated(true);
+        loadPackageFile(file, doc, true, true);
     }
 
     /**
@@ -642,21 +971,23 @@ public class PackageStore
     /**
      * @param schema
      * @param packageName
-     * @return the file for the associated <code>schema</code> and <code>package</code>, or
-     * null if it cannot be found.
+     * @return the file for the associated <code>schema</code> and
+     *         <code>package</code>, or null if it cannot be found.
      */
     public IFile getFile(String schema, String packageName)
     {
-        PlSqlSchema schm = mySchemaNameToSchemaMap.get(schema);
+        PlSqlSchema schm = (PlSqlSchema) mySchemaNameToSchemaMap.get(schema);
         if (schm != null)
         {
             PlSqlPackage pkg = schm.getPackage(packageName);
             if (pkg != null)
             {
-                for (Source source : schm.getSources())
+                String filename = pkg.getPrimarySource().getSource().toString();
+                Source[] sources = schm.getSources();
+                for (int i = 0; i < sources.length; i++)
                 {
+                    Source source = sources[i];
                     IPath schemaLocation = source.getSource();
-                    String filename = pkg.getSourceType().getSource().toString();
                     IProject project = PlsqleditorPlugin.getDefault().getProject();
                     IPath fullpath = schemaLocation.append(filename);
                     if (project.exists(fullpath))
@@ -667,6 +998,65 @@ public class PackageStore
             }
         }
         return null;
+    }
+
+    /**
+     * This method gets all the files associated with a given package.
+     * 
+     * @param schema The schema in which the package is located.
+     * 
+     * @param packageName The name of the package whose associate files are
+     *            sought.
+     * 
+     * @return the files for the associated <code>schema</code> and
+     *         <code>package</code>, or null if none can be found.
+     */
+    public IFile [] getFiles(String schema, String packageName)
+    {
+        Map fileMap = new HashMap();
+        List toReturn = new ArrayList();
+        IProject project = PlsqleditorPlugin.getDefault().getProject();
+        PlSqlSchema schm = (PlSqlSchema) mySchemaNameToSchemaMap.get(schema);
+        if (schm != null)
+        {
+            PlSqlPackage pkg = schm.getPackage(packageName);
+            if (pkg != null)
+            {
+                Source[] schemaSources = schm.getSources();
+                for (int i = 0; i < schemaSources.length; i++)
+                {
+                    Source schemaSource = schemaSources[i];
+                    IPath schemaLocation = schemaSource.getSource();
+                    addFileToMap(ParseType.Package_Body, pkg, schemaLocation, project, fileMap, toReturn);
+                    addFileToMap(ParseType.Package, pkg, schemaLocation, project, fileMap, toReturn);
+                }
+            }
+        }
+        return (IFile[]) toReturn.toArray(new IFile[toReturn.size()]);
+    }
+
+    private void addFileToMap(ParseType parseType,
+                              PlSqlPackage pkg,
+                              IPath schemaLocation,
+                              IProject project,
+                              Map toCheck,
+                              List toAddTo)
+    {
+        if (!toCheck.containsKey(parseType))
+        {
+            Source pkgSource = pkg.getSource(parseType);
+            if (pkgSource != null)
+            {
+                String pkgFilename = pkgSource.getSource().toString();
+                IPath fullpath = schemaLocation.append(pkgFilename);
+                if (project.exists(fullpath))
+                {
+                    IFile file = project.getFile(fullpath);
+                    toCheck.put(parseType, file);
+                    toAddTo.add(file);
+                }
+            }
+        }
     }
 
     /**
@@ -682,6 +1072,6 @@ public class PackageStore
      */
     public void dbPrefsUpdated()
     {
-        initDbPackageStore();
+        initDbPackageStore(myProject);
     }
 }

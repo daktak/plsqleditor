@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://plsqleditor.boomsticks.org/utils/parsers/ParseSpecification.xsd" 
+xmlns="http://plsqleditor.boomsticks.org/utils/parsers/ParseSpecification.xsd"
+xmlns:psh="http://plsqleditor.boomsticks.org/utils/parsers/ParseSpecificationHolder.xsd" 
+elementFormDefault="qualified" 
+attributeFormDefault="unqualified">
+
+	<xs:import namespace="http://plsqleditor.boomsticks.org/utils/parsers/ParseSpecificationHolder.xsd" schemaLocation="ParseSpecificationHolder.xsd"/>
+	<xs:annotation>
+		<xs:documentation> 
+			This is the XML Schema for ParseSpecificationHolders.
+			@author Toby Zines.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:complexType name="XParseSpecificationType" abstract="true">
+		<xs:sequence>
+			<xs:element name="ContainedSpecs">
+				<xs:complexType>
+					<xs:sequence minOccurs="0" maxOccurs="unbounded">
+						<xs:element ref="psh:XParseSpecificationHolder"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+			<xs:element name="AdditionalConstructorArgs">
+				<xs:annotation>
+						<xs:documentation> 
+							The additional constructor args are used for the TypedParseSpecification 
+							and the DelimiterSpec.
+						</xs:documentation>
+				</xs:annotation>
+				<xs:complexType>
+					<xs:sequence minOccurs="0" maxOccurs="unbounded">
+						<xs:element name="ArgType" type="xs:string"/>
+						<xs:element name="ArgValue" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="Name">
+			<xs:simpleType>
+			  <xs:restriction base="xs:string">
+			    <xs:pattern value="[A-Za-z]*"/>
+			  </xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="Version" use="required">
+			<xs:simpleType>
+			  <xs:restriction base="xs:string">
+			    <xs:pattern value="[0-9]+(.[0-9]*)?"/>
+			  </xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="Type" use="required">
+			<xs:simpleType>
+			  <xs:restriction base="xs:string">
+			    <xs:pattern value="\w+(\.\w+)*"/>
+			  </xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:element name="XParseSpecification" type="XParseSpecificationType"/>
+</xs:schema>

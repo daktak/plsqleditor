@@ -9,20 +9,24 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorSite;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 
 import plsqleditor.PlsqleditorPlugin;
+import plsqleditor.editors.PlSqlCompletionProcessor;
 import plsqleditor.editors.PlSqlEditor;
+import plsqleditor.parsers.PlSqlParserManager;
 import plsqleditor.parsers.Segment;
 
 /**
- * Our sample action implements workbench action delegate. The action proxy will be created by the
- * workbench and shown in the UI. When the user tries to use the action, this delegate will be
- * created and execution will be delegated to it.
+ * This action executes (for the plsqleditor plugin) the standard "F3" functionality 
+ * that is offered by the java editor.
  * 
  * TODO This class may do a getSegments too often (every time a lookup is performed)
  * This could be more efficient.
@@ -31,16 +35,6 @@ import plsqleditor.parsers.Segment;
  */
 public class LookupFileAction implements IWorkbenchWindowActionDelegate
 {
-    /**
-     * This class represents the type of open we will perform on an editor.
-     * It will either be a schema open (which does nothing), a package open, which
-     * causes the package to open and no navigation to take place, or a Method open
-     * which causes the package to open and the method to be navigated to.  
-     * 
-     * Created on 7/03/2005 
-     */
-    private enum OpenLocationType { Schema, Package, Method }
-    
     private IWorkbenchWindow myWindow;
 
     /**
@@ -59,7 +53,28 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
     public void run(IAction action)
     {
         IEditorPart part = myWindow.getActivePage().getActiveEditor();
-        ISelection selection = part.getEditorSite().getSelectionProvider().getSelection();
+        String msg = null;
+        if (part == null)
+        {
+            msg = "The editor part associated with the lookupfile action is null";
+            PlsqleditorPlugin.log(msg, new Exception(msg));
+            return;
+        }
+        IEditorSite site = part.getEditorSite();
+        if (site == null)
+        {
+            msg = "The editor site associated with the lookupfile action is null";
+            PlsqleditorPlugin.log(msg, new Exception(msg));
+            return;
+        }
+        ISelectionProvider selectionProvider = site.getSelectionProvider();
+        if (selectionProvider == null)
+        {
+            msg = "The selection provider associated with the lookupfile action is null";
+            PlsqleditorPlugin.log(msg, new Exception(msg));
+            return;
+        }
+        ISelection selection = selectionProvider.getSelection();
         
         int documentOffset = 0;
         if (selection instanceof TextSelection)
@@ -94,21 +109,28 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
                 }
                 lineOfText = lineOfText.substring(0, lotEnd);
 
-                int lastSpace = lineOfText.lastIndexOf(' ');
-                String identifier = lineOfText.substring(lastSpace + 1);
-                int documentOffsetIndex = lotStart - (lastSpace + 2);
+                int lastNonUsableCharacter = -1;
+                for (int i = 0; i < PlSqlCompletionProcessor.autoCompleteDelimiters.length; i++)
+                {
+                    char c = PlSqlCompletionProcessor.autoCompleteDelimiters[i];
+                    lastNonUsableCharacter = Math
+                            .max(lastNonUsableCharacter, lineOfText.lastIndexOf(c));
+                }
+
+                String identifier = lineOfText.substring(lastNonUsableCharacter + 1);
+                int documentOffsetIndex = lotStart - (lastNonUsableCharacter + 2);
 
                 PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
 
                 // check qualifiers
-                if (identifier.contains("."))
+                if (identifier.indexOf(".") != -1)
                 {
                     int lastDotIndex = identifier.lastIndexOf(".");
                     String prior = identifier.substring(0, lastDotIndex).toLowerCase();
                     identifier = identifier.substring(lastDotIndex + 1);
-                    if (prior.contains("."))
+                    if (prior.indexOf(".") != -1)
                     {
-                        // identifier is text after first dot
+                        // identifier is myOutputText after first dot
                         int index = prior.lastIndexOf(".");
                         String schema = prior.substring(0, index);
                         String packageName = prior.substring(index + 1);
@@ -117,7 +139,7 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
                     else
                     {
                         // only one dot, could be schema or package name
-                        // currText is text after the dot
+                        // currText is myOutputText after the dot
                         String schema = plugin.getCurrentSchema();
                         String packageName = prior;
                         openEditor(part, identifier, documentOffsetIndex < lastDotIndex ? OpenLocationType.Package : OpenLocationType.Method, schema, packageName);
@@ -125,8 +147,8 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
                 }
                 else
                 {
-                    List<Segment> segments = plugin.getSegments(input.getFile(), input.getName(), doc);
-                    navigateToSegment(part, identifier, segments);
+                    List segments = plugin.getSegments(input.getFile(), doc, false);
+                    navigateToSegment(part, identifier, segments, documentOffset);
                 }
             }
         }
@@ -146,59 +168,72 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
      * @param identifier The name of the segment (function/procedure/field).
      * 
      * @param segments The list of segments with locations.
+     * 
+     * @return <code>true</code> if the segment was found in the document, and false otherwise.
      */
-    private void navigateToSegment(IEditorPart part, String identifier, List<Segment> segments)
+    private static boolean navigateToSegment(IEditorPart part, String identifier, List segments, int documentOffset)
     {
-        for (Segment s : segments)
+        Segment s = PlSqlParserManager.instance().findNamedSegment(segments, identifier, documentOffset);
+        if (s != null)
         {
-            if (s.getName().equals(identifier))
-            {
-                // TODO differentiate between methods of the same name
-                Position p = s.getPosition();
-                part.getSite().getSelectionProvider().setSelection(new TextSelection(p.getOffset(), p.getLength()));
-            }
+            // TODO differentiate between methods of the same name
+            Position p = s.getPosition();
+            part.getSite().getSelectionProvider().setSelection(new TextSelection(p.getOffset(), p.getLength()));
+            return true;
         }
+        return false;
     }
 
     /**
      * This method opens an editor and moves the selection to the segment represented by
      * the <code>identifier</code>.
      * 
-     * @param part The editor from which the <code>identifier</code> was originally located.
-     * @param identifier
+     * @param part The editor (or other part) from which the <code>identifier</code> was originally located.
+     * @param identifier The string name of the package, procedure, function, constant etc 
+     *        that is being opened.
      * @param openLocType The type of location we expect to open.
      * @param schema
      * @param packageName
      */
-    private void openEditor(IEditorPart part, String identifier, OpenLocationType openLocType, String schema, String packageName)
+    public static void openEditor(IWorkbenchPart part, String identifier, OpenLocationType openLocType, String schema, String packageName)
     {
         PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
-        IFile file = plugin.getFile(schema, packageName);
-        FileEditorInput input = new FileEditorInput(file);
-        try
+        IFile [] files =  plugin.getFiles(schema, packageName);
+        if (files.length > 0)
         {
-            if (openLocType == OpenLocationType.Schema) // documentOffset on the schema
+            for (int i = 0; i < files.length; i++)
             {
-                // do nothing
-            }
-            else
-            {
-                IEditorPart epart = part.getSite().getPage().openEditor(input,
-                                                    "plsqleditor.editors.PlSqlEditor");
-                if (openLocType == OpenLocationType.Package) // documentOffset on the package
+                IFile file = files[i];
+                FileEditorInput input = new FileEditorInput(file);
+                try
                 {
-                    // do nothing
+                    if (openLocType == OpenLocationType.Schema) // documentOffset on the schema
+                    {
+                        // do nothing
+                    }
+                    else
+                    {
+                        IEditorPart epart = part.getSite().getPage().openEditor(input,
+                                                            "plsqleditor.editors.PlSqlEditor");
+                        if (openLocType == OpenLocationType.Package) // documentOffset on the package
+                        {
+                            // do nothing
+                        }
+                        else // openLocType == OpenLocationType.Method
+                        {
+                            List segments = plugin.getSegments(file, ((PlSqlEditor) epart).getDocumentProvider().getDocument(epart.getEditorInput()), false);
+                            if (navigateToSegment(epart, identifier, segments, 0))
+                            {
+                                break;
+                            }
+                        }
+                    }
                 }
-                else // openLocType == OpenLocationType.Method
+                catch (PartInitException e)
                 {
-                    List<Segment> segments = plugin.getSegments(file, file.getName(),((PlSqlEditor) epart).getDocumentProvider().getDocument(epart.getEditorInput()));
-                    navigateToSegment(epart, identifier, segments);
+                    e.printStackTrace();
                 }
             }
-        }
-        catch (PartInitException e)
-        {
-            e.printStackTrace();
         }
     }
 
@@ -222,7 +257,7 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
     }
 
     /**
-     * We will cache myWindow object in order to be able to provide parent shell for the message
+     * We will cache myWindow object in order to be able to provide myParent shell for the message
      * dialog.
      * 
      * @see IWorkbenchWindowActionDelegate#init

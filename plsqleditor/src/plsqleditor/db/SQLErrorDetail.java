@@ -29,7 +29,7 @@ public class SQLErrorDetail
             "SQLErrorDetail:" +
             "\n    row:  " + myRow +
             "\n column:  " + myColumn +
-            "\n   text:  " + myText + "\n";
+            "\n   myOutputText:  " + myText + "\n";
     }
 
     /**
@@ -55,7 +55,7 @@ public class SQLErrorDetail
     
 
     /**
-     * This method returns the text.
+     * This method returns the myOutputText.
      * 
      * @return {@link #myText}.
      */

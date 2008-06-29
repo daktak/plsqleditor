@@ -6,7 +6,11 @@
 package plsqleditor.rules;
 
 import java.util.HashMap;
-import org.eclipse.jface.text.rules.*;
+
+import org.eclipse.jface.text.rules.ICharacterScanner;
+import org.eclipse.jface.text.rules.IRule;
+import org.eclipse.jface.text.rules.IToken;
+import org.eclipse.jface.text.rules.Token;
 
 /**
  * This class
@@ -17,13 +21,11 @@ import org.eclipse.jface.text.rules.*;
  */
 public class KeywordsRule implements IRule
 {
-    private HashMap<String, IToken> myKeywords;
-    private IToken                  myToken;
+    private HashMap myKeywords;
 
     public KeywordsRule(IToken defaultToken)
     {
-        myToken = defaultToken;
-        myKeywords = new HashMap<String, IToken>();
+        myKeywords = new HashMap();
     }
 
     public void addKeyword(IToken token, String word)
@@ -42,16 +44,16 @@ public class KeywordsRule implements IRule
                 value.append(c);
                 c = (char) scanner.read();
             }
-            while (Character.isLetterOrDigit(c) || c == '_');
+            while (Character.isJavaIdentifierPart(c));
             scanner.unread();
-            IToken retVal = myKeywords.get(value.toString().toUpperCase());
+            IToken retVal = (IToken) myKeywords.get(value.toString().toUpperCase());
             if (retVal != null)
             {
                 return retVal;
             }
             else
             {
-                return myToken;
+                return Token.UNDEFINED;
             }
         }
         else

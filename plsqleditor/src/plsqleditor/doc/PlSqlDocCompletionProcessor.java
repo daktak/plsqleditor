@@ -3,23 +3,33 @@ package plsqleditor.doc;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.TextPresentation;
 import org.eclipse.jface.text.contentassist.CompletionProposal;
 import org.eclipse.jface.text.contentassist.ContextInformation;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.contentassist.IContextInformationPresenter;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.templates.TemplateProposal;
 
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.editors.PlSqlCompletionProcessor;
 import plsqleditor.editors.PlSqlEditorMessages;
+import plsqleditor.parsers.PlSqlParserManager;
 import plsqleditor.parsers.Segment;
+import plsqleditor.parsers.SegmentType;
+import plsqleditor.template.PlDocContextType;
+import plsqleditor.template.TemplateEditorUI;
+import plsqleditor.template.TemplateEngine;
 
 /**
  * @author Toby Zines
@@ -32,10 +42,56 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
 
     private IDocument                myCurrentDoc;
 
-    private List<Segment>            myCurrentSegments;
+    private List                     myCurrentSegments;
     final String                     paramString      = "@param";
     final String                     throwsString     = "@throws";
     final String[]                   linkStrings      = new String[]{"{@link", "@see", "@refer"};
+    private TemplateEngine           myTemplateEngine;
+    private Validator                myValidator;
+
+    protected static class Validator
+            implements
+                IContextInformationValidator,
+                IContextInformationPresenter
+    {
+        protected int fInstallOffset;
+
+        protected Validator()
+        {
+            //
+        }
+
+        public boolean isContextInformationValid(int offset)
+        {
+            return Math.abs(fInstallOffset - offset) < 5;
+        }
+
+        public void install(IContextInformation info, ITextViewer viewer, int offset)
+        {
+            fInstallOffset = offset;
+        }
+
+        public boolean updatePresentation(int documentPosition, TextPresentation presentation)
+        {
+            return false;
+        }
+    }
+
+    public PlSqlDocCompletionProcessor()
+    {
+        myValidator = new Validator();
+        TemplateContextType contextType = TemplateEditorUI.getDefault().getContextTypeRegistry()
+                .getContextType(PlDocContextType.PLDOC_CONTEXT_TYPE);
+        if (contextType == null)
+        {
+            contextType = new PlDocContextType();
+            TemplateEditorUI.getDefault().getContextTypeRegistry().addContextType(contextType);
+        }
+        if (contextType != null)
+        {
+            myTemplateEngine = new TemplateEngine(contextType);
+        }
+    }
 
     /*
      * (non-Javadoc) Method declared on IContentAssistProcessor
@@ -44,12 +100,9 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
     {
         IDocument doc = viewer.getDocument();
         PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
-        if (myCurrentDoc != doc)
-        {
-            myCurrentDoc = doc;
-            myCurrentSegments = plugin.getSegments(doc);
-        }
-        List<Segment> completions = new ArrayList<Segment>();
+        myCurrentDoc = doc;
+        myCurrentSegments = plugin.getCurrentSegments(doc);
+        List completions = new ArrayList();
         String currText = null;
         try
         {
@@ -58,8 +111,9 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
             int length = documentOffset - start;
             String lineOfText = doc.get(start, length);
             int lastNonUsableCharacter = -1;
-            for (char c : PlSqlCompletionProcessor.autoCompleteDelimiters)
+            for (int i = 0; i < PlSqlCompletionProcessor.autoCompleteDelimiters.length; i++)
             {
+                char c = PlSqlCompletionProcessor.autoCompleteDelimiters[i];
                 lastNonUsableCharacter = Math
                         .max(lastNonUsableCharacter, lineOfText.lastIndexOf(c));
             }
@@ -68,17 +122,19 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
             Position dummyPosition = new Position(0);
 
             // check qualifiers
-            if (currText.contains("@"))
+            if (currText.indexOf("@") != -1)
             {
                 int atIndex = currText.lastIndexOf("@");
                 currText = currText.substring(atIndex);
 
-                List<String> proposals = Arrays.asList(fgProposals);
-                for (String str : proposals)
+                List proposals = new ArrayList();
+                proposals.addAll(Arrays.asList(fgProposals));
+                for (Iterator it = proposals.iterator(); it.hasNext();)
                 {
+                    String str = (String) it.next();
                     if (str != null && str.toUpperCase().startsWith(currText))
                     {
-                        completions.add(new Segment(str, dummyPosition, Segment.SegmentType.Label));
+                        completions.add(new Segment(str, dummyPosition, SegmentType.Label));
                     }
                 }
             }
@@ -126,8 +182,9 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
         int index = 0;
         int currTextLength = currText.length();
 
-        for (Segment proposal : completions)
+        for (Iterator it = completions.iterator(); it.hasNext();)
         {
+            Segment proposal = (Segment) it.next();
             String proposalString = proposal.getPresentationName(true, false, true);
             String replacementString = proposalString;
             IContextInformation info = new ContextInformation(proposalString, MessageFormat
@@ -147,37 +204,49 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
                                             .getString("CompletionProcessor.Proposal.hoverinfo.pattern"),
                                     new Object[]{proposal}));
         }
+        if (myTemplateEngine != null)
+        {
+            myTemplateEngine.reset();
+            myTemplateEngine.complete(viewer, documentOffset);
+            TemplateProposal templateResults[] = myTemplateEngine.getResults();
+
+            ICompletionProposal total[] = new ICompletionProposal[result.length
+                    + templateResults.length];
+            System.arraycopy(templateResults, 0, total, 0, templateResults.length);
+            System.arraycopy(result, 0, total, templateResults.length, result.length);
+            result = total;
+        }
         return result;
     }
 
     /**
-     * This method adds the list of parameters avaiable for the currently documented procedure or
-     * function to the list of possible auto <code>completions</code>.
+     * This method adds the list of parameters avaiable for the currently
+     * documented procedure or function to the list of possible auto
+     * <code>completions</code>.
      * 
-     * @param documentOffset
-     *            The current location of the cursor in the document when auto completion was
-     *            instantiated.
+     * @param documentOffset The current location of the cursor in the document
+     *            when auto completion was instantiated.
      * 
-     * @param completions
-     *            The list of segment completions to which will be added any new completions
-     *            discovered based on the location of the cursor and the context it is in.
+     * @param completions The list of segment completions to which will be added
+     *            any new completions discovered based on the location of the
+     *            cursor and the context it is in.
      * 
-     * @param currText
-     *            The current piece of text preceding the cursor (back until the first non word
-     *            character, listed in {@link PlSqlCompletionProcessor#autoCompleteDelimiters}.
+     * @param currText The current piece of myOutputText preceding the cursor
+     *            (back until the first non word character, listed in
+     *            {@link PlSqlCompletionProcessor#autoCompleteDelimiters}.
      * 
-     * @param lineOfText
-     *            The single line of text from the beginning of the line up until the cursor
-     *            location.
+     * @param lineOfText The single line of myOutputText from the beginning of
+     *            the line up until the cursor location.
      * 
-     * @param lastCharacterInPreviousWord
-     *            The index into the <code>lineOfText</code> of the last character of the word
+     * @param lastCharacterInPreviousWord The index into the
+     *            <code>lineOfText</code> of the last character of the word
      *            previous to the <code>currText</code>.
      * 
-     * @return <code>true</code> if any completions were added and <code>false</code> otherwise.
+     * @return <code>true</code> if any completions were added and
+     *         <code>false</code> otherwise.
      */
     private boolean addParamCompletions(int documentOffset,
-                                        List<Segment> completions,
+                                        List completions,
                                         String currText,
                                         String lineOfText,
                                         int lastCharacterInPreviousWord)
@@ -188,20 +257,13 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
             String prevText = lineOfText.substring(prevIndex, lastCharacterInPreviousWord);
             if (prevText.equals(paramString))
             {
-                Segment foundSegment = null;
-                for (Segment s : myCurrentSegments)
-                {
-                    // assumes the segments are in order of location in text
-                    if (s.getPosition().getOffset() > documentOffset)
-                    {
-                        foundSegment = s;
-                        break;
-                    }
-                }
+                Segment foundSegment = PlSqlParserManager.instance()
+                        .findNextMethod(myCurrentSegments, documentOffset);
                 if (foundSegment != null)
                 {
-                    for (Segment p : foundSegment.getParameterList())
+                    for (Iterator it = foundSegment.getParameterList().iterator(); it.hasNext();)
                     {
+                        Segment p = (Segment) it.next();
                         if (p.getName().toUpperCase().startsWith(currText))
                         {
                             completions.add(p);
@@ -215,33 +277,33 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
     }
 
     /**
-     * This method adds the list of exceptions thrown by the currently documented procedure or
-     * function to the list of possible auto <code>completions</code>.
+     * This method adds the list of exceptions thrown by the currently
+     * documented procedure or function to the list of possible auto
+     * <code>completions</code>.
      * 
-     * @param documentOffset
-     *            The current location of the cursor in the document when auto completion was
-     *            instantiated.
+     * @param documentOffset The current location of the cursor in the document
+     *            when auto completion was instantiated.
      * 
-     * @param completions
-     *            The list of segment completions to which will be added any new completions
-     *            discovered based on the location of the cursor and the context it is in.
+     * @param completions The list of segment completions to which will be added
+     *            any new completions discovered based on the location of the
+     *            cursor and the context it is in.
      * 
-     * @param currText
-     *            The current piece of text preceding the cursor (back until the first non word
-     *            character, listed in {@link PlSqlCompletionProcessor#autoCompleteDelimiters}.
+     * @param currText The current piece of myOutputText preceding the cursor
+     *            (back until the first non word character, listed in
+     *            {@link PlSqlCompletionProcessor#autoCompleteDelimiters}.
      * 
-     * @param lineOfText
-     *            The single line of text from the beginning of the line up until the cursor
-     *            location.
+     * @param lineOfText The single line of myOutputText from the beginning of
+     *            the line up until the cursor location.
      * 
-     * @param lastCharacterInPreviousWord
-     *            The index into the <code>lineOfText</code> of the last character of the word
+     * @param lastCharacterInPreviousWord The index into the
+     *            <code>lineOfText</code> of the last character of the word
      *            previous to the <code>currText</code>.
      * 
-     * @return <code>true</code> if any completions were added and <code>false</code> otherwise.
+     * @return <code>true</code> if any completions were added and
+     *         <code>false</code> otherwise.
      */
     private boolean addThrowsCompletions(int documentOffset,
-                                         List<Segment> completions,
+                                         List completions,
                                          String currText,
                                          String lineOfText,
                                          int lastCharacterInPreviousWord)
@@ -260,50 +322,51 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
     }
 
     /**
-     * This method adds the standard auto complete list of completions to the list of
-     * <code>completions</code> 
+     * This method adds the standard auto complete list of completions to the
+     * list of <code>completions</code>
      * 
-     * @param documentOffset
-     *            The current location of the cursor in the document when auto completion was
-     *            instantiated.
+     * @param documentOffset The current location of the cursor in the document
+     *            when auto completion was instantiated.
      * 
-     * @param completions
-     *            The list of segment completions to which will be added any new completions
-     *            discovered based on the location of the cursor and the context it is in.
+     * @param completions The list of segment completions to which will be added
+     *            any new completions discovered based on the location of the
+     *            cursor and the context it is in.
      * 
-     * @param currText
-     *            The current piece of text preceding the cursor (back until the first non word
-     *            character, listed in {@link PlSqlCompletionProcessor#autoCompleteDelimiters}.
+     * @param currText The current piece of myOutputText preceding the cursor
+     *            (back until the first non word character, listed in
+     *            {@link PlSqlCompletionProcessor#autoCompleteDelimiters}.
      * 
-     * @param lineOfText
-     *            The single line of text from the beginning of the line up until the cursor
-     *            location.
+     * @param lineOfText The single line of myOutputText from the beginning of
+     *            the line up until the cursor location.
      * 
-     * @param lastCharacterInPreviousWord
-     *            The index into the <code>lineOfText</code> of the last character of the word
+     * @param lastCharacterInPreviousWord The index into the
+     *            <code>lineOfText</code> of the last character of the word
      *            previous to the <code>currText</code>.
      * 
-     * @return <code>true</code> if any completions were added and <code>false</code> otherwise.
+     * @return <code>true</code> if any completions were added and
+     *         <code>false</code> otherwise.
      */
     private String addLinkCompletions(int documentOffset,
-                                      List<Segment> completions,
+                                      List completions,
                                       String currText,
                                       String lineOfText,
                                       int lastCharacterInPreviousWord)
     {
-        for (String linkString : linkStrings)
+        for (int i = 0; i < linkStrings.length; i++)
         {
+            String linkString = linkStrings[i];
             int prevIndex = lastCharacterInPreviousWord - linkString.length();
             if (prevIndex >= 0)
             {
                 String prevText = lineOfText.substring(prevIndex, lastCharacterInPreviousWord);
                 if (prevText.equals(linkString))
                 {
-                    return myPlSqlCompletor.computeCompletionSegments(completions,
-                                                                      documentOffset,
-                                                                      lineOfText,
-                                                                      lastCharacterInPreviousWord,
-                                                                      myCurrentDoc);
+                    currText = lineOfText.substring(lastCharacterInPreviousWord + 1).toUpperCase();
+                    currText = myPlSqlCompletor
+                            .computeCompletionSegments(completions,
+                                                       currText,
+                                                       documentOffset,
+                                                       myCurrentDoc);
                 }
             }
         }
@@ -338,7 +401,7 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
      */
     public IContextInformationValidator getContextInformationValidator()
     {
-        return null;
+        return myValidator;
     }
 
     /*

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://plsqleditor.boomsticks.org/utils/parsers/ParseSpecificationHolder.xsd" 
+xmlns="http://plsqleditor.boomsticks.org/utils/parsers/ParseSpecificationHolder.xsd"
+elementFormDefault="qualified" 
+attributeFormDefault="unqualified">
+
+	<xs:annotation>
+		<xs:documentation> 
+			This is the XML Schema for ParseSpecificationHolders.
+			@author Toby Zines.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:complexType name="XParseSpecificationHolderType" abstract="true">
+		<xs:sequence>
+		  	<xs:element name="MaximumOccurrences" type="xs:integer" default="1"/>
+		  	<xs:element name="MinimumOccurrences" type="xs:integer" default="1"/>
+		  	<xs:element name="Height" type="xs:integer" default="25"/>
+		  	<xs:element name="Width" type="xs:integer" default="60"/>
+		  	<xs:element name="XLocation" type="xs:integer" default="0"/>
+		  	<xs:element name="YLocation" type="xs:integer" default="0"/>
+		  	<xs:element name="LevelsToDisplay" type="xs:integer" default="3"/>
+		  	<xs:element name="Colour">
+			  <xs:simpleType>
+			    <xs:restriction base="xs:string">
+			      <xs:pattern value="[0-9]+\,[0-9]+\,[0-9]+"/>
+  			    </xs:restriction>
+ 			  </xs:simpleType>
+			</xs:element>
+			<xs:element name="ContainedSpec">
+				<xs:complexType>
+					<xs:sequence minOccurs="1" maxOccurs="1">
+						<xs:element name="ParseSpecificationName" type="xs:string"/>
+						<xs:element name="ParseSpecificationVersion" type="xs:string"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	<xs:element name="XParseSpecificationHolder" type="XParseSpecificationHolderType"/>
+</xs:schema>

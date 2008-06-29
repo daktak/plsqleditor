@@ -1,19 +1,23 @@
 /*
  * Created on 22/02/2005
- *
- * @version $Id$
+ * 
+ * @version $Id: PlSqlAutoEditStrategy.java,v 1.4.2.3 2005/04/07 06:34:27 tobyz
+ *          Exp $
  */
 package plsqleditor.editors;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;
-
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.preferences.PreferenceConstants;
 
@@ -26,23 +30,26 @@ import plsqleditor.preferences.PreferenceConstants;
  */
 public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
 {
-    private List<AutoIndentMap>  myAutoIndentMappings;
-    private List<AutoIndentMap>  mySecondaryAutoIndentMappings;
-    private String[]             myUpperCasings = PlSqlCompletionProcessor.getFgProposals();
-
+    private List      myAutoIndentMappings;
+    private List      mySecondaryAutoIndentMappings;
+    private String[]  myUpperCasings = PlSqlCompletionProcessor
+                                             .getFgProposals();
+    
+    private SortedSet myDotEnabledWords = new TreeSet();
+    
     /**
      * This field represents the last word that was uppercased (prior to being
      * uppercased). This is in case we need to un-uppercase it because it turns
      * out to be part of another word.
      */
-    private String               myLastUppercasedWord;
+    private String    myLastUppercasedWord;
     /**
      * This field represents the last offset of the last uppercased word, so
      * that if the index is different, we won't uppercase/lowercase the wrong
      * word.
      */
-    private int                  myLastUppercasedOffset;
-    private ArrayList<Character> myUpperCaseDelimiters;
+    private int       myLastUppercasedOffset;
+    private ArrayList myUpperCaseDelimiters;
 
     static class AutoIndentMap
     {
@@ -56,7 +63,8 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
             myOpenString = open;
             myCloseString = close;
             myTruncatedCloseString = close.substring(0, close.length() - 1);
-            myCloseStringLastChar = String.valueOf(close.charAt(close.length() - 1));
+            myCloseStringLastChar = String.valueOf(close
+                    .charAt(close.length() - 1));
         }
 
         /**
@@ -102,7 +110,11 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
 
     public PlSqlAutoEditStrategy()
     {
-        myAutoIndentMappings = new ArrayList<AutoIndentMap>();
+        for (int i = 0; i < PlSqlCodeScanner.DOT_ENABLED_KEYWORDS.length; i++)
+        {
+            myDotEnabledWords.add(PlSqlCodeScanner.DOT_ENABLED_KEYWORDS[i]);
+        }
+        myAutoIndentMappings = new ArrayList();
         myAutoIndentMappings.add(new AutoIndentMap("IF", "END IF"));
         myAutoIndentMappings.add(new AutoIndentMap("IF", "ELSIF"));
         myAutoIndentMappings.add(new AutoIndentMap("IF", "ELSE"));
@@ -113,25 +125,65 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         myAutoIndentMappings.add(new AutoIndentMap("CASE", "WHEN"));
         myAutoIndentMappings.add(new AutoIndentMap("CASE", "ELSE"));
         myAutoIndentMappings.add(new AutoIndentMap("CASE", "END CASE"));
-
-        mySecondaryAutoIndentMappings = new ArrayList<AutoIndentMap>();
+        mySecondaryAutoIndentMappings = new ArrayList();
         // mySecondaryAutoIndentMappings.add(new AutoIndentMap("WHEN", "END
         // CASE"));
-        mySecondaryAutoIndentMappings.add(new AutoIndentMap("EXCEPTION", "END"));
+        mySecondaryAutoIndentMappings
+                .add(new AutoIndentMap("EXCEPTION", "END"));
         mySecondaryAutoIndentMappings.add(new AutoIndentMap("ELSIF", "ELSE"));
         mySecondaryAutoIndentMappings.add(new AutoIndentMap("ELSIF", "END IF"));
         mySecondaryAutoIndentMappings.add(new AutoIndentMap("ELSE", "END IF"));
         // mySecondaryAutoIndentMappings.add(new AutoIndentMap("WHEN", "END
         // CASE"));
-        myUpperCaseDelimiters = new ArrayList<Character>();
-        for (char c : PlSqlCompletionProcessor.autoCompleteDelimiters)
+        myUpperCaseDelimiters = new ArrayList();
+        for (int i = 0; i < PlSqlCompletionProcessor.autoCompleteDelimiters.length; i++)
         {
-            myUpperCaseDelimiters.add(c);
+            char c = PlSqlCompletionProcessor.autoCompleteDelimiters[i];
+            myUpperCaseDelimiters.add(new Character(c));
         }
+    }
+
+    /**
+     * @param c
+     * @param lineOfText
+     * @return The number of occurrences of the charactet <code>c</code> in
+     *         the supplied <code>lineOfText</code>.
+     */
+    private int countChars(char c, String lineOfText)
+    {
+        char[] characters = lineOfText.toCharArray();
+        int count = 0;
+        for (int i = 0; i < characters.length; i++)
+        {
+            if (characters[i] == c)
+            {
+                count++;
+            }
+        }
+        return count;
     }
 
     public void customizeDocumentCommand(IDocument d, DocumentCommand c)
     {
+    	// mlavergn - get the user preferences
+        PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
+        IPreferenceStore prefs = plugin.getPreferenceStore();
+        boolean doLowerCase = prefs
+                .getBoolean(PreferenceConstants.P_LOWERCASE_KEYWORDS);
+    	
+        int numQuotes = 0;
+        try
+        {
+            int thisline = d.getLineOfOffset(c.offset);
+            int linestart = d.getLineOffset(thisline);
+            int linelength = c.offset - linestart;
+            String lineOfText = d.get(linestart, linelength);
+            numQuotes = countChars('\'', lineOfText);
+        }
+        catch (BadLocationException e1)
+        {
+            e1.printStackTrace();
+        }
         if (c.length != 0)
         {
             myLastUppercasedWord = null;
@@ -156,8 +208,9 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         }
         else
         {
-            for (AutoIndentMap map : myAutoIndentMappings)
+            for (Iterator it = myAutoIndentMappings.iterator(); it.hasNext();)
             {
+                AutoIndentMap map = (AutoIndentMap) it.next();
                 if (map.getCloseStringLastChar().equalsIgnoreCase(c.text))
                 {
                     int length = map.getTruncatedCloseString().length();
@@ -166,9 +219,11 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                         try
                         {
                             String endStr = d.get(c.offset - length, length);
-                            if (endStr.equalsIgnoreCase(map.getTruncatedCloseString()))
+                            if (endStr.equalsIgnoreCase(map
+                                    .getTruncatedCloseString()))
                             {
-                                smartInsertAfterEnd(map.getOpenString(), map.getCloseString(), d, c);
+                                smartInsertAfterEnd(map.getOpenString(), map
+                                        .getCloseString(), d, c);
                                 break;
                             }
                         }
@@ -184,13 +239,19 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         {
             // already processed indenting, or cut and paste job
             // do quick upper case if it is not a cut and paste job
-            for (String toUpperCase : myUpperCasings)
+            for (int i = 0; i < myUpperCasings.length; i++)
             {
-                if (c.text.length() > toUpperCase.length())
+                String toUpperCase = myUpperCasings[i];
+                if (c.text.length() >= toUpperCase.length())
                 {
                     int index = c.text.length() - toUpperCase.length();
-                    char preStringCharacter = c.text.substring(index - 1, index).charAt(0);
-                    if (myUpperCaseDelimiters.contains(preStringCharacter))
+                    if ((index == 0
+                            // the line below indicates that the character before
+                            // the string in question is a delimiter
+                            || myUpperCaseDelimiters.contains(new Character(
+                                    c.text.substring(index - 1, index)
+                                            .charAt(0))))
+                            && (numQuotes % 2 == 0))
                     {
                         String toCheck = c.text.substring(index);
                         if (toCheck.toUpperCase().equals(toUpperCase))
@@ -205,29 +266,50 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         }
         if (c.length == 0 && c.text != null)
         {
-            for (String toUpperCase : myUpperCasings)
+            for (int i = 0; i < myUpperCasings.length; i++)
             {
+                String toUpperCase = myUpperCasings[i];
                 try
                 {
                     int length = toUpperCase.length() - 1;
-                    String lastChar = toUpperCase.substring(toUpperCase.length() - 1);
-                    if (c.text.equalsIgnoreCase(lastChar) && c.offset > length + 1)
+                    String lastChar = toUpperCase.substring(toUpperCase
+                            .length() - 1);
+                    if (c.text.equalsIgnoreCase(lastChar) && c.offset >= length
+                            && (numQuotes % 2 == 0))
                     {
                         String endStr = d.get(c.offset - length, length);
-                        String preChar = d.get(c.offset - (length + 1), 1);
-                        if (endStr
-                                .equalsIgnoreCase(toUpperCase
-                                        .substring(0, toUpperCase.length() - 1))
-                                && !Character.isJavaIdentifierPart(preChar.charAt(0)))
+                        String preChar = null;
+                        if (c.offset > length)
                         {
-                            int p = c.offset != d.getLength() ? c.offset : c.offset - 1;
+                            preChar = d.get(c.offset - (length + 1), 1);
+                        }
+                        else if (c.offset == length)
+                        {
+                            preChar = d.get(0,1);
+                        }
+                        char firstPreChar = preChar.charAt(0);
+                        if (endStr.equalsIgnoreCase(toUpperCase
+                                .substring(0, toUpperCase.length() - 1))
+                                && (c.offset == length || (!Character
+                                        .isJavaIdentifierPart(firstPreChar) && !isDotEnabled(toUpperCase, firstPreChar))))
+                        {
+                            int p = c.offset != d.getLength()
+                                    ? c.offset
+                                    : c.offset - 1;
                             int line = d.getLineOfOffset(p);
                             int start = d.getLineOffset(line);
-                            int whiteend = findEndOfWhiteSpace(d, start, c.offset);
-                            StringBuffer replaceText = new StringBuffer(getIndentOfLine(d, line));
+                            int whiteend = findEndOfWhiteSpace(d,
+                                                               start,
+                                                               c.offset);
+                            StringBuffer replaceText = new StringBuffer(
+                                    getIndentOfLine(d, line));
                             replaceText.append(d.get(whiteend, c.offset
                                     - (whiteend + (toUpperCase.length() - 1))));
-                            replaceText.append(toUpperCase);
+                            // mlavergn - make upper case optional
+                            if (doLowerCase)
+                                replaceText.append(toUpperCase.toLowerCase());
+                            else
+                                replaceText.append(toUpperCase);
                             c.length = c.offset - start;
                             myLastUppercasedOffset = c.offset;
                             myLastUppercasedWord = preChar + endStr + c.text;
@@ -248,7 +330,9 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                 if (c.text.length() == 1 && myLastUppercasedWord != null
                         && (myLastUppercasedOffset == c.offset - 1))
                 {
-                    if (Character.isJavaIdentifierPart(c.text.charAt(0)))
+                    char firstChar = c.text.charAt(0);
+                    // TODO fix this - i don't think it is the right logic
+                    if (Character.isJavaIdentifierPart(firstChar) || isDotEnabled(myLastUppercasedWord, firstChar))
                     {
                         c.text = myLastUppercasedWord + c.text;
                         c.length = myLastUppercasedWord.length();
@@ -258,6 +342,11 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                 myLastUppercasedWord = null;
             }
         }
+    }
+
+    private boolean isDotEnabled(String uppercasedWord, char firstChar)
+    {
+        return (firstChar == '.' && !myDotEnabledWords.contains(uppercasedWord.toUpperCase()));
     }
 
     protected void smartInsertAfterEnd(String openStr,
@@ -271,7 +360,9 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         }
         try
         {
-            int p = command.offset != document.getLength() ? command.offset : command.offset - 1;
+            int p = command.offset != document.getLength()
+                    ? command.offset
+                    : command.offset - 1;
             int line = document.getLineOfOffset(p);
             int start = document.getLineOffset(line);
             int whiteend = findEndOfWhiteSpace(document, start, command.offset);
@@ -285,8 +376,10 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                                                    1);
                 if (indLine != -1 && indLine != line)
                 {
-                    StringBuffer replaceText = new StringBuffer(getIndentOfLine(document, indLine));
-                    replaceText.append(document.get(whiteend, command.offset - whiteend));
+                    StringBuffer replaceText = new StringBuffer(
+                            getIndentOfLine(document, indLine));
+                    replaceText.append(document.get(whiteend, command.offset
+                            - whiteend));
                     replaceText.append(command.text);
                     command.length = command.offset - start;
                     command.offset = start;
@@ -296,7 +389,8 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         }
         catch (BadLocationException _ex)
         {
-            System.out.println(PlSqlEditorMessages.getString("AutoIndent.error.bad_location_2"));
+            System.out.println(PlSqlEditorMessages
+                    .getString("AutoIndent.error.bad_location_2"));
         }
     }
 
@@ -305,10 +399,16 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                                        IDocument document,
                                        int line,
                                        int end,
-                                       int closingEndIfIncrease) throws BadLocationException
+                                       int closingEndIfIncrease)
+            throws BadLocationException
     {
         int start = document.getLineOffset(line);
-        int ifcount = getStartEndCount(openStr, closeStr, document, start, end, false)
+        int ifcount = getStartEndCount(openStr,
+                                       closeStr,
+                                       document,
+                                       start,
+                                       end,
+                                       false)
                 - closingEndIfIncrease;
         for (; ifcount < 0; ifcount += getStartEndCount(openStr,
                                                         closeStr,
@@ -324,7 +424,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
             start = document.getLineOffset(line);
             end = (start + document.getLineLength(line)) - 1;
         }
-
         return line;
     }
 
@@ -333,23 +432,17 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
      * pair within a document between a <code>start</code> and
      * <code>end</code> point.
      * 
-     * @param openStr
-     *            The starting string.
+     * @param openStr The starting string.
      * 
-     * @param closeStr
-     *            The ending string.
+     * @param closeStr The ending string.
      * 
-     * @param document
-     *            The document containing these strings.
+     * @param document The document containing these strings.
      * 
-     * @param start
-     *            The starting offset in the document.
+     * @param start The starting offset in the document.
      * 
-     * @param end
-     *            The endin offset in the document.
+     * @param end The endin offset in the document.
      * 
-     * @param ignoreEnds
-     *            Ignore any discovered endings.
+     * @param ignoreEnds Ignore any discovered endings.
      * 
      * @return The number of start/end pairs.
      * 
@@ -360,7 +453,8 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                                  IDocument document,
                                  int start,
                                  int end,
-                                 boolean ignoreEnds) throws BadLocationException
+                                 boolean ignoreEnds)
+            throws BadLocationException
     {
         int begin = start;
         int ifcount = 0;
@@ -372,7 +466,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
             {
                 default :
                     break;
-
                 case '/' :
                 {
                     if (begin >= end) break;
@@ -385,7 +478,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     if (next == '/') begin = end;
                     break;
                 }
-
                 case '-' :
                 {
                     if (begin >= end) break;
@@ -396,7 +488,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     break;
                 }
-
                 case '*' :
                 {
                     if (begin >= end) break;
@@ -408,7 +499,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     break;
                 }
-
                 case 'i' :
                 case 'I' : // equivalent to '{'
                 {
@@ -426,7 +516,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     break;
                 }
-
                 case 'f' :
                 case 'F' : // equivalent to '{'
                 {
@@ -450,7 +539,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     break;
                 }
-
                 case 'c' :
                 case 'C' : // equivalent to '{'
                 {
@@ -474,7 +562,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     break;
                 }
-
                 case 'l' :
                 case 'L' : // equivalent to '{'
                 {
@@ -498,7 +585,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     break;
                 }
-
                 case 'b' :
                 case 'B' : // equivalent to '{'
                 {
@@ -522,7 +608,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     break;
                 }
-
                 case 'e' :
                 case 'E' : // equivalent to '}'
                 {
@@ -544,7 +629,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     break;
                 }
-
                 case '"' :
                 case '\'' :
                 {
@@ -560,11 +644,9 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
      * This method indicates whether the supplied <code>txt</code> ends with a
      * valid line delimiter for the supplied document <code>d</code>.
      * 
-     * @param d
-     *            The document from which to obtain valid line delimiters.
+     * @param d The document from which to obtain valid line delimiters.
      * 
-     * @param txt
-     *            The text whose end is being checked for end of line
+     * @param txt The myOutputText whose end is being checked for end of line
      *            delimiters.
      * 
      * @return <code>true</code> if <code>txt</code> ends with a line
@@ -586,11 +668,16 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
     protected int findMatchingOpenBracket(IDocument document,
                                           int line,
                                           int end,
-                                          int closingBracketIncrease) throws BadLocationException
+                                          int closingBracketIncrease)
+            throws BadLocationException
     {
         int start = document.getLineOffset(line);
-        int brackcount = getBracketCount(document, start, end, false) - closingBracketIncrease;
-        for (; brackcount < 0; brackcount += getBracketCount(document, start, end, false))
+        int brackcount = getBracketCount(document, start, end, false)
+                - closingBracketIncrease;
+        for (; brackcount < 0; brackcount += getBracketCount(document,
+                                                             start,
+                                                             end,
+                                                             false))
         {
             if (--line < 0)
             {
@@ -599,11 +686,13 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
             start = document.getLineOffset(line);
             end = (start + document.getLineLength(line)) - 1;
         }
-
         return line;
     }
 
-    private int getBracketCount(IDocument document, int start, int end, boolean ignoreCloseBrackets)
+    private int getBracketCount(IDocument document,
+                                int start,
+                                int end,
+                                boolean ignoreCloseBrackets)
             throws BadLocationException
     {
         int begin = start;
@@ -616,7 +705,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
             {
                 default :
                     break;
-
                 case '/' :
                 {
                     if (begin >= end) break;
@@ -632,7 +720,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     break;
                 }
-
                 case '*' :
                 {
                     if (begin >= end) break;
@@ -644,14 +731,12 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     break;
                 }
-
                 case '{' :
                 {
                     bracketcount++;
                     ignoreCloseBrackets = false;
                     break;
                 }
-
                 case '}' :
                 {
                     if (!ignoreCloseBrackets)
@@ -660,7 +745,6 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     break;
                 }
-
                 case '"' :
                 case '\'' :
                 {
@@ -679,16 +763,17 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         {
             char curr = document.getChar(currentPosition);
             currentPosition++;
-            if (curr == '*' && currentPosition < end && document.getChar(currentPosition) == '/')
+            if (curr == '*' && currentPosition < end
+                    && document.getChar(currentPosition) == '/')
             {
                 return currentPosition + 1;
             }
         }
-
         return end;
     }
 
-    protected String getIndentOfLine(IDocument document, int line) throws BadLocationException
+    protected String getIndentOfLine(IDocument document, int line)
+            throws BadLocationException
     {
         if (line > -1)
         {
@@ -703,8 +788,10 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         }
     }
 
-    private int getStringEnd(IDocument document, int position, int end, char character)
-            throws BadLocationException
+    private int getStringEnd(IDocument document,
+                             int position,
+                             int end,
+                             char character) throws BadLocationException
     {
         for (int currentPosition = position; currentPosition < end;)
         {
@@ -719,33 +806,38 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                 return currentPosition;
             }
         }
-
         return end;
     }
 
-    protected void smartIndentAfterNewLine(IDocument document, DocumentCommand command)
+    protected void smartIndentAfterNewLine(IDocument document,
+                                           DocumentCommand command)
     {
         int docLength = document.getLength();
         if (command.offset == -1 || docLength == 0) return;
         try
         {
-            int p = command.offset != docLength ? command.offset : command.offset - 1;
+            int p = command.offset != docLength
+                    ? command.offset
+                    : command.offset - 1;
             int line = document.getLineOfOffset(p);
             StringBuffer buf = new StringBuffer(command.text);
-
             int prevP = document.getLineOffset(line);
             String prevLine = document.get(prevP, document.getLineLength(line));
-
-            if (command.offset < docLength && document.getChar(command.offset) == '}')
+            if (command.offset < docLength
+                    && document.getChar(command.offset) == '}')
             {
-                int indLine = findMatchingOpenBracket(document, line, command.offset, 0);
+                int indLine = findMatchingOpenBracket(document,
+                                                      line,
+                                                      command.offset,
+                                                      0);
                 if (indLine == -1) indLine = line;
                 buf.append(getIndentOfLine(document, indLine));
             }
             // take care of an open bracket (with no close) on the previous
             // line.
-            else if (command.offset < docLength && prevLine.contains("(")
-                    && !prevLine.contains(")"))
+            else if (command.offset < docLength
+                    && (prevLine.indexOf("(") != -1)
+                    && (prevLine.indexOf(")") == -1))
             {
                 int index = prevLine.indexOf('(');
                 for (int i = 0; i < index; i++)
@@ -756,7 +848,9 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
             else
             {
                 int start = document.getLineOffset(line);
-                int whiteend = findEndOfWhiteSpace(document, start, command.offset);
+                int whiteend = findEndOfWhiteSpace(document,
+                                                   start,
+                                                   command.offset);
                 buf.append(document.get(start, whiteend - start));
                 if (getBracketCount(document, start, command.offset, true) > 0)
                 {
@@ -765,8 +859,10 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                 else
                 {
                     boolean isAppended = false;
-                    for (AutoIndentMap map : myAutoIndentMappings)
+                    for (Iterator it = myAutoIndentMappings.iterator(); it
+                            .hasNext();)
                     {
+                        AutoIndentMap map = (AutoIndentMap) it.next();
                         if (getStartEndCount(map.getOpenString(),
                                              map.getCloseString(),
                                              document,
@@ -781,8 +877,10 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     }
                     if (!isAppended)
                     {
-                        for (AutoIndentMap map : mySecondaryAutoIndentMappings)
+                        for (Iterator it = mySecondaryAutoIndentMappings
+                                .iterator(); it.hasNext();)
                         {
+                            AutoIndentMap map = (AutoIndentMap) it.next();
                             if (getStartEndCount(map.getOpenString(),
                                                  map.getCloseString(),
                                                  document,
@@ -801,7 +899,8 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         }
         catch (BadLocationException _ex)
         {
-            System.out.println(PlSqlEditorMessages.getString("AutoIndent.error.bad_location_1"));
+            System.out.println(PlSqlEditorMessages
+                    .getString("AutoIndent.error.bad_location_1"));
         }
     }
 
@@ -820,22 +919,30 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         }
     }
 
-    protected void smartInsertAfterBracket(IDocument document, DocumentCommand command)
+    protected void smartInsertAfterBracket(IDocument document,
+                                           DocumentCommand command)
     {
         if (command.offset == -1 || document.getLength() == 0) return;
         try
         {
-            int p = command.offset != document.getLength() ? command.offset : command.offset - 1;
+            int p = command.offset != document.getLength()
+                    ? command.offset
+                    : command.offset - 1;
             int line = document.getLineOfOffset(p);
             int start = document.getLineOffset(line);
             int whiteend = findEndOfWhiteSpace(document, start, command.offset);
             if (whiteend == command.offset)
             {
-                int indLine = findMatchingOpenBracket(document, line, command.offset, 1);
+                int indLine = findMatchingOpenBracket(document,
+                                                      line,
+                                                      command.offset,
+                                                      1);
                 if (indLine != -1 && indLine != line)
                 {
-                    StringBuffer replaceText = new StringBuffer(getIndentOfLine(document, indLine));
-                    replaceText.append(document.get(whiteend, command.offset - whiteend));
+                    StringBuffer replaceText = new StringBuffer(
+                            getIndentOfLine(document, indLine));
+                    replaceText.append(document.get(whiteend, command.offset
+                            - whiteend));
                     replaceText.append(command.text);
                     command.length = command.offset - start;
                     command.offset = start;
@@ -845,7 +952,8 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
         }
         catch (BadLocationException _ex)
         {
-            System.out.println(PlSqlEditorMessages.getString("AutoIndent.error.bad_location_2"));
+            System.out.println(PlSqlEditorMessages
+                    .getString("AutoIndent.error.bad_location_2"));
         }
     }
 }

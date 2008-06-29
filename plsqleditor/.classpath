@@ -6,6 +6,12 @@
 	<classpathentry exported="true" kind="lib" path="libs/ojdbc14.jar"/>
 	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry sourcepath="ECLIPSE_HOME/plugins/org.eclipse.jdt.source_3.0.0/src/org.junit_3.8.1/junitsrc.zip" kind="var" path="JUNIT_HOME/junit.jar"/>
+	<classpathentry kind="lib" path="/Libraries/lib/jax-qname.jar"/>
+	<classpathentry kind="lib" path="/Libraries/lib/xercesImpl.jar"/>
+	<classpathentry kind="lib" path="/Libraries/lib/relaxngDatatype.jar"/>
+	<classpathentry kind="lib" path="/Libraries/lib/namespace.jar"/>
+	<classpathentry kind="lib" path="/Libraries/jwsdp-1.5/jaxb/lib/jaxb-api.jar"/>
+	<classpathentry kind="lib" path="/Libraries/jwsdp-1.5/jaxb/lib/jaxb-impl.jar"/>
+	<classpathentry kind="lib" path="/Libraries/jwsdp-1.5/jaxb/lib/jaxb-libs.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

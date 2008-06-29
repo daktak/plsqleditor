@@ -23,8 +23,9 @@ public class ConnectionPool implements Runnable
     private int numInitialConnections;
     private int maxConnections;
     private boolean waitForConnection;
-    private Vector<Connection> availableConnections, busyConnections;
+    private Vector availableConnections, busyConnections;
     private boolean connectionPending = false;
+    private boolean myIsAutoCommittingOnClose;
     private final static int DEFAULT_INITIAL_SIZE = 10;
     private final static int DEFAULT_CAPACITY_INCREMENT = 5;
     private final static long CONNECTION_WAIT_INTERVAL = 1000;
@@ -57,9 +58,9 @@ public class ConnectionPool implements Runnable
 			numInitialConnections = maxConnections;
 		}
 		busyConnections =
-			new Vector<Connection>(DEFAULT_INITIAL_SIZE, DEFAULT_CAPACITY_INCREMENT);
+			new Vector(DEFAULT_INITIAL_SIZE, DEFAULT_CAPACITY_INCREMENT);
 		availableConnections =
-			new Vector<Connection>(numInitialConnections, DEFAULT_CAPACITY_INCREMENT);
+			new Vector(numInitialConnections, DEFAULT_CAPACITY_INCREMENT);
 		for (int i = 0; i < numInitialConnections; i++)
 		{
 			availableConnections.addElement(makeNewConnection());
@@ -80,7 +81,7 @@ public class ConnectionPool implements Runnable
 		if (!availableConnections.isEmpty())
 		{
 			Connection existingConnection =
-				availableConnections.lastElement();
+				(Connection) availableConnections.lastElement();
 			int lastIndex = availableConnections.size() - 1;
 			availableConnections.removeElementAt(lastIndex);
 			//-- check to make sure connection is still alive, if not, create a new one
@@ -188,9 +189,9 @@ public class ConnectionPool implements Runnable
 		closeConnections(availableConnections);
 		closeConnections(busyConnections);
 		busyConnections =
-			new Vector<Connection>(DEFAULT_INITIAL_SIZE, DEFAULT_CAPACITY_INCREMENT);
+			new Vector(DEFAULT_INITIAL_SIZE, DEFAULT_CAPACITY_INCREMENT);
 		availableConnections =
-			new Vector<Connection>(numInitialConnections, DEFAULT_CAPACITY_INCREMENT);
+			new Vector(numInitialConnections, DEFAULT_CAPACITY_INCREMENT);
 	}
 
 	public void closeConnections(Vector connections)
@@ -230,4 +231,33 @@ public class ConnectionPool implements Runnable
 		return info;
 	}
 
+    public String getDriver()
+    {
+        return driver;
+    }
+
+    public String getPassword()
+    {
+        return password;
+    }
+
+    public String getUrl()
+    {
+        return url;
+    }
+
+    public String getUserName()
+    {
+        return userName;
+    }
+
+    public void setAutoCommitting(boolean isAutoCommittingOnClose)
+    {
+        myIsAutoCommittingOnClose = isAutoCommittingOnClose;
+    }
+
+    public boolean isAutoCommittingOnClose()
+    {
+        return myIsAutoCommittingOnClose;
+    }
 }

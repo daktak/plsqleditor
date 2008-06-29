@@ -10,6 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -30,12 +31,13 @@ import plsqleditor.preferences.entities.SchemaDetails;
  */
 public class SchemaRegistry
 {
-    private IPath                        myFileStorePath;
-    private SchemaDetails[]              mySchemaMappings;
-    private List<RegistryUpdateListener> myListeners;
-    private static final Object          OPEN_SCHEMA_DETAILS_LIST  = "<SchemaDetailsList>";
-    private static final Object          CLOSE_SCHEMA_DETAILS_LIST = "</SchemaDetailsList>";
-    private boolean                      myIsUpdated               = false;
+    private IPath               myFileStorePath;
+    private SchemaDetails[]     mySchemaMappings;
+    private List                myListeners;
+    private static final Object OPEN_SCHEMA_DETAILS_LIST  = "<SchemaDetailsList>";
+    private static final Object CLOSE_SCHEMA_DETAILS_LIST = "</SchemaDetailsList>";
+    private boolean             myIsUpdated               = false;
+    private String              myProjectName;
 
     public interface RegistryUpdateListener
     {
@@ -45,10 +47,11 @@ public class SchemaRegistry
     /**
      * @param fileStorePath
      */
-    public SchemaRegistry(IPath fileStorePath)
+    public SchemaRegistry(String projectName, IPath fileStorePath)
     {
+        myProjectName = projectName;
         myFileStorePath = fileStorePath;
-        myListeners = new ArrayList<RegistryUpdateListener>();
+        myListeners = new ArrayList();
     }
 
     /**
@@ -57,17 +60,18 @@ public class SchemaRegistry
     public void setSchemaMappings(SchemaDetails[] schemaDetails)
     {
         myIsUpdated = true;
-        List<SchemaDetails> schemaMappings = new ArrayList<SchemaDetails>();
-        SortedSet<String> names = new TreeSet<String>();
-        for (SchemaDetails sd : schemaDetails)
+        List schemaMappings = new ArrayList();
+        SortedSet names = new TreeSet();
+        for (int i = 0; i < schemaDetails.length; i++)
         {
+            SchemaDetails sd = schemaDetails[i];
             if (!names.contains(sd.getName()))
             {
                 schemaMappings.add(sd);
                 names.add(sd.getName());
             }
         }
-        mySchemaMappings = schemaMappings.toArray(new SchemaDetails[schemaMappings.size()]);
+        mySchemaMappings = (SchemaDetails[]) schemaMappings.toArray(new SchemaDetails[schemaMappings.size()]);
     }
 
     /**
@@ -80,8 +84,9 @@ public class SchemaRegistry
             StringBuffer sb = new StringBuffer();
 
             sb.append(OPEN_SCHEMA_DETAILS_LIST).append("\n");
-            for (SchemaDetails details : mySchemaMappings)
+            for (int i = 0; i < mySchemaMappings.length; i++)
             {
+                SchemaDetails details = mySchemaMappings[i];
                 details.writeToBuffer(sb);
             }
             sb.append(CLOSE_SCHEMA_DETAILS_LIST).append("\n");
@@ -117,8 +122,9 @@ public class SchemaRegistry
      */
     private void updateListeners()
     {
-        for (RegistryUpdateListener l : myListeners)
+        for (Iterator it = myListeners.iterator(); it.hasNext();)
         {
+            RegistryUpdateListener l = (RegistryUpdateListener) it.next();
             l.registryUpdated();
         }
     }
@@ -133,8 +139,7 @@ public class SchemaRegistry
             try
             {
                 File f = getStorageFile();
-                BufferedReader br = new BufferedReader(
-                        new InputStreamReader(new FileInputStream(f)));
+                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
                 StringBuffer sb = new StringBuffer();
                 String line = null;
                 while ((line = br.readLine()) != null)
@@ -145,18 +150,18 @@ public class SchemaRegistry
                     }
                 }
                 String buffer = sb.toString();
-                List<SchemaDetails> details = new ArrayList<SchemaDetails>();
+                List details = new ArrayList();
                 int location = 0;
                 while (location < buffer.length())
                 {
-                    SchemaDetails sd = new SchemaDetails("", new ArrayList<String>(), "");
+                    SchemaDetails sd = new SchemaDetails("", new ArrayList(), "");
                     location = sd.readFromBuffer(buffer, location);
                     if (sd.getName().trim().length() > 0)
                     {
                         details.add(sd);
                     }
                 }
-                mySchemaMappings = details.toArray(new SchemaDetails[details.size()]);
+                mySchemaMappings = (SchemaDetails[]) details.toArray(new SchemaDetails[details.size()]);
             }
             catch (IOException e)
             {
@@ -174,8 +179,9 @@ public class SchemaRegistry
     public String getPasswordForSchema(String schema)
     {
         SchemaDetails[] details = getSchemaMappings();
-        for (SchemaDetails sd : details)
+        for (int i = 0; i < details.length; i++)
         {
+            SchemaDetails sd = details[i];
             if (sd.getName().equals(schema))
             {
                 return sd.getPassword();
@@ -189,6 +195,11 @@ public class SchemaRegistry
      */
     private File getStorageFile()
     {
-        return myFileStorePath.append("schemaMappingsFile.store").toFile();
+        return myFileStorePath.append(myProjectName + "_schemaMappingsFile.store").toFile();
+    }
+
+    void setUpdated(boolean b)
+    {
+        myIsUpdated = b;
     }
 }

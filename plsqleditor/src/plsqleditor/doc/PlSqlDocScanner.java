@@ -42,10 +42,10 @@ public class PlSqlDocScanner extends RuleBasedScanner
     }
 
     protected static String[] fgKeywords = {
-            "@author", "@deprecated", "@exception", "@param", "@return", "@see", "@refer", "@since", "@throws", "@version"}; 
+            "@author", "@deprecated", "@exception", "@param", "@return", "@see", "@refer", "@since", "@throws", "@version", "@link", "@private", "@pragma"}; 
 
     /**
-     * Create a new java doc scanner.
+     * Create a new pldoc scanner.
      */
     public PlSqlDocScanner(ColorManager cm)
     {
@@ -57,7 +57,7 @@ public class PlSqlDocScanner extends RuleBasedScanner
         IToken link = new Token(
                 new TextAttribute(cm.getColor(IPlSqlColorConstants.JAVADOC_LINK)));
 
-        List<IRule> list = new ArrayList<IRule>();
+        List list = new ArrayList();
 
         // Add rule for tags.
         list.add(new SingleLineRule("<", ">", tag)); 

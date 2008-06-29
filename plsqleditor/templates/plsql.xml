@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<templates>
+    
+    <!-- Do pldoc templates first -->
+
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.true.desc"
+		id="plsqleditor.template.pldoc.true"
+		name="%pldoc.true.name">&lt;code&gt;true&lt;/code&gt;</template>
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.false.desc"
+		id="plsqleditor.template.pldoc.false"
+		name="%pldoc.false.name">&lt;code&gt;false&lt;/code&gt;</template>
+    
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.bold.desc"
+		id="plsqleditor.template.pldoc.bold"
+		name="%pldoc.bold.name">&lt;b&gt;${value}&lt;/b&gt;${cursor}</template>
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.openbold.desc"
+		id="plsqleditor.template.pldoc.openbold"
+		name="%pldoc.openbold.name">&lt;b&gt;</template>
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.closebold.desc"
+		id="plsqleditor.template.pldoc.closebold"
+		name="%pldoc.closebold.name">&lt;/b&gt;</template>
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.unorderedlist.desc"
+		id="plsqleditor.template.pldoc.unorderedlist"
+		name="%pldoc.unorderedlist.name">&lt;ul&gt;&lt;li&gt;${cursor}&lt;/li&gt;&lt;/ul&gt;</template>
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.orderedlist.desc"
+		id="plsqleditor.template.pldoc.orderedlist"
+		name="%pldoc.orderedlist.name">&lt;ol&gt;&lt;li&gt;${cursor}&lt;/li&gt;&lt;/ol&gt;</template>
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.coderef.desc"
+		id="plsqleditor.template.pldoc.coderef"
+		name="%pldoc.coderef.name">&lt;code&gt;${value}&lt;/code&gt;${cursor}</template>
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.listitem.desc"
+		id="plsqleditor.template.pldoc.listitem"
+		name="%pldoc.listitem.name">&lt;li&gt;${value}&lt;/li&gt;${cursor}</template>
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.openlistitem.desc"
+		id="plsqleditor.template.pldoc.openlistitem"
+		name="%pldoc.openlistitem.name">&lt;li&gt;</template>
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.closelistitem.desc"
+		id="plsqleditor.template.pldoc.closelistitem"
+		name="%pldoc.closelist.name">&lt;/li&gt;</template>
+    <template context="plsqleditor.template.pldoc"
+		description="%pldoc.paragraph.desc"
+		id="plsqleditor.template.pldoc.paragraph"
+		name="%pldoc.paragraph.name">&lt;p&gt;</template>
+
+    <!-- Now do plsql code templates -->
+    
+    	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.savepoint.desc"
+		id="plsqleditor.template.plsql.savepoint"
+		name="%plsql.tasks.savepoint.name">SAVEPOINT ${svpt_name};
+	${cursor}
+	ROLLBACK TO SAVEPOINT ${svpt_name};
+EXCEPTION
+    WHEN others THEN
+        ROLLBACK TO SAVEPOINT ${svpt_name};
+        RAISE;</template>
+
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.procedure.desc"
+		id="plsqleditor.template.plsql.procedure"
+		name="%plsql.tasks.procedure.name">PROCEDURE ${procname} ${cursor} 
+IS
+BEGIN
+END ${procname};</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.function.desc"
+		id="plsqleditor.template.plsql.function"
+		name="%plsql.tasks.function.name">FUNCTION ${procname} ${cursor} 
+RETURN ${return_value}
+IS
+BEGIN
+END ${procname};</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.case.desc"
+		id="plsqleditor.template.plsql.case"
+		name="%plsql.tasks.case.name">CASE ${case_variable}
+WHEN ${value_one} THEN
+	${cursor}
+END CASE;</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.if.desc"
+		id="plsqleditor.template.plsql.if"
+		name="%plsql.tasks.if.name">IF ${test} THEN
+    ${cursor}
+END IF;</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.ifelse.desc"
+		id="plsqleditor.template.plsql.ifelse"
+		name="%plsql.tasks.ifelse.name">IF ${test} THEN
+    ${cursor}
+ELSE
+END IF;</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.ifelsifelse.desc"
+		id="plsqleditor.template.plsql.ifelsifelse"
+		name="%plsql.tasks.ifelsifelse.name">IF ${test} THEN
+    ${cursor}
+ELSIF
+ELSE 
+END IF;</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.ifelse.desc"
+		id="plsqleditor.template.plsql.ifelse"
+		name="%plsql.tasks.ifelse.name">CASE ${cursor} 
+WHEN x THEN
+END CASE;</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.forcursor.desc"
+		id="plsqleditor.template.plsql.forcursor"
+		name="%plsql.tasks.forcursor.name">FOR rec_${recname} IN ${crsr_rec} LOOP
+    ${cursor}
+END LOOP;</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.forn.desc"
+		id="plsqleditor.template.plsql.forn"
+		name="%plsql.tasks.forn.name">FOR n IN 1..${endval} LOOP
+    ${cursor}
+END LOOP;</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.forarray.desc"
+		id="plsqleditor.template.plsql.forarray"
+		name="%plsql.tasks.forarray.name">FOR n IN ${arrayname}.FIRST..${arrayname}.LAST LOOP
+    ${cursor} := ${arrayname}(n);
+END LOOP;</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.beginwhen.desc"
+		id="plsqleditor.template.plsql.beginwhen"
+		name="%plsql.tasks.beginwhen.name">BEGIN 
+	${cursor}
+	${line_selection} 
+EXCEPTION
+    WHEN ${plsqlexception} THEN
+END;</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.package_declaration.desc"
+		id="plsqleditor.template.plsql.package_declaration"
+		name="%plsql.tasks.package_declaration.name">CREATE OR REPLACE PACKAGE BODY ${pkg_name} IS
+/*
+ * put file specific details in here.
+ *
+ * header details
+ * end header details
+ */
+
+/**
+ * This package represents ...
+ *
+ * @version $$Id${file_name},v 1.0 2005/04/21 00:51:42 tobyz Exp Exp $$
+ *
+ * @headcom
+ */
+
+${cursor}
+
+END ${pkg_name};
+
+/
+SHOW ERRORS PACKAGE BODY ${pkg_name}</template>
+</templates>

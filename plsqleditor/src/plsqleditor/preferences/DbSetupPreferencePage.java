@@ -3,6 +3,7 @@ package plsqleditor.preferences;
 import org.eclipse.jface.preference.BooleanFieldEditor;
 import org.eclipse.jface.preference.FieldEditorPreferencePage;
 import org.eclipse.jface.preference.FileFieldEditor;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.IntegerFieldEditor;
 import org.eclipse.jface.preference.StringFieldEditor;
 import org.eclipse.ui.IWorkbench;
@@ -10,6 +11,7 @@ import org.eclipse.ui.IWorkbenchPreferencePage;
 
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.db.DbUtility;
+import plsqleditor.views.SqlOutputContentProvider;
 
 /**
  * This class represents a preference page that is contributed to the Preferences dialog. By
@@ -21,7 +23,6 @@ import plsqleditor.db.DbUtility;
  * belongs to the main plug-in class. That way, preferences can be accessed directly via the
  * preference store.
  */
-
 public class DbSetupPreferencePage extends FieldEditorPreferencePage
         implements
             IWorkbenchPreferencePage
@@ -52,10 +53,16 @@ public class DbSetupPreferencePage extends FieldEditorPreferencePage
                 getFieldEditorParent()));
         addField(new IntegerFieldEditor(PreferenceConstants.P_MAX_CONNS, "&Max Connections",
                 getFieldEditorParent()));
+        addField(new IntegerFieldEditor(PreferenceConstants.P_NUM_RESULT_SET_ROWS,
+                "&Number of ResultSet Rows per Fetch", getFieldEditorParent()));
+        addField(new BooleanFieldEditor(PreferenceConstants.P_AUTO_COMMIT_ON_CLOSE,
+                "Auto Commit Connections on Close/Shutdown", getFieldEditorParent()));
         addField(new BooleanFieldEditor(PreferenceConstants.P_USE_LOCAL_CLIENT,
                 "Use Local Oracle Client", getFieldEditorParent()));
         addField(new FileFieldEditor(PreferenceConstants.P_SQLPLUS_EXECUTABLE,
-                "SQLPlus Client executable", true, getFieldEditorParent()));
+                                     "SQLPlus Client executable", true, getFieldEditorParent()));
+        addField(new StringFieldEditor(PreferenceConstants.P_SCHEMA_BROWSER_FILTER_LIST,
+                                     "List of schemas to ignore (in schema browser)", getFieldEditorParent()));
     }
 
     /**
@@ -65,6 +72,9 @@ public class DbSetupPreferencePage extends FieldEditorPreferencePage
     public boolean performOk()
     {
         super.performOk();
+        IPreferenceStore prefs = getPreferenceStore();
+        SqlOutputContentProvider.getInstance().setNumRowsPerNext(prefs
+                .getInt(PreferenceConstants.P_NUM_RESULT_SET_ROWS));
         DbUtility.reinit();
         return true;
     }

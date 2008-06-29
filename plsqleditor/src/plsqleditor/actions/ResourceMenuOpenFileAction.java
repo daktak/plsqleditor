@@ -52,8 +52,9 @@ public class ResourceMenuOpenFileAction extends AbstractMenuAction implements IO
         if (fSelectedFiles != null)
         {
             Object [] objs = fSelectedFiles.toArray();
-            for (Object selectedFile : objs)
+            for (int i = 0;  i < objs.length; i++)
             {
+                Object selectedFile = objs[i];
                 if (selectedFile != null)
                 {
                     if (selectedFile instanceof IFile)
@@ -61,7 +62,7 @@ public class ResourceMenuOpenFileAction extends AbstractMenuAction implements IO
                         IFile file = (IFile) selectedFile;
                         FileEditorInput input = new FileEditorInput(file);
                         ITextEditor editor = null;
-                        editor = openEditor(input, editor);
+                        editor = openEditor(input);
                         executeOperation(file, action.getId(), editor);
                     }
                 }
@@ -76,8 +77,9 @@ public class ResourceMenuOpenFileAction extends AbstractMenuAction implements IO
         }
     }
 
-    private ITextEditor openEditor(FileEditorInput input, ITextEditor editor)
+    private ITextEditor openEditor(FileEditorInput input)
     {
+        ITextEditor editor = null;
         try
         {
             editor = (ITextEditor) mySite.getPage().openEditor(input, "plsqleditor.editors.PlSqlEditor");
@@ -88,6 +90,7 @@ public class ResourceMenuOpenFileAction extends AbstractMenuAction implements IO
         }
         return editor;
     }
+    
     public void selectionChanged(IAction iaction, ISelection iselection)
     {
         if (iselection != null && (iselection instanceof IStructuredSelection))

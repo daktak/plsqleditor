@@ -1,9 +1,8 @@
 package plsqleditor.preferences.entities;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.SortedSet;
-import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -12,7 +11,7 @@ import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.ISharedImages;
-import org.eclipse.ui.internal.WorkbenchImages;
+import org.eclipse.ui.PlatformUI;
 
 
 /**
@@ -24,30 +23,30 @@ import org.eclipse.ui.internal.WorkbenchImages;
  */
 public class SchemaDetails implements Cloneable
 {
-    private static final String  OPEN_SCHEMA_DETAILS  = "<SchemaDetails>";
-    private static final String  CLOSE_SCHEMA_DETAILS = "</SchemaDetails>";
-    private static final String  OPEN_NAME            = "<Name>";
-    private static final String  CLOSE_NAME           = "</Name>";
-    private static final String  OPEN_LOCATIONS       = "<Locations>";
-    private static final String  CLOSE_LOCATIONS      = "</Locations>";
-    private static final String  OPEN_LOCATION        = "<Location>";
-    private static final String  CLOSE_LOCATION       = "</Location>";
-    private static final String  OPEN_PASSWORD        = "<Password>";
-    private static final String  CLOSE_PASSWORD       = "</Password>";
-    private static final String  OPEN_PACKAGES        = "<Packages>";
-    private static final String  CLOSE_PACKAGES       = "</Packages>";
+    private static final String OPEN_SCHEMA_DETAILS  = "<SchemaDetails>";
+    private static final String CLOSE_SCHEMA_DETAILS = "</SchemaDetails>";
+    private static final String OPEN_NAME            = "<Name>";
+    private static final String CLOSE_NAME           = "</Name>";
+    private static final String OPEN_LOCATIONS       = "<Locations>";
+    private static final String CLOSE_LOCATIONS      = "</Locations>";
+    private static final String OPEN_LOCATION        = "<Location>";
+    private static final String CLOSE_LOCATION       = "</Location>";
+    private static final String OPEN_PASSWORD        = "<Password>";
+    private static final String CLOSE_PASSWORD       = "</Password>";
+    private static final String OPEN_PACKAGES        = "<Packages>";
+    private static final String CLOSE_PACKAGES       = "</Packages>";
 
-    private String               myName;
-    private String               myPassword;
-    private List<String>         myLocations;
-    private List<PackageDetails> myPackageDetails;
+    private String              myName;
+    private String              myPassword;
+    private List                myLocations;
+    private List                myPackageDetails;
 
-    public SchemaDetails(String name, List<String> locations, String password)
+    public SchemaDetails(String name, List locations, String password)
     {
         myName = name;
         myLocations = locations;
         myPassword = password;
-        myPackageDetails = new ArrayList<PackageDetails>();
+        myPackageDetails = new ArrayList();
     }
 
     /**
@@ -55,7 +54,7 @@ public class SchemaDetails implements Cloneable
      * 
      * @return {@link #myLocations}.
      */
-    public List<String> getLocations()
+    public List getLocations()
     {
         return myLocations;
     }
@@ -63,11 +62,19 @@ public class SchemaDetails implements Cloneable
     public String getLocationString()
     {
         StringBuffer sb = new StringBuffer();
-        for (String loc : getLocations())
+        for (Iterator it = getLocations().iterator(); it.hasNext();)
         {
+            String loc = (String) it.next();
             sb.append(loc).append(",");
         }
-        return sb.toString().substring(0, sb.length() - 1);
+        if (sb.length() > 0)
+        {
+            return sb.toString().substring(0, sb.length() - 1);
+        }
+        else
+        {
+            return sb.toString();
+        }
     }
 
     /**
@@ -132,14 +139,16 @@ public class SchemaDetails implements Cloneable
      */
     public ImageDescriptor getImageDescriptor()
     {
-        return WorkbenchImages.getImageDescriptor(ISharedImages.IMG_OBJ_FILE);
+        return PlatformUI.getWorkbench().getSharedImages()
+                .getImageDescriptor(ISharedImages.IMG_OBJ_FILE);
     }
 
     public Object clone()
     {
         SchemaDetails det = new SchemaDetails(myName, myLocations, myPassword);
-        for (PackageDetails pd : myPackageDetails)
+        for (Iterator it = myPackageDetails.iterator(); it.hasNext();)
         {
+            PackageDetails pd = (PackageDetails) it.next();
             det.addPackage((PackageDetails) pd.clone());
         }
         return det;
@@ -151,7 +160,8 @@ public class SchemaDetails implements Cloneable
      */
     public PackageDetails[] getPackages()
     {
-        return myPackageDetails.toArray(new PackageDetails[myPackageDetails.size()]);
+        return (PackageDetails[]) myPackageDetails.toArray(new PackageDetails[myPackageDetails
+                .size()]);
     }
 
     /**
@@ -172,8 +182,9 @@ public class SchemaDetails implements Cloneable
         sb.append(myName);
         sb.append(CLOSE_NAME);
         sb.append(OPEN_LOCATIONS);
-        for (String loc : myLocations)
+        for (Iterator it = myLocations.iterator(); it.hasNext();)
         {
+            String loc = (String) it.next();
             sb.append(OPEN_LOCATION);
             sb.append(loc);
             sb.append(CLOSE_LOCATION);
@@ -183,8 +194,9 @@ public class SchemaDetails implements Cloneable
         sb.append(myPassword);
         sb.append(CLOSE_PASSWORD).append("\n");
         sb.append(OPEN_PACKAGES).append("\n");
-        for (PackageDetails p : myPackageDetails)
+        for (Iterator it = myPackageDetails.iterator(); it.hasNext();)
         {
+            PackageDetails p = (PackageDetails) it.next();
             p.writeToBuffer(sb);
         }
         sb.append(CLOSE_PACKAGES).append("\n");
@@ -206,7 +218,7 @@ public class SchemaDetails implements Cloneable
             String locations = m.group(2);
             Pattern locPattern = Pattern.compile(OPEN_LOCATION + "([^<]*?)" + CLOSE_LOCATION);
             Matcher locMatcher = locPattern.matcher(locations);
-            myLocations = new ArrayList<String>();
+            myLocations = new ArrayList();
             while (locMatcher.find())
             {
                 myLocations.add(locMatcher.group(1));
@@ -218,7 +230,7 @@ public class SchemaDetails implements Cloneable
             int length = packageDetails.length();
             while (pLocation < length)
             {
-                PackageDetails pd = new PackageDetails("", "");
+                PackageDetails pd = new PackageDetails("", "", null);
                 pLocation = pd.readFromBuffer(packageDetails, pLocation);
                 if (pd.getName().trim().length() > 0)
                 {
@@ -232,18 +244,53 @@ public class SchemaDetails implements Cloneable
 
     /**
      * @param pd
+     * @return <code>true</code> if the package was added and
+     *         <code>false</code> otherwise.
      */
-    public void addPackage(PackageDetails pd)
+    public boolean addPackage(PackageDetails pd)
     {
-        SortedSet<String> names = new TreeSet<String>();
-        for (PackageDetails details : myPackageDetails)
+        String pdName = pd.getName();
+        PackageLocation[] newLocations = pd.getLocations();
+        boolean[] alreadyThere = new boolean[newLocations.length];
+        boolean somethingNew = false;
+        for (Iterator it = myPackageDetails.iterator(); it.hasNext();)
         {
-            names.add(details.getName());
+            PackageDetails details = (PackageDetails) it.next();
+            if (details.getName().equals(pdName))
+            {
+                PackageLocation[] locations = details.getLocations();
+                for (int i = 0; i < locations.length; i++)
+                {
+                    for (int j = 0; j < newLocations.length; j++)
+                    {
+                        PackageLocation newLocation = newLocations[j];
+                        if (locations[i].getLocation().equals(newLocation.getLocation()))
+                        {
+                            alreadyThere[j] = true;
+                            break;
+                        }
+                    }
+                }
+                for (int i = 0; i < alreadyThere.length; i++)
+                {
+                    if (!alreadyThere[i])
+                    {
+                        somethingNew = true;
+                    }
+                }
+                if (somethingNew)
+                {
+                    // TODO could optimise
+                    for (int i = 0; i < newLocations.length; i++)
+                    {
+                        details.addLocation(newLocations[i]);
+                    }
+                }
+                return somethingNew;
+            }
         }
-        if (!names.contains(pd.getName()))
-        {
-            myPackageDetails.add(pd);
-        }
+        myPackageDetails.add(pd);
+        return true;
     }
 
     public boolean equals(Object obj)

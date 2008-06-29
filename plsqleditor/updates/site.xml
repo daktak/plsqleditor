@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<site>
+   <description url="http://plsqleditor.sourceforge.net/">
+      This project provides an editor for the oracle (pl/sql) programming language.
+   </description>
+   <feature url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_features_0.4.2.jar" id="plsqleditor_features" version="0.4.2">
+      <category name="pslqeditor_core"/>
+   </feature>
+   <feature url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_features_0.4.3.jar" id="plsqleditor_features" version="0.4.3">
+      <category name="pslqeditor_core"/>
+   </feature>
+   <feature url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_features_0.4.4.jar" id="plsqleditor_features" version="0.4.4">
+      <category name="pslqeditor_core"/>
+   </feature>
+   <feature url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_features_0.4.5.jar" id="plsqleditor_features" version="0.4.5">
+      <category name="pslqeditor_core"/>
+   </feature>
+   <feature url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_features_0.4.6.jar" id="plsqleditor_features" version="0.4.6">
+      <category name="pslqeditor_core"/>
+   </feature>
+   <feature url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_features_0.4.7.jar" id="plsqleditor_features" version="0.4.7">
+      <category name="pslqeditor_core"/>
+   </feature>
+   <archive path="plugins/plsqleditor_0.4.2.jar" url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_0.4.2.jar"/>
+   <archive path="plugins/plsqleditor_0.4.3.jar" url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_0.4.3.jar"/>
+   <archive path="plugins/plsqleditor_0.4.4.jar" url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_0.4.4.jar"/>
+   <archive path="plugins/plsqleditor_0.4.5.jar" url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_0.4.5.jar"/>
+   <archive path="plugins/plsqleditor_0.4.6.jar" url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_0.4.6.jar"/>
+   <archive path="plugins/plsqleditor_0.4.7.jar" url="http://switch.dl.sourceforge.net/sourceforge/plsqleditor/plsqleditor_0.4.7.jar"/>
+   <category-def name="pslqeditor_core" label="pslqeditor_core"/>
+</site>

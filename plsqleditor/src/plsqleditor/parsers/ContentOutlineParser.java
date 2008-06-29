@@ -24,83 +24,53 @@ import org.eclipse.jface.text.IDocument;
  */
 public class ContentOutlineParser
 {
-    public enum Type {
-        Package, Package_Body, SqlScript
-    }
-
-    private PackageHeaderParser myPackageHeaderParser;
-    private PackageBodyParser   myPackageBodyParser;
-
     public ContentOutlineParser()
     {
-        myPackageBodyParser = new PackageBodyParser();
-        myPackageHeaderParser = new PackageHeaderParser();
+        //
+    }
+    
+    public List parseFile(ParseType type,
+                          IDocument document,
+                          String[] packageName,
+                          SegmentType[] toIgnore) throws IOException
+    {
+        return PlSqlParserManager.instance().getParser(type).parseBodyFile(document, packageName, toIgnore);
     }
 
-    public List<Segment> parseFile(ContentOutlineParser.Type type, IDocument document, String[] packageName)
-            throws IOException
+    public List parseFile(ParseType type,
+                          IDocument document,
+                          String[] packageName) throws IOException
     {
-        switch (type)
-        {
-            default :
-            case SqlScript :
-            case Package :
-            {
-                return myPackageHeaderParser.parseBodyFile(document, packageName);
-            }
-            case Package_Body :
-            {
-                return myPackageBodyParser.parseBodyFile(document, packageName);
-            }
-        }
+        return parseFile(type, document, packageName, new SegmentType[] {SegmentType.Code});
     }
 
     /**
-     * This method parses a single section of a <code>document</code> of a particular <code>type</code>.
+     * This method parses a single section of a <code>document</code> of a particular
+     * <code>type</code>.
      * 
      * @param type
      * @param document
      * @param offset
      * @param length
-     * @param packageName
+     * @param packageSegment
      * 
      * @return The segments inside the specified section of the document.
      * 
      * @throws IOException
      * @throws BadLocationException
      */
-    public List<Segment> parseBodySection(ContentOutlineParser.Type type,
-                                          IDocument document,
-                                          int offset,
-                                          int length,
-                                          String packageName) throws IOException, BadLocationException
+    public List parseBodySection(ParseType type,
+                                 IDocument document,
+                                 int offset,
+                                 int length,
+                                 Segment packageSegment) throws IOException, BadLocationException
     {
         String toParse = document.get(offset, length);
-        BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(toParse.getBytes())));
+        BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
+                toParse.getBytes())));
         int currentLineOffset = document.getLineOfOffset(offset);
-        List<Segment> segments = new ArrayList<Segment>();
-        switch (type)
-        {
-            default :
-            case SqlScript :
-            case Package :
-            {
-                myPackageHeaderParser.parseBody(currentLineOffset, document, br, segments, packageName);
-            }
-            case Package_Body :
-            {
-                myPackageBodyParser.parseBody(currentLineOffset, document, br, segments, packageName);
-            }
-        }
+        List segments = new ArrayList();
+        PlSqlParserManager.instance().getParser(type).parseBody(currentLineOffset, document, br, segments, packageSegment);
         return segments;
     }
-
-    public static final Type getType(String filename)
-    {
-        return filename.contains(".pkb") ? ContentOutlineParser.Type.Package_Body : filename
-                .contains(".pkh")
-                ? Type.Package
-                : Type.SqlScript;
-    }
-    
 }

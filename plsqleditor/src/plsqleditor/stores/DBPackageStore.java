@@ -1,6 +1,7 @@
 package plsqleditor.stores;
 
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -10,103 +11,107 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import org.eclipse.jface.text.Position;
 
 import plsqleditor.db.ConnectionPool;
 import plsqleditor.parsers.Segment;
+import plsqleditor.parsers.SegmentType;
 
 /**
- * This class represents a store of all the schema, package and segment (function, procedure field)
- * information about the pl-sql source in the database.
+ * This class represents a store of all the schema, package and segment (function, procedure field) information about
+ * the pl-sql source in the database.
  * 
  * @author Andrew Cohen
  */
 public class DBPackageStore
 {
-    private ConnectionPool                 myDefaultConnectionPool;
+    private ConnectionPool        myDefaultConnectionPool;
 
     /**
      * This field maps a schema name to a list of packages.
      */
-    private HashMap<String, List<String>>  mySchemaToPackageMap;
+    private HashMap               mySchemaToPackageMap;
 
     /**
      * This field maps a package name to a list of segments.
      */
-    private HashMap<String, List<Segment>> myPackageToSegmentMap;
+    private HashMap               myPackageToSegmentMap;
 
     /**
      * The last time we got the list of schemas.
      */
-    private Timestamp                      myDBLastCacheTime;
+    private Timestamp             myDBLastCacheTime;
 
     /**
      * This field maps each schema to the time we last cached that schema's objects.
      */
-    private HashMap<String, Timestamp>     mySchemaToLastCacheTimeMap;
+    private HashMap               mySchemaToLastCacheTimeMap;
+
+    /**
+     * This field maps each schema to the public schema boolean last requested of it.
+     */
+    private HashMap               mySchemaToLastPublicSchemaRequestBoolean;
 
     /**
      * This field maps each package to the time we last cached that package's segments.
      */
-    private HashMap<String, Timestamp>     myPackageToLastCacheTimeMap;
+    private HashMap               myPackageToLastCacheTimeMap;
 
     /**
-     * A dummy position to be used when creating Segments. DBPackageStore doesn't keep track of
-     * Positions so we need a dummy position.
+     * A dummy position to be used when creating Segments. DBPackageStore doesn't keep track of Positions so we need a
+     * dummy position.
      */
-    private static final Position          dummyPosition = null;
-
-	/**
-	 * This SQL string is like a view that shows you all viewable packages
-	 * for a given schema, including ones that are viewable via a synonym.
-	 * Note that to use it in a preparedStatement, you must bind the 
-	 * schemaName 3 times.
-	 * There are two reasons this is a sql-string and not just a view in 
-	 * the database.  First of all, we don't want to depend on any DDL
-	 * statements, and second of all it makes this query faster to have
-	 * the schema name in the where-clause as it is here, which you couldn't
-	 * do with a view.
-	 */
-	private static final String            myViewablePackagesSQL = 
-		"SELECT p.owner  " + // user who can view this package 
-		",p.object_name NAME " + // viewable name of package, i.e. name or synonym name
-		",p.owner       package_owner " + // user who owns the package
-		",p.object_name package_name " + // actual name of package
-		",p.last_ddl_time " + 
-		"FROM all_objects p " + 
-		"WHERE p.object_type = 'PACKAGE' " + 
-		"AND p.owner = UPPER(?) " + 
-		"UNION ALL " + 
-		"SELECT s.owner owner " + 
-		",s.synonym_name NAME " + 
-		",s.table_owner package_owner " + 
-		",s.table_name package_name " + 
-		",p.last_ddl_time " + 
-		"FROM all_synonyms s, all_objects p " +
-		"WHERE p.object_type = 'PACKAGE' " +
-		"AND p.owner <> UPPER(?) " +
-		"AND s.owner IN (UPPER(?), 'PUBLIC') " +
-		"AND s.synonym_name = p.object_name " +
-		"AND s.table_name = p.object_name " +
-		"AND s.table_owner = p.owner";
+    private static final Position dummyPosition         = null;
 
     /**
-     * Initializes the DBPackageStore with a database connection. Note that this connection must be
-     * kept open throughout the life of DBPackageStore. At the moment there is no support for a
-     * connection pool.
+     * This SQL string is like a view that shows you all viewable packages for a given schema, including ones that are
+     * viewable via a synonym. Note that to use it in a preparedStatement, you must bind the schemaName 3 times. There
+     * are two reasons this is a sql-string and not just a view in the database. First of all, we don't want to depend
+     * on any DDL statements, and second of all it makes this query faster to have the schema name in the where-clause
+     * as it is here, which you couldn't do with a view.
+     */
+    private static final String   myViewablePackagesSQL = "SELECT p.owner  " + // user who can view this
+                                                                // package
+                                                                ",p.object_name NAME " + // viewable name of package,
+                                                                // i.e. name or synonym name
+                                                                ",p.owner       package_owner " + // user who owns the
+                                                                                                    // package
+                                                                ",p.object_name package_name " + // actual name of
+                                                                                                    // package
+                                                                ",p.last_ddl_time " + "FROM all_objects p "
+                                                                + "WHERE p.object_type = 'PACKAGE' "
+                                                                + "AND p.owner = UPPER(?) " + "UNION ALL "
+                                                                + "SELECT s.owner owner " + ",s.synonym_name NAME "
+                                                                + ",s.table_owner package_owner "
+                                                                + ",s.table_name package_name " + ",p.last_ddl_time "
+                                                                + "FROM all_synonyms s, all_objects p "
+                                                                + "WHERE p.object_type = 'PACKAGE' "
+                                                                + "AND p.owner <> UPPER(?) "
+                                                                + "AND s.owner IN (UPPER(?), 'PUBLIC') "
+                                                                + "AND s.synonym_name = p.object_name "
+                                                                + "AND s.table_name = p.object_name "
+                                                                + "AND s.table_owner = p.owner";
+
+    /**
+     * Initializes the DBPackageStore with a database connection. Note that this connection must be kept open throughout
+     * the life of DBPackageStore. At the moment there is no support for a connection pool.
      * 
      * @param defaultConnectionPool
      */
     public DBPackageStore(ConnectionPool defaultConnectionPool)
     {
         myDefaultConnectionPool = defaultConnectionPool;
-        myPackageToLastCacheTimeMap = new HashMap<String, Timestamp>();
-        mySchemaToLastCacheTimeMap = new HashMap<String, Timestamp>();
+        myPackageToLastCacheTimeMap = new HashMap();
+        mySchemaToLastCacheTimeMap = new HashMap();
+        mySchemaToLastPublicSchemaRequestBoolean = new HashMap();
         myDBLastCacheTime = null;
-        mySchemaToPackageMap = new HashMap<String, List<String>>();
-        myPackageToSegmentMap = new HashMap<String, List<Segment>>();
+        mySchemaToPackageMap = new HashMap();
+        myPackageToSegmentMap = new HashMap();
     }
 
     /**
@@ -118,8 +123,8 @@ public class DBPackageStore
     protected Timestamp getSysTimestamp() throws SQLException
     {
         String sql = "SELECT sysdate FROM dual";
-        List lt = getObjectsByVariables(sql, new Object[]{}, new Timestamp[0]);
-        return (Timestamp) lt.get(0);
+        SortedSet lt = getObjectsByVariables(sql, new Object[]{}, new Timestamp[0]);
+        return (Timestamp) lt.first();
     }
 
     /**
@@ -139,53 +144,137 @@ public class DBPackageStore
      * 
      * @param sql SQL to execute. Only the first column in the SELECT is relevant.
      * @param objects The objects to be used as bind parameter in the WHERE clause.
-     * @param returnClass The return class. Defaults to String.
+     * @param dummy The object array in the particular format of the return class.
      * @return The list of objects in the result set.
-     * @throws SQLException If the sql is malformed or there is a problem with the database
-     *             connection.
+     * @throws SQLException If the sql is malformed or there is a problem with the database connection.
      */
-    protected <T> List<T> getObjectsByVariables(String sql, Object[] objects, T[] dummy)
-            throws SQLException
+    protected SortedSet getObjectsByVariables(String sql, Object[] objects, Object[] dummy) throws SQLException
     {
-        List<Object> toReturn = new ArrayList<Object>();
+        SortedSet toReturn = new TreeSet();
         ResultSet rs = getResultSetByVariables(sql, objects);
         Class returnClass = dummy.getClass().getComponentType();
         while (rs.next())
         {
             if (returnClass.equals(String.class))
             {
-                toReturn.add(rs.getString(1));
+                String s = rs.getString(1);
+                // fix for [ 1512712 ] "Content Assist" did not complete normally. NPE
+                if (s != null)
+                {
+                    // should we add a blank here?
+                    toReturn.add(s);
+                }
             }
             else if (returnClass == Time.class)
             {
-                toReturn.add(rs.getTime(1));
+                Time t = rs.getTime(1);
+                if (t != null)
+                {
+                    // should we add a blank here?
+                    toReturn.add(t);
+                }
             }
             else if (returnClass == Timestamp.class)
             {
-                toReturn.add(rs.getTimestamp(1));
+                Timestamp t = rs.getTimestamp(1);
+                if (t != null)
+                {
+                    // should we add a blank here?
+                    toReturn.add(t);
+                }
             }
             else if (returnClass == Date.class)
             {
-                toReturn.add(rs.getDate(1));
+                Date d = rs.getDate(1);
+                if (d != null)
+                {
+                    // should we add a blank here?
+                    toReturn.add(d);
+                }
             }
             else if (returnClass == Integer.class)
             {
-                toReturn.add(rs.getInt(1));
+                toReturn.add(new Integer(rs.getInt(1)));
             }
         }
         Statement s = rs.getStatement();
         s.close(); // s closes rs
 
-        T[] a = toReturn.toArray(dummy);
-        List<T> newList = new ArrayList<T>();
-        for (T t : a)
-        {
-            newList.add(t);
-        }
-        return newList;
+        // Object[] a = toReturn.toArray(dummy);
+        // List newList = new ArrayList();
+        // for (int i = 0; i < a.length; i++)
+        // {
+        // newList.add(a[i]);
+        // }
+        // return newList;
+        return toReturn;
     }
 
-    protected List<String> getObjectsByVariables(String sql, Object[] objects) throws SQLException
+    /**
+     * Utility function to get a list of objects from a SQL query string. Example:
+     * <code>newStrings = getObjectsByVariables("SELECT object_name FROM user_objects WHERE object_name = UPPER(?)",new String("xxx");</code>
+     * 
+     * @param sql SQL to execute. Only the first column in the SELECT is relevant.
+     * @param objects The objects to be used as bind parameter in the WHERE clause.
+     * @param dummyArrays An array of object arrays, each of which is in the particular format of the return classes.
+     * 
+     * @return The list of object arrays representing each field of retrieved data in the result set.
+     * 
+     * @throws SQLException If the sql is malformed or there is a problem with the database connection.
+     */
+    protected List getObjectSetsByVariables(String sql, Object[] objects, Object[] dummyArrays) throws SQLException
+    {
+        List toReturn = new ArrayList();
+        ResultSet rs = getResultSetByVariables(sql, objects);
+        while (rs.next())
+        {
+            Object[] retrievedData = new Object[dummyArrays.length];
+            for (int i = 0; i < dummyArrays.length; i++)
+            {
+                Object[] dummy = (Object[]) dummyArrays[i];
+                Class returnClass = dummy.getClass().getComponentType();
+                if (returnClass.equals(String.class))
+                {
+                    retrievedData[i] = rs.getString(i + 1);
+                }
+                else if (returnClass == Time.class)
+                {
+                    retrievedData[i] = rs.getTime(i + 1);
+                }
+                else if (returnClass == Timestamp.class)
+                {
+                    retrievedData[i] = rs.getTimestamp(i + 1);
+                }
+                else if (returnClass == Date.class)
+                {
+                    retrievedData[i] = rs.getDate(i + 1);
+                }
+                else if (returnClass == Integer.class)
+                {
+                    retrievedData[i] = new Integer(rs.getInt(i + 1));
+                }
+            }
+            toReturn.add(retrievedData);
+        }
+        Statement s = rs.getStatement();
+        s.close(); // s closes rs
+
+        // Object[] a = toReturn.toArray(dummy);
+        // List newList = new ArrayList();
+        // for (int i = 0; i < a.length; i++)
+        // {
+        // newList.add(a[i]);
+        // }
+        // return newList;
+        return toReturn;
+    }
+
+    /**
+     * Defaults the dummy variable to String[], i.e. the return value is set to be a List of String objects
+     * 
+     * @see #getObjectsByVariables(String , Object[], Object[])
+     */
+    protected SortedSet getObjectsByVariables(String sql, Object[] objects) throws SQLException
     {
         return getObjectsByVariables(sql, objects, new String[0]);
     }
@@ -197,8 +286,7 @@ public class DBPackageStore
      * @param sql SQL to execute.
      * @param objects The objects to be used as bind parameter in the where clause.
      * @return A ResultSet that can be scrolled through and examined to get the results.
-     * @throws SQLException If the sql is malformed or there is a problem with the database
-     *             connection.
+     * @throws SQLException If the sql is malformed or there is a problem with the database connection.
      */
     protected ResultSet getResultSetByVariables(String sql, Object[] objects) throws SQLException
     {
@@ -229,7 +317,8 @@ public class DBPackageStore
                 }
                 else if (objects[i].getClass() == Integer.class)
                 {
-                    s.setInt(i + 1, (Integer) objects[i]); // can throw an exception if null
+                    s.setInt(i + 1, ((Integer) objects[i]).intValue()); // can throw an exception if
+                    // null
                     // integer
                 }
                 else
@@ -253,14 +342,19 @@ public class DBPackageStore
         return rs;
     }
 
+    /**
+     * Release the connection. Must be called when done with the Connection object returned by getConnection
+     * 
+     * @param c The Connection object
+     */
     private void releaseConnection(Connection c)
     {
         myDefaultConnectionPool.free(c);
     }
 
     /**
-     * Returns our internal representation of packageName to be used as the key to the HashMaps. In
-     * reality just concatenates the two together.
+     * Returns our internal representation of packageName to be used as the key to the HashMaps. In reality just
+     * concatenates the two together.
      * 
      * @param schemaName
      * @param packageName
@@ -272,25 +366,24 @@ public class DBPackageStore
     }
 
     /**
-     * This method returns the list of currently known schema names. The first time it is called, it
-     * will look the schema names up in the database. On subsequenet calls, it will only check for
-     * new scemas. Note that dropped schemas will never be removed from the cache for now.
+     * This method returns the list of currently known schema names. The first time it is called, it will look the
+     * schema names up in the database. On subsequenet calls, it will only check for new scemas. Note that dropped
+     * schemas will never be removed from the cache for now.
      * 
-     * @param forceUpdate Pass true if you want to force a refresh of all schemas. This will cause
-     *            all packages for all schemas to be reset. Defaults to false.
+     * @param forceUpdate Pass true if you want to force a refresh of all schemas. This will cause all packages for all
+     *            schemas to be reset. Defaults to false.
      * 
      * @param updateList Pass true if you want to check for newly added schemas. Default true.
      * 
      * @return The list of currently known schema names.
      * @throws SQLException
      */
-    public List<String> getSchemas(boolean forceUpdate, boolean updateList, int refreshSeconds) throws SQLException
+    public SortedSet getSchemas(boolean forceUpdate, boolean updateList, int refreshSeconds) throws SQLException
     {
-        List<String> schemaList = new ArrayList<String>();
-        List<String> newSchemaList = new ArrayList<String>();
-        String allSchemasSql = "SELECT username " + "FROM all_users u "
-                + "WHERE EXISTS (SELECT p.procedure_name " + "              FROM all_procedures p "
-                + "              WHERE p.owner = u.username)";
+        SortedSet schemaList = new TreeSet();
+        SortedSet newSchemaList = new TreeSet();
+        String allSchemasSql = "SELECT username " + "FROM all_users u " + "WHERE EXISTS (SELECT p.procedure_name "
+                + "              FROM all_procedures p " + "              WHERE p.owner = u.username)";
         String newSchemasSql = "SELECT username " + "FROM all_users u " + "WHERE u.created >= ? "
                 + "AND EXISTS (SELECT p.procedure_name " + "            FROM all_procedures p "
                 + "            WHERE p.owner = u.username)";
@@ -302,27 +395,33 @@ public class DBPackageStore
             myDBLastCacheTime = getSysTimestamp();
             newSchemaList = schemaList;
         }
-        else if (updateList && 
-				(getSysTimestamp().getTime() > 
-						myDBLastCacheTime.getTime() + (long) (refreshSeconds * 1000)))
+        else if (updateList)
         {
-            newSchemaList = getObjectsByVariables(newSchemasSql, new Object[]{myDBLastCacheTime});
-            schemaList.addAll(newSchemaList);
-            myDBLastCacheTime = getSysTimestamp();
+            // System.out.println("ZZZ" + getSysTimestamp().getTime() + "|" +
+            // myDBLastCacheTime.getTime() + "|" + (refreshSeconds * 1000));
+            if (getSysTimestamp().getTime() > myDBLastCacheTime.getTime() + (refreshSeconds * 1000))
+            {
+                newSchemaList = getObjectsByVariables(newSchemasSql, new Object[]{myDBLastCacheTime});
+                schemaList.addAll(newSchemaList);
+                myDBLastCacheTime = getSysTimestamp();
+            }
+            // else { System.out.println("Using cached schemas(1)"); }
         }
-/*		else
-		{
-			System.out.println("Using cached schemas");
-		}
-*/        // Now add all new schemas to our cache
-        for (String s : newSchemaList)
+        // else { System.out.println("Using cached schemas(2)"); }
+
+        // Now add all new schemas to our cache
+        for (Iterator it = newSchemaList.iterator(); it.hasNext();)
         {
+            String s = (String) it.next();
             mySchemaToPackageMap.put(s, null);
         }
         return schemaList;
     }
 
-    public List<String> getSchemas() throws SQLException
+    /**
+     * @see #getSchemas(boolean, boolean, int)
+     */
+    public SortedSet getSchemas() throws SQLException
     {
         return getSchemas(false, true, 10);
     }
@@ -335,25 +434,23 @@ public class DBPackageStore
      * @return The list of segments that were just loaded.
      * @throws SQLException
      */
-    protected List<Segment> loadSegments(String schemaName, String packageName) throws SQLException
+    protected List loadSegments(String schemaName, String packageName) throws SQLException
     {
-        String sql = 
-			"SELECT p.procedure_name " +
-			"      ,p.object_name " +
-			"FROM   all_procedures p " +
-			"      , (" + myViewablePackagesSQL + ") pk " +
-			"WHERE  pk.owner IN (UPPER(?), 'PUBLIC') " +
-			"AND    pk.NAME = UPPER(?) " +
-			"AND    p.owner = pk.package_owner " +
-			"AND    p.object_name = pk.package_name";
+        String sql = "SELECT p.procedure_name " + "      ,p.object_name " + "FROM   all_procedures p " + "      , ("
+                + myViewablePackagesSQL + ") pk " + "WHERE  pk.owner IN (UPPER(?), 'PUBLIC') "
+                + "AND    pk.NAME = UPPER(?) " + "AND    p.owner = pk.package_owner "
+                + "AND    p.object_name = pk.package_name";
 
         Timestamp cacheTime = getSysTimestamp();
-        List<String> segmentNameList = getObjectsByVariables(sql, new Object[]{schemaName,schemaName,schemaName,schemaName,
-                packageName});
-        List<Segment> segmentList = new ArrayList<Segment>();
-        for (String segmentName : segmentNameList)
+        SortedSet segmentNameList = getObjectsByVariables(sql, new Object[]{schemaName, schemaName, schemaName,
+                schemaName, packageName});
+        List segmentList = new ArrayList();
+        for (Iterator it = segmentNameList.iterator(); it.hasNext();)
         {
-            segmentList.add(getSegmentFromDB(schemaName, packageName, segmentName));
+            String segmentName = (String) it.next();
+            System.out.println("adding segments for " + segmentName + " in schema " + schemaName + " and package " + packageName);
+            // segmentList.add(getSegmentFromDB(schemaName, packageName, segmentName));
+            addSegmentsToList(schemaName, packageName, segmentName, segmentList);
         }
         myPackageToSegmentMap.put(getPackageName(schemaName, packageName), segmentList);
         myPackageToLastCacheTimeMap.put(getPackageName(schemaName, packageName), cacheTime);
@@ -361,170 +458,210 @@ public class DBPackageStore
     }
 
     /**
-     * Gets the segment representing a function or procedure from the database.
+     * Gets the segment representing a function or procedure from the database, and loads it into the list that is
+     * passed in. In most cases, it will only find one segment to add, but in the case of an overloaded function or
+     * procedure, it will find each overloaded function and add it as a separate entry.
      * 
      * @param schemaName The scehma name.
      * @param packageName The package name.
      * @param segmentName The segment name.
-     * @return The segment representing the procedure or function.
+     * @param theList The list to add the segments to
      * @throws SQLException
      */
-    protected Segment getSegmentFromDB(String schemaName, String packageName, String segmentName)
+    protected void addSegmentsToList(String schemaName, String packageName, String segmentName, List theList)
             throws SQLException
     {
-        String sql = 
-			"SELECT a.argument_name, a.position, a.in_out " +
-			"      ,(CASE WHEN a.type_owner IS NULL THEN a.data_type ELSE a.type_owner || '.'|| a.type_name || '.'|| a.type_subname END) data_type " +
-			"      ,(CASE WHEN pk.owner <> pk.package_owner THEN 'YES' ELSE 'NO' END) is_synonym " +
-			"FROM   all_arguments a " + 
-			"      , (" + myViewablePackagesSQL + ") pk " +
-			"WHERE  pk.owner IN (UPPER(?), 'PUBLIC') " +
-			"AND    pk.NAME = UPPER(?) " +
-			"AND    a.owner = pk.package_owner " + 
-			"AND    a.package_name = pk.package_name " +
-			"AND    a.OBJECT_NAME = UPPER(?) " +
-			"AND    a.DATA_LEVEL = 0 " +
-			"ORDER BY a.position";
-//		System.out.println(sql);
-        Segment.SegmentType segmentType = Segment.SegmentType.Procedure;
+        String sql = "SELECT a.argument_name, a.position, a.in_out, a.overload "
+                + "      ,(CASE WHEN a.type_owner IS NULL THEN a.data_type ELSE a.type_owner || '.'|| a.type_name || '.'|| a.type_subname END) data_type "
+                + "      ,(CASE WHEN pk.owner <> pk.package_owner THEN 'YES' ELSE 'NO' END) is_synonym "
+                + "FROM   all_arguments a " + "      , (" + myViewablePackagesSQL + ") pk "
+                + "WHERE  pk.owner IN (UPPER(?), 'PUBLIC') " + "AND    pk.NAME = UPPER(?) "
+                + "AND    a.owner = pk.package_owner " + "AND    a.package_name = pk.package_name "
+                + "AND    a.OBJECT_NAME = UPPER(?) " + "AND    a.DATA_LEVEL = 0 " + "ORDER BY a.overload, a.position";
+        // System.out.println(sql);
+        SegmentType segmentType = SegmentType.Procedure;
         String segmentReturnType = null;
         Segment segment = null;
 
-        ResultSet rs = getResultSetByVariables(sql, new Object[]{schemaName, schemaName, schemaName, schemaName, packageName,
-                segmentName});
+        ResultSet rs = getResultSetByVariables(sql, new Object[]{schemaName, schemaName, schemaName, schemaName,
+                packageName, segmentName});
 
+        int prevOverload = 1;
         while (rs.next())
         {
-            if (rs.isFirst())
+            if (rs.isFirst() || rs.getInt("OVERLOAD") != prevOverload)
             {
+                if (!rs.isFirst() && rs.getInt("OVERLOAD") != prevOverload)
+                {
+                    theList.add(segment);
+                }
                 if (rs.getInt("POSITION") == 0)
                 {
-                    segmentType = Segment.SegmentType.Function;
+                    segmentType = SegmentType.Function;
                     segmentReturnType = rs.getString("DATA_TYPE");
                 }
                 segment = new Segment(segmentName, dummyPosition, segmentType);
-                segment.setReturnType(segmentReturnType); // hopefully shouldn't freak if it's set to null
-				segment.setPublic(rs.getString("IS_SYNONYM").equals("YES"));
+                segment.setReturnType(segmentReturnType);
+                segment.setPublicSynonym(rs.getString("IS_SYNONYM").equals("YES"));
             }
             if (rs.getInt("POSITION") > 0)
             {
-                segment.addParameter(rs.getString("ARGUMENT_NAME"), rs.getString("IN_OUT"), rs
-                        .getString("DATA_TYPE"));
+                segment.addParameter(rs.getString("ARGUMENT_NAME"),
+                                     rs.getString("IN_OUT"),
+                                     rs.getString("DATA_TYPE"),
+                                     "", 0);
             }
+            prevOverload = rs.getInt("OVERLOAD");
         }
-
-        return segment;
+        theList.add(segment);
+        Statement s = rs.getStatement();
+        s.close(); // s closes rs
     }
 
     /**
-     * Returns the segments (procedures and functions) for the given schema and package. Will make
-     * appropriate use of cache, and/or get updates from the database.
+     * Returns the segments (procedures and functions) for the given schema and package. Will make appropriate use of
+     * cache, and/or get updates from the database.
      * 
      * @param schemaName The schema name.
      * @param packageName The package name.
-     * @param forceUpdate Pass true if you want to force it to look at the database. Default is
-     *            <code>false</code>.
+     * @param forceUpdate Pass true if you want to force it to look at the database. Default is <code>false</code>.
      * @return the list of segments for the given schema and package.
      * @throws SQLException
      */
-    public List<Segment> getSegments(String schemaName, String packageName, boolean forceUpdate, int refreshSeconds)
+    public List getSegments(String schemaName, String packageName, boolean forceUpdate, int refreshSeconds)
             throws SQLException
     {
-        String lastPackageDDLDateSQL = 
-			"SELECT last_ddl_time " + 
-			"FROM   all_objects o " + //was (" + myViewablePackagesSQL + ") 
-			"WHERE  o.owner = UPPER(?) " +  
-			"AND    o.object_name = UPPER(?) ";
-        String lastPublicPackageDDLDateSQL = 
-			"SELECT last_ddl_time " + 
-			"FROM   (" + myViewablePackagesSQL + ") o " + //was  
-			"WHERE  o.owner IN (UPPER(?),'PUBLIC') " +  
-			"AND    o.name = UPPER(?) ";
+        String lastPackageDDLDateSQL = "SELECT last_ddl_time " + "FROM   all_objects o " + // was
+                // (" +
+                // myViewablePackagesSQL
+                // + ")
+                "WHERE  o.owner = UPPER(?) " + "AND    o.object_name = UPPER(?) ";
+        String lastPublicPackageDDLDateSQL = "SELECT last_ddl_time " + "FROM   (" + myViewablePackagesSQL + ") o " + // was
+                "WHERE  o.owner IN (UPPER(?),'PUBLIC') " + "AND    o.name = UPPER(?) ";
 
-        List<Segment> segmentList = myPackageToSegmentMap.get(getPackageName(schemaName,
-                                                                             packageName));
+        List segmentList = (List) myPackageToSegmentMap.get(getPackageName(schemaName, packageName));
         if (segmentList == null || forceUpdate)
         {
             segmentList = loadSegments(schemaName, packageName);
         }
-        else if (getSysTimestamp().getTime() > myPackageToLastCacheTimeMap.get(getPackageName(schemaName, packageName)).getTime() + (long) (refreshSeconds * 1000))
+        else if (getSysTimestamp().getTime() > ((java.util.Date) myPackageToLastCacheTimeMap
+                .get(getPackageName(schemaName, packageName))).getTime()
+                + (refreshSeconds * 1000))
         {
-            Timestamp lastCacheTime = myPackageToLastCacheTimeMap.get(getPackageName(schemaName,
-                                                                                     packageName));
-			List<Timestamp> lastUpdateTimeList;
-			if (segmentList.get(0).isPublic())
-			{
-	            lastUpdateTimeList = getObjectsByVariables(lastPublicPackageDDLDateSQL,
-						new Object[]{schemaName, schemaName, schemaName, schemaName,packageName},
-                        new Timestamp[0]);
-			} 
-			else
-			{
-				lastUpdateTimeList = getObjectsByVariables(lastPackageDDLDateSQL,
-														   new Object[]{schemaName,packageName},
+            Timestamp lastCacheTime = (Timestamp) myPackageToLastCacheTimeMap.get(getPackageName(schemaName,
+                                                                                                 packageName));
+            SortedSet lastUpdateTimeList;
+            if (segmentList.size() > 0 && ((Segment) segmentList.get(0)).isPublicSynonym())
+            {
+                lastUpdateTimeList = getObjectsByVariables(lastPublicPackageDDLDateSQL, new Object[]{schemaName,
+                        schemaName, schemaName, schemaName, packageName}, new Timestamp[0]);
+            }
+            else
+            {
+                lastUpdateTimeList = getObjectsByVariables(lastPackageDDLDateSQL,
+                                                           new Object[]{schemaName, packageName},
                                                            new Timestamp[0]);
-			}
-            if (lastUpdateTimeList.size() == 0 || lastUpdateTimeList.get(0).after(lastCacheTime))
+            }
+            if (lastUpdateTimeList.size() == 0 || ((java.util.Date) lastUpdateTimeList.first()).after(lastCacheTime))
             {
                 segmentList = loadSegments(schemaName, packageName);
             }
         }
-/*		else
-		{
-			System.out.println("Using cached segments");
-		}
-*/
+
+        // else { System.out.println("Using cached segments"); }
+
         return segmentList;
     }
 
-	/**
-	 * @see getSegments
-	 */
-    public List<Segment> getSegments(String schemaName, String packageName) throws SQLException
+    /**
+     * @see #getSegments(String, String, boolean, int)
+     */
+    public List getSegments(String schemaName, String packageName) throws SQLException
     {
         return getSegments(schemaName, packageName, false, 10);
     }
 
     /**
-     * Gets all packages in the given schema. Will make appropriate use of cache, and/or get updates
-     * from the database.
+     * Gets all packages in the given schema. Will make appropriate use of cache, and/or get updates from the database.
      * 
-     * @param schemaName The schema name.
-     * @param forceUpdate Pass true if you want to force it to look at the database. Default is
-     *            <code>false</code>.
+     * @param schemaName The <b>owning</b> schema name. i.e if you qualify a call with this schema name you can access
+     *            the returned packages. N.B there is one deviation from this, which is that specifying the
+     *            <code>schema</code> as <code>PUBLIC </code> will cause the return of all the public packages.
+     * @param forceUpdate Pass true if you want to force it to look at the database. Default is <code>false</code>.
      * @return The list of packages for the given schema.
      * @throws SQLException
      */
-    public List<String> getPackages(String schemaName, boolean forceUpdate, int refreshSeconds) throws SQLException
+    public SortedSet getPackages(String schemaName,
+                                 boolean forceUpdate,
+                                 int refreshSeconds,
+                                 boolean isExpectingPublicSchemas) throws SQLException
     {
 
-        String allPackagesSQL = 
-			"SELECT p.name " + // for synonyms, this is the synonym
-			"      ,p.owner " + // for synonyms, this is the synonym-owner, i.e. PUBLIC
-			"FROM (" + myViewablePackagesSQL + ") p ";
+        String allPackagesSQL = "SELECT p.name " + // for synonyms, this is the synonym
+                "      ,p.owner " + // for synonyms, this is the synonym-owner, i.e. PUBLIC
+                "FROM (" + myViewablePackagesSQL + ") p ";
 
-        String newPackagesSQL =
-			"SELECT p.name " + // for synonyms, this is the synonym
-			"      ,p.owner " + // for synonyms, this is the synonym-owner, i.e. PUBLIC
-			"FROM (" + myViewablePackagesSQL + ") p " + 
-			"WHERE p.last_ddl_time >= ?";
+        String newPackagesSQL = "SELECT p.name " + // for synonyms, this is the synonym
+                "      ,p.owner " + // for synonyms, this is the synonym-owner, i.e. PUBLIC
+                "FROM (" + myViewablePackagesSQL + ") p " + "WHERE p.last_ddl_time >= ?";
 
-        List<String> packageList = mySchemaToPackageMap.get(schemaName);
-        List<String> newPackageList = null;
+        SortedSet packageList = (SortedSet) mySchemaToPackageMap.get(schemaName);
+        SortedSet newPackageList = null;
         Timestamp newCacheTime = getSysTimestamp(); // get cache Timestamp before selects so that
         // reported cache Timestamp is no later than
         // actual cache Timestamp
 
-        if (packageList == null || forceUpdate)
+        // TODO should make this more efficient, by storing a public view and an ALL view
+        boolean lastPublicSchemaBooleanForThisSchemaWasDifferent = false;
+        Boolean lastPublicSchemaRequestType = (Boolean) mySchemaToLastPublicSchemaRequestBoolean.get(schemaName);
+        lastPublicSchemaBooleanForThisSchemaWasDifferent = (lastPublicSchemaRequestType == null || lastPublicSchemaRequestType
+                .booleanValue() != isExpectingPublicSchemas);
+
+        if (packageList == null || forceUpdate || lastPublicSchemaBooleanForThisSchemaWasDifferent)
         {
-            packageList = getObjectsByVariables(allPackagesSQL, new Object[]{schemaName, schemaName, schemaName});
+            if (isExpectingPublicSchemas)
+            {
+                packageList = getObjectsByVariables(allPackagesSQL, new Object[]{schemaName, schemaName, schemaName});
+            }
+            else
+            {
+                List resultingList = getObjectSetsByVariables(allPackagesSQL, new Object[]{schemaName, schemaName,
+                        schemaName}, new Object[]{new String[0], new String[0]});
+                packageList = new TreeSet();
+                for (Iterator it = resultingList.iterator(); it.hasNext();)
+                {
+                    Object[] data = (Object[]) it.next();
+                    if (!data[1].equals("PUBLIC"))
+                    {
+                        packageList.add(data[0]);
+                    }
+                }
+            }
             mySchemaToPackageMap.put(schemaName, packageList);
             mySchemaToLastCacheTimeMap.put(schemaName, newCacheTime);
         }
-        else if (getSysTimestamp().getTime() > mySchemaToLastCacheTimeMap.get(schemaName).getTime() + (long) (refreshSeconds * 1000))
+        else if (getSysTimestamp().getTime() > ((java.util.Date) mySchemaToLastCacheTimeMap.get(schemaName)).getTime()
+                + (refreshSeconds * 1000))
         {
-            newPackageList = getObjectsByVariables(newPackagesSQL, new Object[]{schemaName, schemaName, schemaName,
-                    mySchemaToLastCacheTimeMap.get(schemaName)});
+            if (isExpectingPublicSchemas)
+            {
+                newPackageList = getObjectsByVariables(newPackagesSQL, new Object[]{schemaName, schemaName, schemaName,
+                        mySchemaToLastCacheTimeMap.get(schemaName)});
+            }
+            else
+            {
+                List resultingList = getObjectSetsByVariables(allPackagesSQL, new Object[]{schemaName, schemaName,
+                        schemaName}, new Object[]{new String[0], new String[0]});
+                newPackageList = new TreeSet();
+                for (Iterator it = resultingList.iterator(); it.hasNext();)
+                {
+                    Object[] data = (Object[]) it.next();
+                    if (!data[1].equals("PUBLIC"))
+                    {
+                        newPackageList.add(data[0]);
+                    }
+                }
+            }
             if (!newPackageList.isEmpty())
             {
                 packageList.addAll(newPackageList);
@@ -533,37 +670,82 @@ public class DBPackageStore
                 mySchemaToLastCacheTimeMap.put(schemaName, newCacheTime);
             }
         }
-/*        else
-		{
-			System.out.println("Using cached packages");
-		}
-*/
+        mySchemaToLastPublicSchemaRequestBoolean.put(schemaName, new Boolean(isExpectingPublicSchemas));
+
+        // else { System.out.println("Using cached packages"); }
+
         return packageList;
     }
 
-    public List<String> getPackages(String schemaName) throws SQLException
+    /**
+     * @see #getPackages(String, boolean, int, boolean)
+     */
+    public SortedSet getPackages(String schemaName, boolean isExpectingPublicSchemas) throws SQLException
     {
-        return getPackages(schemaName, false,10);
+        return getPackages(schemaName, false, 10, isExpectingPublicSchemas);
     }
 
+    /**
+     * Gets the PACKAGE SPECIFICATION, without the initial "CREATE OR REPLACE" at the beginning
+     * 
+     * @param schemaName
+     * @param packageName
+     * @return the PACKAGE SPECIFICATION, without the initial "CREATE OR REPLACE" at the beginning
+     * @throws SQLException
+     */
     public String getSource(String schemaName, String packageName) throws SQLException
     {
         String packageSpec = "";
-        String sql = 
-			"SELECT text " + 
-			"FROM   all_source s " + 
-			"WHERE  owner IN (UPPER(?),'PUBLIC') " + 
-			"AND    s.TYPE = 'PACKAGE' " + 
-			"AND    s.NAME = UPPER(?) " + 
-			"ORDER BY s.line ";
+        String sql = "SELECT text " + "FROM   all_source s " + "WHERE  owner IN (UPPER(?),'PUBLIC') "
+                + "AND    s.TYPE = 'PACKAGE' " + "AND    s.NAME = UPPER(?) " + "ORDER BY s.line ";
 
-        List<String> lines = getObjectsByVariables(sql, new Object[]{schemaName, packageName});
+        SortedSet lines = getObjectsByVariables(sql, new Object[]{schemaName, packageName});
 
-        for (String l : lines)
+        for (Iterator it = lines.iterator(); it.hasNext();)
         {
+            String l = (String) it.next();
             packageSpec += l;
         }
         return packageSpec;
+    }
+
+    /**
+     * 
+     * @param schemaName
+     * @param tableType Must be TABLE or VIEW
+     * @return the tables/views for the given schemaName
+     * @throws SQLException
+     */
+    public List getTablesOrViews(String schemaName, String tableType) throws SQLException
+    {
+        Connection conn = null;
+        List tableList = new ArrayList();
+        try
+        {
+            conn = getConnection();
+            DatabaseMetaData dbmd = conn.getMetaData();
+            ResultSet rs;
+            rs = dbmd.getTables(null, schemaName, null, null);
+            // System.out.println("In getTables");
+            while (rs.next())
+            {
+                if (rs.getString("TABLE_TYPE").equalsIgnoreCase(tableType))
+                {
+                    tableList.add(rs.getString("TABLE_NAME"));
+                    System.out.println("+ " + rs.getString("TABLE_CAT") + " | " + rs.getString("TABLE_SCHEM") + " | "
+                            + rs.getString("TABLE_NAME") + " | " + rs.getString("TABLE_TYPE"));
+                }
+            }
+            System.out.println("End getTables");
+            rs.close();
+            releaseConnection(conn);
+        }
+        finally
+        {
+            releaseConnection(conn);
+        }
+        return tableList;
+
     }
 
 }

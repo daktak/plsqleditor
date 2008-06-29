@@ -3,6 +3,7 @@ package plsqleditor.editors;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.DefaultIndentLineAutoEditStrategy;
 import org.eclipse.jface.text.IAutoEditStrategy;
 import org.eclipse.jface.text.IDocument;
@@ -13,6 +14,8 @@ import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.reconciler.IReconciler;
+import org.eclipse.jface.text.reconciler.MonoReconciler;
 import org.eclipse.jface.text.rules.BufferedRuleBasedScanner;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
@@ -20,6 +23,7 @@ import org.eclipse.jface.text.rules.Token;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.swt.graphics.RGB;
 
 import plsqleditor.PlsqleditorPlugin;
@@ -41,10 +45,11 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
     private PlSqlDoubleClickStrategy2 doubleClickStrategy;
     private PlSqlCodeScanner          codeScanner;
     private PlSqlDocScanner           fDocScanner;
+    private PlSqlEditor               myEditor;
 
-    public PlSqlConfiguration()
+    public PlSqlConfiguration(PlSqlEditor editor)
     {
-        //
+        myEditor = editor;
     }
 
     public String[] getConfiguredContentTypes(ISourceViewer sourceViewer)
@@ -52,7 +57,8 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
         return PlSqlPartitionScanner.PLSQL_PARTITION_TYPES;
     }
 
-    public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer, String contentType)
+    public ITextDoubleClickStrategy getDoubleClickStrategy(ISourceViewer sourceViewer,
+                                                           String contentType)
     {
         if (doubleClickStrategy == null)
         {
@@ -113,14 +119,29 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
     {
         ContentAssistant assistant = new ContentAssistant();
         assistant.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-        assistant.setContentAssistProcessor(new PlSqlCompletionProcessor(), IDocument.DEFAULT_CONTENT_TYPE);
-        assistant.setContentAssistProcessor(new PlSqlDocCompletionProcessor(), PlSqlPartitionScanner.PL_DOC);
-        assistant.enableAutoActivation(true);
-        assistant.setAutoActivationDelay(500);
+        assistant.setContentAssistProcessor(new PlSqlCompletionProcessor(),
+                                            IDocument.DEFAULT_CONTENT_TYPE);
+        // assistant.setContentAssistProcessor(new
+        // PlSqlTemplateCompletionProcessor(), IDocument.DEFAULT_CONTENT_TYPE);
+        assistant.setContentAssistProcessor(new PlSqlDocCompletionProcessor(),
+                                            PlSqlPartitionScanner.PL_DOC);
+        IPreferenceStore prefs = PlsqleditorPlugin.getDefault().getPreferenceStore();
+        assistant.enableAutoInsert(prefs
+                .getBoolean(PreferenceConstants.P_CONTENT_ASSIST_AUTO_INSERT));
+        boolean autoActivation = prefs
+                .getBoolean(PreferenceConstants.P_CONTENT_ASSIST_AUTO_ACTIVATION);
+        assistant.enableAutoActivation(autoActivation);
+        if (autoActivation)
+        {
+            assistant.setAutoActivationDelay(500);
+        }
         assistant.setProposalPopupOrientation(10);
-        assistant.setContextInformationPopupOrientation(20);
-        assistant.setContextInformationPopupBackground(PlsqleditorPlugin.getDefault().getPlSqlColorProvider()
-                .getColor(new RGB(150, 150, 0)));
+        assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
+        assistant.setContextInformationPopupBackground(PlsqleditorPlugin.getDefault()
+                .getPlSqlColorProvider().getColor(new RGB(150, 150, 0)));
+        // the following line allows the second popup box to appear when auto
+        // assist is activated
+        assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
         return assistant;
     }
 
@@ -131,8 +152,8 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
 
     public String[] getIndentPrefixes(ISourceViewer sourceViewer, String contentType)
     {
-        List<String> list = new ArrayList<String>();
-        int tabWidth = 4;
+        List list = new ArrayList();
+        int tabWidth = getTabWidth(sourceViewer);
         boolean useSpaces = true;
         for (int i = 0; i <= tabWidth; i++)
         {
@@ -165,7 +186,7 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
         }
 
         list.add("");
-        return list.toArray(new String[list.size()]);
+        return (String[]) list.toArray(new String[list.size()]);
     }
 
     public IPresentationReconciler getPresentationReconciler(ISourceViewer sourceViewer)
@@ -176,13 +197,20 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
         reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
         reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
 
+        // added for for bug 1295164
+        dr = new DefaultDamagerRepairer(new SingleTokenScanner(new ConfigurableTextAttribute(
+                PreferenceConstants.P_STRING_COLOUR, PreferenceConstants.P_BACKGROUND_COLOUR, 0)));
+        reconciler.setDamager(dr, PlSqlPartitionScanner.SQL_STRING);
+        reconciler.setRepairer(dr, PlSqlPartitionScanner.SQL_STRING);
+        // end added for for bug 1295164
+
         dr = new DefaultDamagerRepairer(getPlDocScanner());
-        // dr = new DefaultDamagerRepairer(new SingleTokenScanner(new ConfigurableTextAttribute(
-        // PreferenceConstants.P_JAVADOC_COLOUR, PreferenceConstants.P_BACKGROUND_COLOUR, 0)));
         reconciler.setDamager(dr, PlSqlPartitionScanner.PL_DOC);
         reconciler.setRepairer(dr, PlSqlPartitionScanner.PL_DOC);
         dr = new DefaultDamagerRepairer(new SingleTokenScanner(new ConfigurableTextAttribute(
                 PreferenceConstants.P_COMMENT_COLOUR, PreferenceConstants.P_BACKGROUND_COLOUR, 0)));
+        // dr = new DefaultDamagerRepairer(new
+        // CommentScanner(PlsqleditorPlugin.getDefault().getPlSqlColorProvider()));
         reconciler.setDamager(dr, PlSqlPartitionScanner.PLSQL_MULTILINE_COMMENT);
         reconciler.setRepairer(dr, PlSqlPartitionScanner.PLSQL_MULTILINE_COMMENT);
         return reconciler;
@@ -190,11 +218,33 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
 
     public int getTabWidth(ISourceViewer sourceViewer)
     {
-        return 4;
+        return PlsqleditorPlugin.getDefault().getPreferenceStore()
+                .getInt(PreferenceConstants.P_EDITOR_TAB_WIDTH);
     }
 
     public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType)
     {
         return new PlSqlTextHover();
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getReconciler(org.eclipse.jface.text.source.ISourceViewer)
+     */
+    public IReconciler getReconciler(ISourceViewer sourceViewer)
+    {
+        PlSqlReconcilingStrategy strategy = new PlSqlReconcilingStrategy();
+        strategy.setEditor(myEditor);
+
+        MonoReconciler reconciler = new MonoReconciler(strategy, false);
+
+        return reconciler;
+    }
+
+    public void handlePropertyChangeEvent(PropertyChangeEvent event)
+    {
+        // for future use
+    }
+
 }

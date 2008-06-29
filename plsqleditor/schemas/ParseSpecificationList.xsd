@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+targetNamespace="http://plsqleditor.boomsticks.org/utils/parsers/ParseSpecificationList.xsd" 
+xmlns="http://plsqleditor.boomsticks.org/utils/parsers/ParseSpecificationList.xsd"
+xmlns:ps="http://plsqleditor.boomsticks.org/utils/parsers/ParseSpecification.xsd" 
+elementFormDefault="qualified" 
+attributeFormDefault="unqualified">
+
+	<xs:import namespace="http://plsqleditor.boomsticks.org/utils/parsers/ParseSpecification.xsd" schemaLocation="ParseSpecification.xsd"/>
+	<xs:annotation>
+		<xs:documentation> 
+			This is the XML Schema for the list of ParseSpecifications.
+			@author Toby Zines.
+		</xs:documentation>
+	</xs:annotation>
+
+	<xs:complexType name="XParseSpecificationListType" abstract="true">
+		<xs:sequence>
+			<xs:element name="ParseSpecifications">
+				<xs:complexType>
+					<xs:sequence minOccurs="0" maxOccurs="unbounded">
+						<xs:element ref="ps:XParseSpecification"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+		<xs:attribute name="Name">
+			<xs:simpleType>
+			  <xs:restriction base="xs:string">
+			    <xs:pattern value="[A-Za-z]*"/>
+			  </xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+		<xs:attribute name="Version" use="required">
+			<xs:simpleType>
+			  <xs:restriction base="xs:string">
+			    <xs:pattern value="[0-9]+(.[0-9]*)?"/>
+			  </xs:restriction>
+			</xs:simpleType>
+		</xs:attribute>
+	</xs:complexType>
+	<xs:element name="XParseSpecificationList" type="XParseSpecificationListType"/>
+</xs:schema>

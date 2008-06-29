@@ -14,8 +14,7 @@ public class PlSqlDocumentProvider extends FileDocumentProvider
         if (document != null)
         {
             IDocumentPartitioner partitioner = new FastPartitioner(new PlSqlPartitionScanner(),
-                    new String[]{PlSqlPartitionScanner.PLSQL_MULTILINE_COMMENT,
-                PlSqlPartitionScanner.PL_DOC});
+                    PlSqlPartitionScanner.PLSQL_PARTITION_TYPES);
             partitioner.connect(document);
             document.setDocumentPartitioner(partitioner);
         }

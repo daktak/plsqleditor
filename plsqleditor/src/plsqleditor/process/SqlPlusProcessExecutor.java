@@ -1,6 +1,3 @@
-/**
- * 
- */
 package plsqleditor.process;
 
 import java.io.BufferedReader;
@@ -175,7 +172,7 @@ public class SqlPlusProcessExecutor
     /**
      * This method releases the process by forcibly killing it if it is still running.
      * 
-     * @param myProcess A non-null Process that may or may not be running.
+     * @param bw The buffered writer writing to the process.
      */
     private void releaseProcess(BufferedWriter bw)
     {
@@ -254,7 +251,7 @@ public class SqlPlusProcessExecutor
 
             public boolean negativeResponse(String line)
             {
-                return line.contains("ERROR:");
+                return line.indexOf("ERROR:") != -1;
             }
         };
         try
@@ -306,12 +303,12 @@ public class SqlPlusProcessExecutor
 
     /**
      * @param line
-     * @return
+     * @return <code>true</code> if the supplied <code>line</code> matches JServer Release .* Production
      */
     boolean matchPositiveStartupResponse(String line)
     {
         // JServer Release 9.2.0.6.0 - Production
-        return line.contains("JServer Release ") && line.contains("Production");
+        return line.indexOf("JServer Release ") != -1 && line.indexOf("Production") != -1;
     }
 
     /**
@@ -326,7 +323,7 @@ public class SqlPlusProcessExecutor
      * 
      * @param sid
      * 
-     * @return
+     * @return The string to execute.
      */
     protected String constructSystemCall(String executable,
                                          String schema,
@@ -352,10 +349,8 @@ public class SqlPlusProcessExecutor
      * approximatly 1 second before retrying the response stream. In order to perform this pause the
      * method must be syncronised in order for the Thread to obtain this objects monitor.
      * 
-     * @param myProcess
-     * @param resultText
-     * @param ipAddress
-     * @return
+     * @return true if the response was positive.
+     * 
      * @throws CannotCompleteException
      */
     private boolean parseResponse(String input, BufferedReader in, BufferedWriter out)
@@ -570,7 +565,7 @@ public class SqlPlusProcessExecutor
      */
     protected boolean matchPositiveResponse(String response)
     {
-        if (response.contains("Package") && response.contains("created"))
+        if (response.indexOf("Package") != -1 && response.indexOf("created") != -1)
         {
             return true;
         }

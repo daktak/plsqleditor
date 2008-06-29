@@ -2,9 +2,11 @@ package plsqleditor.actions;
 
 import java.util.ResourceBundle;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import plsqleditor.db.LoadPackageManager;
+import plsqleditor.PlsqleditorPlugin;
+import plsqleditor.db.PackageType;
 import plsqleditor.db.SQLErrorDetail;
 
 public class RefreshErrorStatusAction extends LoadToDatabaseAction
@@ -19,14 +21,23 @@ public class RefreshErrorStatusAction extends LoadToDatabaseAction
 
     protected SQLErrorDetail[] execute(String toLoad,
                                        String packageName,
-                                       LoadPackageManager.PackageType type,
+                                       PackageType type,
                                        String schema)
     {
-        return theLoadPackageManager.getErrorDetails(schema, packageName, type);
+        IProject project = PlsqleditorPlugin.getDefault().getProject();
+
+        return theLoadPackageManager.getErrorDetails(project, schema, packageName, type);
     }
 
-    protected String modifyCodeToLoad(String toLoad, String packageName, String separator)
+    protected String getRuntimeErrorMsg(RuntimeException e)
     {
-        return toLoad;
+        // fix for bug 1436209 - the "refresh error status" prints wrong msg
+        return "There was a failure while trying to retrieve the error status: " + e;
+    }
+
+    protected String getNoErrorMsg()
+    {
+        // fix for bug 1436209 - the "refresh error status" prints wrong msg
+        return "The file has no errors.";
     }
 }

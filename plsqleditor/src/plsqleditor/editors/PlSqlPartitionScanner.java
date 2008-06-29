@@ -53,7 +53,8 @@ public class PlSqlPartitionScanner extends RuleBasedPartitionScanner
     public static final String SQL_STRING = "sql_string";
 
 
-    public static final String PLSQL_PARTITION_TYPES[] = {IDocument.DEFAULT_CONTENT_TYPE, PLSQL_MULTILINE_COMMENT, PL_DOC};
+    // added SQL_STRING to list for for bug 1295164
+    public static final String PLSQL_PARTITION_TYPES[] = {IDocument.DEFAULT_CONTENT_TYPE, PLSQL_MULTILINE_COMMENT, PL_DOC, SQL_STRING};
 
     public PlSqlPartitionScanner()
     {
@@ -61,12 +62,21 @@ public class PlSqlPartitionScanner extends RuleBasedPartitionScanner
         IToken plDoc = new Token(PL_DOC);
         IToken sqlString = new Token(SQL_STRING);
 
-        List<IRule> rules = new ArrayList<IRule>();
+        List rules = new ArrayList();
         rules.add(new MultiLineRule("/**", "*/", plDoc, '\0', true));
-        rules.add(new MultiLineRule("/*", "*/", plsqlComment, '\0', true));
+        
+//      enhancement for [ 1428741 ] Format header details as code
+        rules.add(new MultiOptionMultiLineRule("/*", new String [] {"header details", "*/"}, plsqlComment, '\0', true));
+        //rules.add(new MultiLineRule("/*", "*/", plsqlComment, '\0', true));
+        rules.add(new MultiLineRule("end header details", "*/", plsqlComment, '\0', true));
         rules.add(new EndOfLineRule("--", plsqlComment));
+        // enhancement for [ 1894058 ] text after "PROMPT" keyword should be treated as comments
+        rules.add(new EndOfLineRule("PROMPT", plsqlComment));
+        rules.add(new EndOfLineRule("prompt", plsqlComment));
+        //rules.add(new EndOfLineRule("//", plsqlComment));
         rules.add(new SingleLineRule("\"", "\"", Token.UNDEFINED, '\\'));
-        rules.add(new SingleLineRule("'", "'", sqlString, '\\'));
+        // added for for bug 1295164 - can't use ' as an escape char
+        rules.add(new MultiLineRule("'", "'", sqlString, '\\'));
         rules.add(new WordPredicateRule(plsqlComment));
 
         IPredicateRule result[] = new IPredicateRule[rules.size()];

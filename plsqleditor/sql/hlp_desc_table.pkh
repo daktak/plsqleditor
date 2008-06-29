@@ -1,0 +1,38 @@
+CREATE OR REPLACE PACKAGE desc_table 
+/*
+ */
+  authid current_user
+AS
+
+  table_does_not_exist EXCEPTION;
+  PRAGMA exception_init(table_does_not_exist, -20010);
+
+  TYPE check_t        IS TABLE of long;
+
+  TYPE col_t          IS RECORD (name varchar2(30), nullable BOOLEAN, dataTYPE varchar2(106), checks check_t);
+  TYPE cols_t         IS TABLE   OF col_t;
+
+  TYPE col_comment_t  IS RECORD (pos number, comment user_tab_comments.comments%type);
+  TYPE col_comments_t IS TABLE   OF col_comment_t;
+
+  TYPE TABLE_t        IS RECORD (own varchar2(30), nam varchar2(30));
+  TYPE TABLEs_t       IS TABLE   OF table_t;
+
+  TYPE char_to_number IS TABLE   OF number(2) index by varchar2(30);
+
+  TYPE description    IS RECORD (tab           table_t,
+                                 tab_type      user_tab_comments.table_type%type, -- 'TABLE', 'VIEW' ..?
+                                 tab_comment   user_tab_comments.comments%type,
+                                 cols          cols_t,
+                                 col_comments  col_comments_t,
+                                 pks           char_to_number, -- Position OF primary keys
+                                 parents       tables_t,
+                                 children      tables_t);
+
+  -- TABLE_name: 61 chars maximum: 30 chars schema (optional), 1 char dot (optional), 30 chars username 
+  FUNCTION describe(table_name in VARCHAR2) RETURN description;
+
+  FUNCTION describe(tab        in table_t ) RETURN description;
+
+END desc_table;
+/

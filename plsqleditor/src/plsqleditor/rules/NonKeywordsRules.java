@@ -19,12 +19,12 @@ import org.eclipse.jface.text.rules.Token;
 public class NonKeywordsRules implements IRule
 {
 
-    private IToken            myToken;
-    private ArrayList<String> myKeywords;
+    private IToken    myToken;
+    private ArrayList myKeywords;
 
     public NonKeywordsRules(IToken token)
     {
-        myKeywords = new ArrayList<String>();
+        myKeywords = new ArrayList();
         this.myToken = token;
     }
 
@@ -37,7 +37,7 @@ public class NonKeywordsRules implements IRule
     {
         for (int i = 0; i < myKeywords.size(); i++)
         {
-            String word = myKeywords.get(i);
+            String word = (String) myKeywords.get(i);
             char cArray[] = word.toCharArray();
             if (cArray[0] == c)
             {
@@ -63,7 +63,10 @@ public class NonKeywordsRules implements IRule
             }
 
             scanner.unread();
-            if (value.toString().toUpperCase().equals(word)) return myToken;
+            if (value.toString().toUpperCase().equals(word))
+            {
+                return myToken;
+            }
         }
         scanner.unread();
         return Token.UNDEFINED;

@@ -3,27 +3,33 @@ package plsqleditor.actions;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.db.LoadPackageManager;
+import plsqleditor.db.ResultSetWrapper;
 import plsqleditor.parsers.StringLocationMap;
+import plsqleditor.util.Util;
+import plsqleditor.views.DbmsOutputView;
+import plsqleditor.views.ScratchPadView;
+import plsqleditor.views.SqlOutputContentProvider;
 
 /**
- * This class
+ * This class represents the action that executes individual sql calls.
  * 
  * @author Toby Zines
  * 
- * @version $Id: ExecuteScratchSqlAction.java,v 1.1 2005/03/24 02:12:55 tobyz
- *          Exp $
+ * @version $Id$
  * 
  * Created on 15/03/2005
- * 
  */
 public class ExecuteScratchSqlAction extends SelectedTextAction
 {
@@ -39,33 +45,57 @@ public class ExecuteScratchSqlAction extends SelectedTextAction
         Shell shell = new Shell();
 
         String schema = PlsqleditorPlugin.getDefault().getCurrentSchema();
+        IProject project = PlsqleditorPlugin.getDefault().getProject();
 
         String toLoad = null;
         try
         {
-            toLoad = doc.get(selection.getOffset(), selection.getLength());
+            if (selection.getLength() == 0)
+            {
+                toLoad = Util.grabSurroundingSqlBlock(doc, selection.getOffset());
+            }
+            else
+            {
+                toLoad = doc.get(selection.getOffset(), selection.getLength());
+            }
         }
         catch (BadLocationException e)
         {
             e.printStackTrace();
         }
-        toLoad = StringLocationMap.replacePlSqlSingleLineComments(toLoad);
-        toLoad = StringLocationMap.replaceNewLines(toLoad);
-        // SQLErrorDetail [] errors = theLoadPackageManager.loadCode(schema,
-        // "scratch", toLoad, LoadPackageManager.PackageType.Sql);
-        // if (errors != null)
-        // {
-        // MessageDialog.openInformation(shell,
-        // "Toby's PL SQL Editor",
-        // errors[0].getText());
-        // }
+        //TODO add bug id for removing single line comments
+        //toLoad = StringLocationMap.replacePlSqlSingleLineComments(toLoad);
+        toLoad = StringLocationMap.replaceNewLines(toLoad).trim();
+
+        ResultSetWrapper rsw = null;
         try
         {
-            theLoadPackageManager.loadCode(schema, toLoad);
+            rsw = theLoadPackageManager.loadCode(project, schema, toLoad);
+            DbmsOutputView.getInstance().addMessage(schema);
+            if (rsw != null)
+            {
+                // open the viewer, reset the input.
+                try
+                {
+                    SqlOutputContentProvider.getInstance().updateContent(rsw, toLoad);
+                    IWorkbenchPage page = getTextEditor().getSite().getPage();
+                    /*IViewPart scratchOutput = */
+                    page.showView(ScratchPadView.theId);
+                }
+                catch (PartInitException e)
+                {
+                    // TODO Auto-generated catch block
+                    e.printStackTrace();
+                }
+            }
         }
         catch (SQLException e)
         {
             MessageDialog.openInformation(shell, "Toby's PL SQL Editor", e.getMessage());
+            if (rsw != null)
+            {
+                rsw.close();
+            }
         }
     }
 }

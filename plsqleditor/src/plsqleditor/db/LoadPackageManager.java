@@ -1,6 +1,5 @@
 package plsqleditor.db;
 
-
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -8,19 +7,31 @@ import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.IDocument;
 
 import plsqleditor.PlsqleditorPlugin;
+import plsqleditor.parsers.PackageSegment;
+import plsqleditor.parsers.Segment;
+import plsqleditor.parsers.SegmentType;
 import plsqleditor.parsers.StringLocationMap;
 import plsqleditor.preferences.PreferenceConstants;
 import plsqleditor.process.CannotCompleteException;
 import plsqleditor.process.SqlPlusProcessExecutor;
+import plsqleditor.stores.PackageStore;
+import sun.misc.Perf;
 
 /**
  * This class
@@ -33,23 +44,21 @@ import plsqleditor.process.SqlPlusProcessExecutor;
  */
 public class LoadPackageManager
 {
-    public enum PackageType
-    {
-        Package_Body, Package, Sql
-    }
-
-    private SQLErrorDetail[]              mySQLErrors = new SQLErrorDetail[0];
-    private static LoadPackageManager     theInstance;
-    private Map<String, ResultSetWrapper> myResultSetWrapperMap;
+    private SQLErrorDetail[]          mySQLErrors = new SQLErrorDetail[0];
+    private static LoadPackageManager theInstance;
+    private Map                       myResultSetWrapperMap;
+    private static final Perf         myClock     = Perf.getPerf();
+    private long                      myFrequency;
 
 
     /**
-     * This constructor creates the LoadPackageManager, instantiating the map of 
+     * This constructor creates the LoadPackageManager, instantiating the map of
      * resultset wrappers.
      */
     private LoadPackageManager()
     {
-        myResultSetWrapperMap = new HashMap<String, ResultSetWrapper>();
+        myResultSetWrapperMap = new HashMap();
+        myFrequency = myClock.highResFrequency();
     }
 
     public synchronized static LoadPackageManager instance()
@@ -61,7 +70,28 @@ public class LoadPackageManager
         return theInstance;
     }
 
-    public synchronized SQLErrorDetail[] execute(String schema,
+    /**
+     * This method executes a piece of code (primarily a package body or header,
+     * or similar piece of ddl (rather than dml) into the database. This may be
+     * executed using jdbc or sqlplus depending on configuration set up in the
+     * {@link plsqleditor.preferences.DbSetupPreferencePage}.
+     * 
+     * @param schema The schema against which to execute the code.
+     * 
+     * @param packageName The name of the package being executed.
+     * 
+     * @param toLoad The code describing the package to be executed.
+     * 
+     * @param type The type of the code (pkb,pkh,sql etc - see
+     *            {@link PackageType}).
+     * 
+     * @return The errors from either the execution of the code, the failure to
+     *         retrieve the connection, or the resulting compile errors from the
+     *         loaded code.
+     */
+    public synchronized SQLErrorDetail[] execute(IFile file,
+    		                                     IProject project,
+                                                 String schema,
                                                  String packageName,
                                                  String toLoad,
                                                  PackageType type)
@@ -76,14 +106,14 @@ public class LoadPackageManager
         if (useLocalClient && (executable != null && executable.length() > 0))
         {
             String passwd = DbUtility.getPasswordForSchema(schema);
-            String sid = DbUtility.getSid();
+            String sid = DbUtility.getSid(project);
 
             SqlPlusProcessExecutor sqlplus = new SqlPlusProcessExecutor(executable, schema, passwd,
                     sid);
             try
             {
                 sqlplus.execute(toLoad);
-                details = getErrorDetails(schema, packageName, type);
+                details = getErrorDetails(project, schema, packageName, type);
             }
             catch (CannotCompleteException e)
             {
@@ -94,8 +124,60 @@ public class LoadPackageManager
         }
         else
         {
-            toLoad = modifyCodeToLoad(toLoad, packageName);
-            details = loadCode(schema, packageName, toLoad, type);
+        	if (type == PackageType.Package_Header_And_Body)
+        	{
+        		// split the file into two
+        		IDocument document = PackageStore.getDoc(file);
+        		List segments = plugin.getSegments(file, document, true);
+        		
+        		//getSegments(schema,packageName);
+                SortedSet sortedSegments = new TreeSet();
+                sortedSegments.addAll(segments);
+        		
+        		for (Iterator it = sortedSegments.iterator(); it.hasNext();)
+                {
+                    Segment segment = (Segment) it.next();
+                    int lastPosition = 0;
+                    if (segment instanceof PackageSegment)
+                    {
+                    	if (segment.getType() == SegmentType.Package_Body)
+                    	{
+                    		lastPosition = segment.getPosition().offset;
+                    		int packageBodyStartingLine = 0;
+                    		try 
+                    		{
+								packageBodyStartingLine = document.getLineOfOffset(lastPosition);
+							} 
+                    		catch (BadLocationException e) 
+                    		{
+								e.printStackTrace(); // should not happen
+							}
+	                        String packageHeader = toLoad.substring(0, lastPosition);
+	                        packageHeader = modifyCodeToLoad(packageHeader, packageName);
+	                        String packageBody = toLoad.substring(lastPosition);
+	                        packageBody = modifyCodeToLoad(packageBody, packageName);
+	                        details = loadSinglePieceOfCode(project, schema, packageName, packageHeader, PackageType.Package);
+	                        SQLErrorDetail [] details2 = loadSinglePieceOfCode(project, schema, packageName, packageBody, PackageType.Package_Body);
+	                        SQLErrorDetail []  newDetails = new SQLErrorDetail[details.length + details2.length];
+	                        System.arraycopy(details,0,newDetails,0,details.length);
+	                        for (int i = 0, j = details.length; j < newDetails.length; i++, j++) 
+	                        {
+	                        	SQLErrorDetail oldDetails2 = details2[i];
+								newDetails[j] = new SQLErrorDetail(oldDetails2.getRow() + packageBodyStartingLine, oldDetails2.getColumn(), oldDetails2.getText());
+							}
+	                        //System.arraycopy(details2,0,newDetails,details.length,details2.length);
+	                        return newDetails;
+                    	}
+                    }
+                }
+                final String msg = "Failed to execute package header and body together for " + packageName;
+                return new SQLErrorDetail[]{new SQLErrorDetail(0, 0, msg)};
+        	}
+        	else
+        	{
+	            toLoad = modifyCodeToLoad(toLoad, packageName);
+	            details = loadSinglePieceOfCode(project, schema, packageName, toLoad, type);
+        	}
         }
 
         return details;
@@ -103,9 +185,12 @@ public class LoadPackageManager
 
     protected String modifyCodeToLoad(String toLoad, String packageName)
     {
-        toLoad = StringLocationMap.replacePlSqlSingleLineComments(toLoad);
+        // FIX for bug 1363370 - jdbc forces code onto one line, commented out
+        // next line
+        // toLoad = StringLocationMap.replacePlSqlSingleLineComments(toLoad);
         toLoad = StringLocationMap.replaceNewLines(toLoad);
-        String terminator = "[Ee][Nn][Dd] +" + packageName + ";";
+        toLoad = StringLocationMap.escapeSingleCommentedQuotes(toLoad);
+        String terminator = "\\W*[Ee][Nn][Dd] +" + packageName + "\\W*;";
         int end = toLoad.length();
         Pattern p = Pattern.compile(terminator);
         Matcher m = p.matcher(toLoad);
@@ -117,22 +202,49 @@ public class LoadPackageManager
         return toLoad;
     }
 
-    public synchronized SQLErrorDetail[] loadCode(String schemaName,
-                                                  String packageName,
-                                                  String toLoad,
-                                                  PackageType type)
+    /**
+     * This method executes a single piece of code in the database, and commits
+     * it (via auto commit on close functionality) before closing the
+     * connection, and freeing it back to the connection pool. This is always
+     * executed by jdbc.
+     * 
+     * @param schemaName The schema against which to retrieve a connection.
+     * 
+     * @param packageName The name of the package (piece of code) being
+     *            executed.
+     * 
+     * @param toLoad The string to execute.
+     * 
+     * @param type The type of the code being executed (pkb,pkh,sql etc - see
+     *            {@link PackageType}).
+     * 
+     * @return The errors from either the execution of the code, the failure to
+     *         retrieve the connection, or the resulting compile errors from the
+     *         loaded code.
+     */
+    private synchronized SQLErrorDetail[] loadSinglePieceOfCode(IProject project,
+                                                                String schemaName,
+                                                                String packageName,
+                                                                String toLoad,
+                                                                PackageType type)
     {
         Connection c = null;
         try
         {
-            c = DbUtility.getConnection(schemaName);
+            c = DbUtility.getTempConnection(project, schemaName);
             return loadCode(c, packageName, toLoad, type);
+        }
+        catch (SQLException e)
+        {
+            final String msg = "Failed to retrieve connection for schema " + schemaName
+                    + " package " + packageName + " and type " + type + " : " + e.getMessage();
+            return new SQLErrorDetail[]{new SQLErrorDetail(0, 0, msg)};
         }
         finally
         {
             if (c != null)
             {
-                DbUtility.free(schemaName, c);
+                DbUtility.free(project, schemaName, c);
             }
         }
     }
@@ -141,30 +253,27 @@ public class LoadPackageManager
      * This method loads a file into the database, returning any errors it
      * found.
      * 
-     * @param c
-     *            The connection to use to load the database.
+     * @param c The connection to use to load the database.
      * 
-     * @param packageName
-     *            The name of the package being loaded, for error purposes.
+     * @param packageName The name of the package being loaded, for error
+     *            purposes.
      * 
-     * @param toLoad
-     *            The text representation of the entire package.
+     * @param toLoad The text representation of the entire package.
      * 
-     * @param type
-     *            The type of thing being loaded. (package/package body etc).
+     * @param type The type of thing being loaded. (package/package body etc).
      * 
      * @return The list of errors from the compile, or null if there were none.
      */
     private SQLErrorDetail[] loadCode(Connection c,
                                       String packageName,
                                       String toLoad,
-                                      LoadPackageManager.PackageType type)
+                                      PackageType type)
     {
-        Statement s = null;
+        PreparedStatement s = null;
         try
         {
-            s = c.createStatement();
-            s.execute(toLoad);
+            s = c.prepareStatement(toLoad);
+            s.execute();
 
             if (type != PackageType.Sql)
             {
@@ -185,21 +294,75 @@ public class LoadPackageManager
         }
     }
 
-    public synchronized ResultSetWrapper loadCode(String schemaName, String toLoad) throws SQLException
+    /**
+     * This method loads the supplied piece of code <code>toLoad</code> into
+     * the database using a connection based on the supplied
+     * <code>schemaName</code>. The connection is left unfreed until the
+     * caller closes the returned result set wrapper. However, a subsequent call
+     * to this method will close any previous result set for the given
+     * <code>schemaName</code>. If there is no result set resulting from the
+     * execution, the connection is freed.
+     * 
+     * @param schemaName The name of the schema in which to execute the code
+     *            <code>toLoad</code>.
+     * 
+     * @param toLoad The code to execute in the database.
+     * 
+     * @return The results set (wrapped) resulting from the execution of the
+     *         code <code>toLoad</code>. If there was no result set, null is
+     *         returned.
+     * 
+     * @throws SQLException when the executed code fails for some reason.
+     */
+    public synchronized ResultSetWrapper loadCode(IProject project, String schemaName, String toLoad)
+            throws SQLException
     {
-        ResultSetWrapper rw = DbUtility.loadCode(schemaName, toLoad);
-        ResultSetWrapper oldRw = myResultSetWrapperMap.get(schemaName);
+        ResultSetWrapper oldRw = (ResultSetWrapper) myResultSetWrapperMap.get(schemaName);
         if (oldRw != null)
         {
             oldRw.close();
+            myResultSetWrapperMap.remove(schemaName);
         }
+        long startTime = myClock.highResCounter();
+        ResultSetWrapper rw = DbUtility.loadCode(project, schemaName, toLoad);
+
+        long stopTime = myClock.highResCounter();
+        long diffTime = elapsed(startTime, stopTime, myFrequency);
+
+        rw.setElapsedTime(diffTime);
         myResultSetWrapperMap.put(schemaName, rw);
         return rw;
     }
-    
+
+    /**
+     * This method
+     * 
+     * @param start
+     * @param end
+     * @param freq
+     * @return the time elapsed between the <code>start</code> and
+     *         <code>end</code> over the <code>freq</code>.
+     */
+    public static long elapsed(long start, long end, long freq)
+    {
+        return (end - start) * 1000000L / freq;
+    }
+
+    /**
+     * This method returns the result set wrapper that is currently stored
+     * against the supplied <code>schemaName</code>. This represents the
+     * output of the last piece of code executed in the database against that
+     * schema. This may be null if there have been no pieces of code executed
+     * against this schema, or the last execution had no result.
+     * 
+     * @param schemaName The name of the schema whose last result set is sought.
+     * 
+     * @return the result set wrapper that is currently stored against the
+     *         supplied <code>schemaName</code>.
+     */
     public ResultSetWrapper getResultSetWrapper(String schemaName)
     {
-        return myResultSetWrapperMap.get(schemaName);
+        return (ResultSetWrapper) myResultSetWrapperMap.get(schemaName);
     }
 
     /**
@@ -208,15 +371,13 @@ public class LoadPackageManager
      * new errors, and the first warning message will be returned to indicate
      * something is wrong.
      * 
-     * @param s
-     *            The statement whose warning status is being checked.
+     * @param s The statement whose warning status is being checked.
      * 
-     * @param packageName
-     *            The name of the package/package body that was just created in
-     *            the statement <code>s</code>.
+     * @param packageName The name of the package/package body that was just
+     *            created in the statement <code>s</code>.
      * 
-     * @param packageType
-     *            The type of package errors we are searching for on failure.
+     * @param packageType The type of package errors we are searching for on
+     *            failure.
      * 
      * @return The message from the first warning, or null if there were no
      *         warnings.
@@ -249,21 +410,27 @@ public class LoadPackageManager
         }
     }
 
-    public SQLErrorDetail[] getErrorDetails(String schemaName,
+    public SQLErrorDetail[] getErrorDetails(IProject project,
+                                            String schemaName,
                                             String packageName,
                                             PackageType errorType)
     {
         Connection c = null;
         try
         {
-            c = DbUtility.getConnection(schemaName);
+            c = DbUtility.getTempConnection(project, schemaName);
             return getErrorDetails(c, packageName, errorType);
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+            return new SQLErrorDetail[]{new SQLErrorDetail(0, 0, e.toString())};
         }
         finally
         {
             if (c != null)
             {
-                DbUtility.free(schemaName, c);
+                DbUtility.free(project, schemaName, c);
             }
         }
     }
@@ -273,21 +440,19 @@ public class LoadPackageManager
      * create/replace the procedure/function of type <code>procType</code> and
      * name <code>procName</code>.
      * 
-     * @param c
-     *            The connection to use to create the error request statement.
+     * @param c The connection to use to create the error request statement.
      * 
-     * @param packageName
-     *            The name of the package or package body that was compiled, but
-     *            caused warnings.
+     * @param packageName The name of the package or package body that was
+     *            compiled, but caused warnings.
      * 
-     * @param errorType
-     *            the type of the errors to look for.
+     * @param errorType the type of the errors to look for.
      * 
      * @return The list of error details concerning the compile problems.
      */
     private SQLErrorDetail[] getErrorDetails(Connection c, String packageName, PackageType errorType)
     {
-        String sql = "select line, position, text from all_errors where upper(name) = upper(?) "
+        // fix for [ 1539302 ] Load to database report errors from other schema
+        String sql = "select line, position, text from user_errors where upper(name) = upper(?) "
                 + " and type = ? order by sequence";
 
         SQLErrorDetail detail = null;
@@ -300,13 +465,13 @@ public class LoadPackageManager
             s.setString(1, packageName.toUpperCase());
             s.setString(2, errorType.toString().toUpperCase().replace('_', ' '));
             rs = s.executeQuery();
-            List<SQLErrorDetail> v = new Vector<SQLErrorDetail>();
+            List v = new Vector();
             while (rs.next())
             {
                 detail = new SQLErrorDetail(rs.getInt(1), rs.getInt(2), rs.getString(3));
                 v.add(detail);
             }
-            toReturn = v.toArray(new SQLErrorDetail[v.size()]);
+            toReturn = (SQLErrorDetail[]) v.toArray(new SQLErrorDetail[v.size()]);
             s.close();
         }
         catch (SQLException e)
@@ -326,13 +491,5 @@ public class LoadPackageManager
     private void setErrors(SQLErrorDetail[] details)
     {
         mySQLErrors = details;
-        // for (int i = 0; i < details.length; i++)
-        // {
-        // SQLErrorDetail detail = details[i];
-        // if (detail.getRow() == 1)
-        // {
-        // detail.getColumn() -= 24;
-        // }
-        // }
     }
 }

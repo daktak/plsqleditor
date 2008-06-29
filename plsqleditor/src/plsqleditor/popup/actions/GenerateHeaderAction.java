@@ -40,7 +40,6 @@ public class GenerateHeaderAction implements IObjectActionDelegate
      */
     public void run(IAction action)
     {
-        System.out.println("In Run");
         if (myWorkBenchPart != null)
         {
             IWorkbenchPartSite site = myWorkBenchPart.getSite();
@@ -62,9 +61,10 @@ public class GenerateHeaderAction implements IObjectActionDelegate
                             if (o instanceof IFile)
                             {
                                 IFile file = (IFile) o;
+                                
                                 try
                                 {
-                                    successBuffer.append(plsqleditor.actions.GenerateHeaderAction.generateHeader(file)).append("\n");
+                                    successBuffer.append(plsqleditor.actions.GenerateHeaderAction.generateHeader(file, myWorkBenchPart.getSite())).append("\n");
                                 }
                                 catch (IOException e)
                                 {

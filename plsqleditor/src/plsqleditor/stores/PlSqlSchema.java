@@ -2,6 +2,7 @@ package plsqleditor.stores;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -19,19 +20,20 @@ import org.eclipse.core.runtime.IPath;
  */
 public class PlSqlSchema
 {
-    private String                    myName;
-    private List<Source>              mySources = new ArrayList<Source>();
-    private Map<String, PlSqlPackage> myPackages;
+    private String myName;
+    private List   mySources = new ArrayList();
+    private Map    myPackages;
 
     public PlSqlSchema(String name, Source source)
     {
-        assert (name != null) : "Name is null";
+        // TODO, put back in for 1.4
+        // assert (name != null) : "Name is null";
         myName = name;
         if (source != null)
         {
             mySources.add(source);
         }
-        myPackages = new HashMap<String, PlSqlPackage>();
+        myPackages = new HashMap();
     }
 
     /**
@@ -39,27 +41,37 @@ public class PlSqlSchema
      * 
      * @return {@link #myPackages}.
      */
-    public Map<String, PlSqlPackage> getPackages()
+    public Map getPackages()
     {
         return myPackages;
     }
 
     public PlSqlPackage getPackage(String name)
     {
-        return myPackages.get(name);
+        return (PlSqlPackage) myPackages.get(name);
     }
 
     public PlSqlPackage addPackage(PlSqlPackage pkg)
     {
-        return myPackages.put(pkg.getName(), pkg);
+        return (PlSqlPackage) myPackages.put(pkg.getName(), pkg);
     }
 
+    public void removePackage(PlSqlPackage pkg)
+    {
+        myPackages.remove(pkg.getName());
+    }
+    
+    public int size()
+    {
+        return myPackages.size();
+    }
+    
     /**
      * This method sets the ...
      * 
      * @param packages The packages to set.
      */
-    public void setPackages(Map<String, PlSqlPackage> packages)
+    public void setPackages(Map packages)
     {
         myPackages = packages;
     }
@@ -72,7 +84,7 @@ public class PlSqlSchema
      */
     public Source[] getSources()
     {
-        return mySources.toArray(new Source[mySources.size()]);
+        return (Source[]) mySources.toArray(new Source[mySources.size()]);
     }
 
 
@@ -87,8 +99,9 @@ public class PlSqlSchema
         {
             mySources.add(source);
             Source toRemove = null;
-            for (Source src : mySources)
+            for (Iterator it = mySources.iterator(); it.hasNext();)
             {
+                Source src = (Source) it.next();
                 IPath path = src.getSource();
                 if (path == null || path.toString().trim().length() == 0)
                 {

@@ -11,15 +11,17 @@ import org.eclipse.jface.text.rules.IWordDetector;
 public class PlSqlWordDetector
     implements IWordDetector
 {
-
-    public PlSqlWordDetector()
+    private boolean myIsDotAWordPart = false;
+    
+    public PlSqlWordDetector(boolean isDotAWordPart)
     {
-        // do nothing
+        myIsDotAWordPart = isDotAWordPart;
     }
 
     public boolean isWordPart(char character)
     {
-        return Character.isJavaIdentifierPart(character);
+        // fix for 1439880 - Keywords as functions/procedures
+        return character == '.' ? myIsDotAWordPart : Character.isJavaIdentifierPart(character);
     }
 
     public boolean isWordStart(char character)
