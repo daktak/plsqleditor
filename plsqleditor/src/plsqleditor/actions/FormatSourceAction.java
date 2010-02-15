@@ -32,7 +32,7 @@ public class FormatSourceAction extends SelectedTextAction
         List segments = null;
         try
         {
-            segments = theBodyParser.parseBodyFile(doc, packageName, new SegmentType[0]);
+            segments = theBodyParser.parseFile(doc, packageName, new SegmentType[0]);
             for (Iterator it = segments.iterator(); it.hasNext();)
             {
                 Segment seg = (Segment) it.next();

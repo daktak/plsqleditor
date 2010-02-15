@@ -71,4 +71,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.core.resources,
  org.junit
-Eclipse-AutoStart: true
+Eclipse-LazyStart: true

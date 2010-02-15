@@ -46,7 +46,7 @@ public class PackageBodyParser extends AbstractPlSqlParser
     }
 
 
-    protected int parseBody(final int currentLineOffset,
+    public int parseBody(final int currentLineOffset,
                             IDocument document,
                             BufferedReader file,
                             List segments,

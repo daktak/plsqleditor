@@ -24,7 +24,7 @@ public class PlSqlParserManager
     private PackageHeaderParser        myPackageHeaderParser        = new PackageHeaderParser();
     private PackageBodyParser          myPackageBodyParser          = new PackageBodyParser();
     private PackageHeaderAndBodyParser myPackageHeaderAndBodyParser = new PackageHeaderAndBodyParser();
-    private AbstractPlSqlParser        mySqlScriptParser            = myPackageHeaderParser;
+    private PlSqlParser                mySqlScriptParser            = new FullGrammarParser();
 
     private Comparator                 thePositionComparator        = new Comparator()
                                                                     {
@@ -101,7 +101,7 @@ public class PlSqlParserManager
         return theInstance;
     }
 
-    public AbstractPlSqlParser getParser(ParseType type) throws IOException
+    public PlSqlParser getParser(ParseType type) throws IOException
     {
         if (type == ParseType.Package_Body)
         {
@@ -355,7 +355,7 @@ public class PlSqlParserManager
             SegmentType type = foundSegment.getType();
             if (type == SegmentType.Field)
             {
-                foundSegment = (Segment) foundSegment.getParent();
+                foundSegment = foundSegment.getParent();
             }
         }
         return foundSegment;

@@ -69,7 +69,7 @@ public class PackageHeaderParser extends AbstractPlSqlParser
      * 
      * @param packageSegment The segment holding the name of the package.
      */
-    protected int parseBody(int currentLineOffset,
+    public int parseBody(int currentLineOffset,
                             IDocument document,
                             BufferedReader file,
                             List segments,

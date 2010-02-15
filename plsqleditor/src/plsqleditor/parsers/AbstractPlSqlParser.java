@@ -25,7 +25,7 @@ import au.com.zinescom.util.UsefulOperations;
  * 
  * Created on 26/02/2005
  */
-public abstract class AbstractPlSqlParser
+public abstract class AbstractPlSqlParser implements PlSqlParser
 {
     public static final String     FUNCTION            = "[Ff][Uu][Nn][Cc][Tt][Ii][Oo][Nn]";
     public static final String     PROCEDURE           = "[Pp][Rr][Oo][Cc][Ee][Dd][Uu][Rr][Ee]";
@@ -423,31 +423,6 @@ public abstract class AbstractPlSqlParser
      * correct starting point for parsing.
      */
     protected abstract String getStartOfFilePrefix();
-
-    /**
-     * This method parses the body of the file in question.
-     * 
-     * @param currentLineOffset The current line we are parsing.
-     * 
-     * @param document The document we are parsing (from line
-     *            <code>currentLineOffset</code>). This is only used to
-     *            determine context sensitive offset details. The actual input
-     *            is parsed off the supplied <code>file</code>.
-     * 
-     * @param file The file from which we are actually parsing the data.
-     * 
-     * @param segments The list of segments to add to when segments are parsed
-     *            from the <code>file</code>.
-     * 
-     * @param packageSegment The segment representing the package that this file
-     *            is creating.
-     */
-    protected abstract int parseBody(int currentLineOffset,
-                                     IDocument document,
-                                     BufferedReader file,
-                                     List segments,
-                                     Segment packageSegment) throws IOException,
-            BadLocationException;
 
     /**
      * This method indicates whether a <code>line</code> contains a comment
@@ -967,7 +942,7 @@ public abstract class AbstractPlSqlParser
         return null;
     }
 
-    public List parseBodyFile(IDocument document, String[] packageName, SegmentType[] filters)
+    public List parseFile(IDocument document, String[] packageName, SegmentType[] filters)
             throws IOException
     {
         String wholeText = document.get();

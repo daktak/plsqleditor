@@ -13,5 +13,8 @@
 	<classpathentry kind="lib" path="/Libraries/jwsdp-1.5/jaxb/lib/jaxb-api.jar"/>
 	<classpathentry kind="lib" path="/Libraries/jwsdp-1.5/jaxb/lib/jaxb-impl.jar"/>
 	<classpathentry kind="lib" path="/Libraries/jwsdp-1.5/jaxb/lib/jaxb-libs.jar"/>
+	<classpathentry kind="lib" path="/plsql_code_checker/thirdparty/antlr-3.0.1.jar"/>
+	<classpathentry kind="lib" path="/plsql_code_checker/thirdparty/antlr-runtime-3.0.1.jar"/>
+	<classpathentry kind="lib" path="/plsql_code_checker/dist/CodeChecker/CodeChecker.jar" sourcepath="/plsql_code_checker"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -25,11 +25,11 @@ public class Segment implements Comparable, Cloneable
     private static final String PRAGMA    = AbstractPlSqlParser.PRAGMA;
     private static final String TYPE      = "[Tt][Yy][Pp][Ee]";
 
-    protected List        myParameterList   = new ArrayList();
-    protected List        myFieldList       = new ArrayList();
-    protected String      myName;
-    protected Position    myPosition;
-    protected Position    myLastPosition;
+    protected List<Parameter>     myParameterList   = new ArrayList<Parameter>();
+    protected List              myFieldList       = new ArrayList();
+    protected String            myName;
+    protected Position          myPosition;
+    protected Position          myLastPosition;
     
     protected SegmentType myType;
     
@@ -176,7 +176,7 @@ public class Segment implements Comparable, Cloneable
         }
 
         /**
-         * This method
+         * This method identifies whether the Segment is showing the in/out indicator.
          * 
          * @return whether or not to show the in out type.
          */
@@ -186,7 +186,7 @@ public class Segment implements Comparable, Cloneable
         }
 
         /**
-         * This method
+         * This method identifies whether the Segment is showing the parameter types. 
          * 
          * @return whether or not to show the parameter types.
          */
@@ -319,13 +319,13 @@ public class Segment implements Comparable, Cloneable
      * @return The parameter list (as {@link Segment}s) in the format
      *         (p1,p2,p3).
      */
-    public List getParameterList()
+    public List<Segment> getParameterList()
     {
-        List toReturn = new ArrayList();
+        List<Segment> toReturn = new ArrayList<Segment>();
 
-        for (Iterator it = myParameterList.iterator(); it.hasNext();)
+        for (Iterator<Parameter> it = myParameterList.iterator(); it.hasNext();)
         {
-            Parameter p = (Parameter) it.next();
+            Parameter p = it.next();
             Position pos = getPosition();
             Segment s = new Segment(p.myParameter, pos);
             s.myPosition = new Position(p.myOffset);
@@ -815,9 +815,9 @@ public class Segment implements Comparable, Cloneable
         return getType() + " " + getPresentationName(true, true, true);
     }
 
-    public List getContainedSegments()
+    public List<Segment> getContainedSegments()
     {
-        List containedSegments = getParameterList();
+        List<Segment> containedSegments = getParameterList();
         containedSegments.addAll(myFieldList);
         return containedSegments;
     }

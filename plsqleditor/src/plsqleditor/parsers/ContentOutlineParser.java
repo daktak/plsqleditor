@@ -34,7 +34,7 @@ public class ContentOutlineParser
                           String[] packageName,
                           SegmentType[] toIgnore) throws IOException
     {
-        return PlSqlParserManager.instance().getParser(type).parseBodyFile(document, packageName, toIgnore);
+        return PlSqlParserManager.instance().getParser(type).parseFile(document, packageName, toIgnore);
     }
 
     public List parseFile(ParseType type,
