@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import plsqleditor.PlsqleditorPlugin;
+import plsqleditor.db.DbUtility.ConnectionContainer;
 import plsqleditor.parsers.PackageSegment;
 import plsqleditor.parsers.Segment;
 import plsqleditor.parsers.SegmentType;
@@ -40,16 +42,49 @@ import sun.misc.Perf;
  * 
  * @version $Id$
  * 
- * Created on 2/03/2005
+ *          Created on 2/03/2005
  */
 public class LoadPackageManager
 {
-    private SQLErrorDetail[]          mySQLErrors = new SQLErrorDetail[0];
-    private static LoadPackageManager theInstance;
-    private Map                       myResultSetWrapperMap;
-    private static final Perf         myClock     = Perf.getPerf();
-    private long                      myFrequency;
+    private SQLErrorDetail[]              mySQLErrors                   = new SQLErrorDetail[0];
+    private static LoadPackageManager     theInstance;
+    private Map<String, ResultSetWrapper> myResultSetWrapperMap;
+    private static final Perf             myClock                       = Perf.getPerf();
+    private long                          myFrequency;
+    private Map<String, ConnectionHolder> myFileToSpecificConnectionMap = new HashMap<String, ConnectionHolder>();
 
+    class ConnectionHolder extends Object
+    {
+        private ConnectionContainer myConnection;
+        ConnectionDetails   myDetails;
+        private ResultSetWrapper    myRSW;
+
+        ConnectionHolder(ConnectionDetails details)
+        {
+            myDetails = details;
+        }
+
+        ConnectionContainer getConnection(IFile file) throws SQLException
+        {
+            if (myConnection == null)
+            {
+                myConnection = DbUtility.getFixedConnection(file, myDetails);
+            }
+            return myConnection;
+        }
+
+        public ResultSetWrapper getResultSetWrapper()
+        {
+            return myRSW;
+        }
+
+        public void setResultSetWrapper(ResultSetWrapper rsw)
+        {
+            myRSW = rsw;
+        }
+
+        // TODO need to clear connection
+    }
 
     /**
      * This constructor creates the LoadPackageManager, instantiating the map of
@@ -90,7 +125,7 @@ public class LoadPackageManager
      *         loaded code.
      */
     public synchronized SQLErrorDetail[] execute(IFile file,
-    		                                     IProject project,
+                                                 IProject project,
                                                  String schema,
                                                  String packageName,
                                                  String toLoad,
@@ -124,60 +159,74 @@ public class LoadPackageManager
         }
         else
         {
-        	if (type == PackageType.Package_Header_And_Body)
-        	{
-        		// split the file into two
-        		IDocument document = PackageStore.getDoc(file);
-        		List segments = plugin.getSegments(file, document, true);
-        		
-        		//getSegments(schema,packageName);
+            if (type == PackageType.Package_Header_And_Body)
+            {
+                // split the file into two
+                IDocument document = PackageStore.getDoc(file);
+                List segments = plugin.getSegments(file, document, true);
+
+                // getSegments(schema,packageName);
                 SortedSet sortedSegments = new TreeSet();
                 sortedSegments.addAll(segments);
-        		
-        		for (Iterator it = sortedSegments.iterator(); it.hasNext();)
+
+                for (Iterator it = sortedSegments.iterator(); it.hasNext();)
                 {
                     Segment segment = (Segment) it.next();
                     int lastPosition = 0;
                     if (segment instanceof PackageSegment)
                     {
-                    	if (segment.getType() == SegmentType.Package_Body)
-                    	{
-                    		lastPosition = segment.getPosition().offset;
-                    		int packageBodyStartingLine = 0;
-                    		try 
-                    		{
-								packageBodyStartingLine = document.getLineOfOffset(lastPosition);
-							} 
-                    		catch (BadLocationException e) 
-                    		{
-								e.printStackTrace(); // should not happen
-							}
-	                        String packageHeader = toLoad.substring(0, lastPosition);
-	                        packageHeader = modifyCodeToLoad(packageHeader, packageName);
-	                        String packageBody = toLoad.substring(lastPosition);
-	                        packageBody = modifyCodeToLoad(packageBody, packageName);
-	                        details = loadSinglePieceOfCode(project, schema, packageName, packageHeader, PackageType.Package);
-	                        SQLErrorDetail [] details2 = loadSinglePieceOfCode(project, schema, packageName, packageBody, PackageType.Package_Body);
-	                        SQLErrorDetail []  newDetails = new SQLErrorDetail[details.length + details2.length];
-	                        System.arraycopy(details,0,newDetails,0,details.length);
-	                        for (int i = 0, j = details.length; j < newDetails.length; i++, j++) 
-	                        {
-	                        	SQLErrorDetail oldDetails2 = details2[i];
-								newDetails[j] = new SQLErrorDetail(oldDetails2.getRow() + packageBodyStartingLine, oldDetails2.getColumn(), oldDetails2.getText());
-							}
-	                        //System.arraycopy(details2,0,newDetails,details.length,details2.length);
-	                        return newDetails;
-                    	}
+                        if (segment.getType() == SegmentType.Package_Body)
+                        {
+                            lastPosition = segment.getPosition().offset;
+                            int packageBodyStartingLine = 0;
+                            try
+                            {
+                                packageBodyStartingLine = document.getLineOfOffset(lastPosition);
+                            }
+                            catch (BadLocationException e)
+                            {
+                                e.printStackTrace(); // should not happen
+                            }
+                            String packageHeader = toLoad.substring(0, lastPosition);
+                            packageHeader = modifyCodeToLoad(packageHeader, packageName);
+                            String packageBody = toLoad.substring(lastPosition);
+                            packageBody = modifyCodeToLoad(packageBody, packageName);
+                            details = loadSinglePieceOfCode(file,
+                                                            project,
+                                                            schema,
+                                                            packageName,
+                                                            packageHeader,
+                                                            PackageType.Package);
+                            SQLErrorDetail[] details2 = loadSinglePieceOfCode(file,
+                                                                              project,
+                                                                              schema,
+                                                                              packageName,
+                                                                              packageBody,
+                                                                              PackageType.Package_Body);
+                            SQLErrorDetail[] newDetails = new SQLErrorDetail[details.length
+                                    + details2.length];
+                            System.arraycopy(details, 0, newDetails, 0, details.length);
+                            for (int i = 0, j = details.length; j < newDetails.length; i++, j++)
+                            {
+                                SQLErrorDetail oldDetails2 = details2[i];
+                                newDetails[j] = new SQLErrorDetail(oldDetails2.getRow()
+                                        + packageBodyStartingLine, oldDetails2.getColumn(),
+                                        oldDetails2.getText());
+                            }
+                            // System.arraycopy(details2,0,newDetails,details.length,details2.length);
+                            return newDetails;
+                        }
                     }
                 }
-                final String msg = "Failed to execute package header and body together for " + packageName;
+                final String msg = "Failed to execute package header and body together for "
+                        + packageName;
                 return new SQLErrorDetail[]{new SQLErrorDetail(0, 0, msg)};
-        	}
-        	else
-        	{
-	            toLoad = modifyCodeToLoad(toLoad, packageName);
-	            details = loadSinglePieceOfCode(project, schema, packageName, toLoad, type);
-        	}
+            }
+            else
+            {
+                toLoad = modifyCodeToLoad(toLoad, packageName);
+                details = loadSinglePieceOfCode(file, project, schema, packageName, toLoad, type);
+            }
         }
 
         return details;
@@ -203,10 +252,16 @@ public class LoadPackageManager
     }
 
     /**
-     * This method executes a single piece of code in the database, and commits
-     * it (via auto commit on close functionality) before closing the
-     * connection, and freeing it back to the connection pool. This is always
-     * executed by jdbc.
+     * This method executes a single piece of code in the database. If the file
+     * does not have a specific connection open against it, this function will
+     * then commits the loaded code (via auto commit on close functionality)
+     * before closing the connection, and freeing it back to the connection
+     * pool. This is always executed by jdbc. If the file has a specific
+     * connection against it, that connection is chosen and no commit is
+     * executed.
+     * 
+     * @param file The file that is being executed on. This is required in case
+     *            there is a specific connection set against the file.
      * 
      * @param schemaName The schema against which to retrieve a connection.
      * 
@@ -222,29 +277,51 @@ public class LoadPackageManager
      *         retrieve the connection, or the resulting compile errors from the
      *         loaded code.
      */
-    private synchronized SQLErrorDetail[] loadSinglePieceOfCode(IProject project,
+    private synchronized SQLErrorDetail[] loadSinglePieceOfCode(IFile file,
+                                                                IProject project,
                                                                 String schemaName,
                                                                 String packageName,
                                                                 String toLoad,
                                                                 PackageType type)
     {
         Connection c = null;
-        try
+        String fullFilename = file.getFullPath().toString();
+        if (myFileToSpecificConnectionMap.containsKey(fullFilename))
         {
-            c = DbUtility.getTempConnection(project, schemaName);
-            return loadCode(c, packageName, toLoad, type);
-        }
-        catch (SQLException e)
-        {
-            final String msg = "Failed to retrieve connection for schema " + schemaName
-                    + " package " + packageName + " and type " + type + " : " + e.getMessage();
-            return new SQLErrorDetail[]{new SQLErrorDetail(0, 0, msg)};
-        }
-        finally
-        {
-            if (c != null)
+            ConnectionHolder ch = myFileToSpecificConnectionMap.get(fullFilename);
+            try
             {
-                DbUtility.free(project, schemaName, c);
+                c = ch.getConnection(file).connection;
+                // TODO check whether there was an update
+                return loadCode(c, packageName, toLoad, type);
+            }
+            catch (SQLException e)
+            {
+                e.printStackTrace();
+                final String msg = "Failed to retrieve connection for file " + fullFilename
+                        + " with type " + type + " : " + e.getMessage();
+                return new SQLErrorDetail[]{new SQLErrorDetail(0, 0, msg)};
+            }
+        }
+        else
+        {
+            try
+            {
+                c = DbUtility.getTempConnection(project, schemaName);
+                return loadCode(c, packageName, toLoad, type);
+            }
+            catch (SQLException e)
+            {
+                final String msg = "Failed to retrieve connection for schema " + schemaName
+                        + " package " + packageName + " and type " + type + " : " + e.getMessage();
+                return new SQLErrorDetail[]{new SQLErrorDetail(0, 0, msg)};
+            }
+            finally
+            {
+                if (c != null)
+                {
+                    DbUtility.free(project, schemaName, c);
+                }
             }
         }
     }
@@ -295,14 +372,20 @@ public class LoadPackageManager
     }
 
     /**
-     * This method loads the supplied piece of code <code>toLoad</code> into
-     * the database using a connection based on the supplied
-     * <code>schemaName</code>. The connection is left unfreed until the
-     * caller closes the returned result set wrapper. However, a subsequent call
-     * to this method will close any previous result set for the given
-     * <code>schemaName</code>. If there is no result set resulting from the
-     * execution, the connection is freed.
+     * This method loads the supplied piece of code <code>toLoad</code> into the
+     * database using a connection based on the supplied <code>schemaName</code>
+     * unless there is a specific connection set for the given file. In this
+     * case that is used, and the connection remains open. The connection is
+     * left unfreed until the caller closes the returned result set wrapper.
+     * However, a subsequent call to this method will close any previous result
+     * set for the given <code>schemaName</code> (or file). If there is no
+     * result set resulting from the execution, the connection is freed.
      * 
+     * @param file The file that contains the code to load. If this file has a
+     *            specific connection against it, that connection will be used
+     *            instead of the default schema connection, and it will not be
+     *            autoclosed. Instead, the connection will remain as an open
+     *            session.
      * @param schemaName The name of the schema in which to execute the code
      *            <code>toLoad</code>.
      * 
@@ -314,10 +397,26 @@ public class LoadPackageManager
      * 
      * @throws SQLException when the executed code fails for some reason.
      */
-    public synchronized ResultSetWrapper loadCode(IProject project, String schemaName, String toLoad)
-            throws SQLException
+    public synchronized ResultSetWrapper loadCode(IFile file,
+                                                  IProject project,
+                                                  String schemaName,
+                                                  String toLoad) throws SQLException
     {
-        ResultSetWrapper oldRw = (ResultSetWrapper) myResultSetWrapperMap.get(schemaName);
+        String fullFilename = file.getFullPath().toString();
+        if (myFileToSpecificConnectionMap.containsKey(fullFilename))
+        {
+            ConnectionHolder ch = myFileToSpecificConnectionMap.get(fullFilename);
+            ConnectionContainer cc = ch.getConnection(file);
+            ResultSetWrapper oldRw = ch.getResultSetWrapper();
+            if (oldRw != null)
+            {
+                oldRw.close();
+                ch.setResultSetWrapper(null);
+            }
+            return DbUtility.loadCode(cc, toLoad);
+        }
+
+        ResultSetWrapper oldRw = myResultSetWrapperMap.get(schemaName);
         if (oldRw != null)
         {
             oldRw.close();
@@ -350,10 +449,10 @@ public class LoadPackageManager
 
     /**
      * This method returns the result set wrapper that is currently stored
-     * against the supplied <code>schemaName</code>. This represents the
-     * output of the last piece of code executed in the database against that
-     * schema. This may be null if there have been no pieces of code executed
-     * against this schema, or the last execution had no result.
+     * against the supplied <code>schemaName</code>. This represents the output
+     * of the last piece of code executed in the database against that schema.
+     * This may be null if there have been no pieces of code executed against
+     * this schema, or the last execution had no result.
      * 
      * @param schemaName The name of the schema whose last result set is sought.
      * 
@@ -362,7 +461,7 @@ public class LoadPackageManager
      */
     public ResultSetWrapper getResultSetWrapper(String schemaName)
     {
-        return (ResultSetWrapper) myResultSetWrapperMap.get(schemaName);
+        return myResultSetWrapperMap.get(schemaName);
     }
 
     /**
@@ -465,13 +564,13 @@ public class LoadPackageManager
             s.setString(1, packageName.toUpperCase());
             s.setString(2, errorType.toString().toUpperCase().replace('_', ' '));
             rs = s.executeQuery();
-            List v = new Vector();
+            List<SQLErrorDetail> v = new Vector<SQLErrorDetail>();
             while (rs.next())
             {
                 detail = new SQLErrorDetail(rs.getInt(1), rs.getInt(2), rs.getString(3));
                 v.add(detail);
             }
-            toReturn = (SQLErrorDetail[]) v.toArray(new SQLErrorDetail[v.size()]);
+            toReturn = v.toArray(new SQLErrorDetail[v.size()]);
             s.close();
         }
         catch (SQLException e)
@@ -491,5 +590,57 @@ public class LoadPackageManager
     private void setErrors(SQLErrorDetail[] details)
     {
         mySQLErrors = details;
+    }
+
+    public void removeFixedConnection(IFile file)
+    {
+        String fullFileName = file.getFullPath().toString();
+        myFileToSpecificConnectionMap.remove(fullFileName);
+        DbUtility.removeFixedConnection(file);
+    }
+
+    public void removeFixedConnection(String fullFilename)
+    {
+        myFileToSpecificConnectionMap.remove(fullFilename);
+        DbUtility.removeFixedConnection(fullFilename);
+    }
+
+    public void setFixedConnection(IFile file, ConnectionDetails details)
+    {
+        String fullFileName = file.getFullPath().toString();
+        ConnectionHolder ch = new ConnectionHolder(details);
+        myFileToSpecificConnectionMap.remove(fullFileName);
+        DbUtility.removeFixedConnection(file);
+        myFileToSpecificConnectionMap.put(fullFileName, ch);
+    }
+
+    public String[] getFilesForConnection(ConnectionDetails cd)
+    {
+        List <String> files = new ArrayList<String>();
+        
+        for (String key : myFileToSpecificConnectionMap.keySet())
+        {
+            ConnectionDetails cd_i = myFileToSpecificConnectionMap.get(key).myDetails;
+            if (cd_i.equals(cd))
+            {
+                files.add(key);
+            }
+        }
+        if (files.size() > 0)
+        {
+            return files.toArray(new String[files.size()]);
+        }
+        return null;
+    }
+
+    public Map<String,ConnectionDetails> getAllSpecificConnections()
+    {
+        Map<String,ConnectionDetails> toReturn = new HashMap<String,ConnectionDetails>();
+        
+        for (String fullFilename : myFileToSpecificConnectionMap.keySet())
+        {
+            toReturn.put(fullFilename,myFileToSpecificConnectionMap.get(fullFilename).myDetails);
+        }
+        return toReturn;
     }
 }

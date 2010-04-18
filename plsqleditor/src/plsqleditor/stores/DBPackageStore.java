@@ -367,7 +367,7 @@ public class DBPackageStore
 
     /**
      * This method returns the list of currently known schema names. The first time it is called, it will look the
-     * schema names up in the database. On subsequenet calls, it will only check for new scemas. Note that dropped
+     * schema names up in the database. On subsequent calls, it will only check for new scemas. Note that dropped
      * schemas will never be removed from the cache for now.
      * 
      * @param forceUpdate Pass true if you want to force a refresh of all schemas. This will cause all packages for all
@@ -378,10 +378,10 @@ public class DBPackageStore
      * @return The list of currently known schema names.
      * @throws SQLException
      */
-    public SortedSet getSchemas(boolean forceUpdate, boolean updateList, int refreshSeconds) throws SQLException
+    public SortedSet<String> getSchemas(boolean forceUpdate, boolean updateList, int refreshSeconds) throws SQLException
     {
-        SortedSet schemaList = new TreeSet();
-        SortedSet newSchemaList = new TreeSet();
+        SortedSet<String> schemaList = new TreeSet<String>();
+        SortedSet<String> newSchemaList = new TreeSet<String>();
         String allSchemasSql = "SELECT username " + "FROM all_users u " + "WHERE EXISTS (SELECT p.procedure_name "
                 + "              FROM all_procedures p " + "              WHERE p.owner = u.username)";
         String newSchemasSql = "SELECT username " + "FROM all_users u " + "WHERE u.created >= ? "
@@ -421,7 +421,7 @@ public class DBPackageStore
     /**
      * @see #getSchemas(boolean, boolean, int)
      */
-    public SortedSet getSchemas() throws SQLException
+    public SortedSet<String> getSchemas() throws SQLException
     {
         return getSchemas(false, true, 10);
     }

@@ -8,10 +8,10 @@ import org.eclipse.core.resources.IMarker;
 public class TaskListIdentityStore
 {
     private static TaskListIdentityStore theInstance;
-    private Map myTodoMarkers;
+    private Map<String,Integer> myTodoMarkers;
     private TaskListIdentityStore()
     {
-        myTodoMarkers = new HashMap();
+        myTodoMarkers = new HashMap<String,Integer>();
         myTodoMarkers.put("TODO", new Integer(IMarker.PRIORITY_NORMAL));
         myTodoMarkers.put("FIXME", new Integer(IMarker.PRIORITY_HIGH));
     }
@@ -25,7 +25,7 @@ public class TaskListIdentityStore
         return theInstance;
     }
 
-    public Map getMarkers()
+    public Map<String,Integer> getMarkers()
     {
         return myTodoMarkers;
     }

@@ -8,8 +8,8 @@
             name="PL-SQL Editor"
             extensions="pkb,sql,pks,prc,pkh,pkdb,pkg"
             icon="icons/at_no_alpha.png"
-            contributorClass="plsqleditor.editors.PlSqlActionContributor"
-            class="plsqleditor.editors.PlSqlEditor"
+            contributorClass="plsqleditor.editors.MultiPagePlsqlEditorContributor"
+            class="plsqleditor.editors.MultiPagePlsqlEditor"
             id="plsqleditor.editors.PlSqlEditor">
       </editor>
    </extension>
@@ -259,7 +259,7 @@
                definitionId="plsql.file.lookup"
                icon="icons/srch.gif"
                id="plsqleditor.actions.LookupFileAction"
-               label="&amp;Lookup File Action"
+               label="&amp;Lookup File"
                menubarPath="plSqlMenu/plsqlGroup"
                style="push"
                toolbarPath="plsqlGroup"
@@ -321,6 +321,17 @@
                style="push"
                toolbarPath="plsqlGroup"
                tooltip="Rollback the current schema (visible in the debug info)"/>
+         <action
+               class="plsqleditor.actions.ManageLiveConnectionsAction"
+               definitionId="plsql.db.manageLiveConnections"
+               icon="icons/manageConnections.gif"
+               id="plsqleditor.actions.ManageLiveConnectionsAction"
+               label="&amp;Manage Live Connections"
+               menubarPath="plSqlMenu/plsqlGroup"
+               style="push"
+               toolbarPath="plsqlGroup"
+               tooltip="Allows you to manage the open DB Connections">
+         </action>
       </actionSet>
    </extension>
    <extension
@@ -354,6 +365,19 @@
             id="plsqleditor.views.DbmsOutputView"
             name="Dbms Output"/>
    </extension>
+   <extension
+      point="org.eclipse.compare.contentMergeViewers">
+      <viewer
+            extensions="pkb,sql,pks,prc,pkh,pkdb,pkg"
+            class="plsqleditor.compare.PlsqlContentViewerCreator"
+            id="org.eclipse.jdt.internal.ui.compare.PlsqlContentViewerCreator">
+      </viewer>
+      <contentTypeBinding
+            contentTypeId="org.eclipse.jdt.core.plsqlSource"
+            contentMergeViewerId="org.eclipse.jdt.internal.ui.compare.PlsqlContentViewerCreator">
+	  </contentTypeBinding>
+   </extension>
+   
    <extension
          point="org.eclipse.ui.perspectiveExtensions">
       <perspectiveExtension targetID="plsqleditor.perspective">
@@ -468,5 +492,4 @@
             nameFilter="*"
             objectClass="org.eclipse.core.resources.IProject"/>
    </extension>
-
 </plugin>

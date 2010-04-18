@@ -31,6 +31,7 @@ public class PlSqlPreferencePage extends FieldEditorPreferencePage implements IW
     public void createFieldEditors()
     {
         addField(new IntegerFieldEditor(PreferenceConstants.P_EDITOR_TAB_WIDTH, "Tab Width", getFieldEditorParent()));
+        addField(new StringFieldEditor(PreferenceConstants.P_SCHEMA_PACKAGE_DELIMITER, "Schema to Package Delimiter", getFieldEditorParent()));
         addField(new BooleanFieldEditor(PreferenceConstants.P_IS_SHOWING_PARAMETER_LIST,
                 "Show Parameter &List in Outline", getFieldEditorParent()));
         addField(new BooleanFieldEditor(PreferenceConstants.P_IS_SHOWING_PARAMETER_NAME,

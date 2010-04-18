@@ -21,19 +21,18 @@ import org.eclipse.core.runtime.IPath;
 public class PlSqlSchema
 {
     private String myName;
-    private List   mySources = new ArrayList();
-    private Map    myPackages;
+    private List<Source>   mySources = new ArrayList<Source>();
+    private Map<String,PlSqlPackage>    myPackages;
 
     public PlSqlSchema(String name, Source source)
     {
-        // TODO, put back in for 1.4
-        // assert (name != null) : "Name is null";
+        assert (name != null) : "Name is null";
         myName = name;
         if (source != null)
         {
             mySources.add(source);
         }
-        myPackages = new HashMap();
+        myPackages = new HashMap<String,PlSqlPackage>();
     }
 
     /**
@@ -41,19 +40,19 @@ public class PlSqlSchema
      * 
      * @return {@link #myPackages}.
      */
-    public Map getPackages()
+    public Map<String,PlSqlPackage> getPackages()
     {
         return myPackages;
     }
 
     public PlSqlPackage getPackage(String name)
     {
-        return (PlSqlPackage) myPackages.get(name);
+        return myPackages.get(name);
     }
 
     public PlSqlPackage addPackage(PlSqlPackage pkg)
     {
-        return (PlSqlPackage) myPackages.put(pkg.getName(), pkg);
+        return myPackages.put(pkg.getName(), pkg);
     }
 
     public void removePackage(PlSqlPackage pkg)
@@ -71,7 +70,7 @@ public class PlSqlSchema
      * 
      * @param packages The packages to set.
      */
-    public void setPackages(Map packages)
+    public void setPackages(Map<String,PlSqlPackage> packages)
     {
         myPackages = packages;
     }
@@ -84,7 +83,7 @@ public class PlSqlSchema
      */
     public Source[] getSources()
     {
-        return (Source[]) mySources.toArray(new Source[mySources.size()]);
+        return mySources.toArray(new Source[mySources.size()]);
     }
 
 
@@ -99,9 +98,9 @@ public class PlSqlSchema
         {
             mySources.add(source);
             Source toRemove = null;
-            for (Iterator it = mySources.iterator(); it.hasNext();)
+            for (Iterator<Source> it = mySources.iterator(); it.hasNext();)
             {
-                Source src = (Source) it.next();
+                Source src = it.next();
                 IPath path = src.getSource();
                 if (path == null || path.toString().trim().length() == 0)
                 {

@@ -2,7 +2,6 @@ package plsqleditor.editors;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -49,6 +48,7 @@ import plsqleditor.actions.FormatSourceAction;
 import plsqleditor.actions.GenerateHeaderAction;
 import plsqleditor.actions.LoadToDatabaseAction;
 import plsqleditor.actions.LowerCaseAction;
+import plsqleditor.actions.ManageConnectionDetailsAction;
 import plsqleditor.actions.RefreshErrorStatusAction;
 import plsqleditor.actions.ShowDebugInfoAction;
 import plsqleditor.actions.UpperCaseAction;
@@ -57,54 +57,58 @@ import plsqleditor.views.schema.SchemaBrowserContentProvider;
 
 public class PlSqlEditor extends TextEditor
 {
-    private static final String       PLSQLEDITOR_LOADTODATABASE_DEF_ID       = "plsqleditor.loadToDatabase";
-    private static final String       PLSQLEDITOR_LOADTODATABASE_ID           = PLSQLEDITOR_LOADTODATABASE_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_REFRESH_ERROR_STATUS_DEF_ID = "plsqleditor.refreshErrorStatus";
-    private static final String       PLSQLEDITOR_REFRESH_ERROR_STATUS_ID     = PLSQLEDITOR_REFRESH_ERROR_STATUS_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_GENERATEHEADER_DEF_ID       = "plsqleditor.generateHeader";
-    private static final String       PLSQLEDITOR_GENERATEHEADER_ID           = PLSQLEDITOR_GENERATEHEADER_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_EXECUTE_SQL_DEF_ID          = "plsql.file.executeSql";
-    private static final String       PLSQLEDITOR_EXECUTE_SQL_ID              = PLSQLEDITOR_EXECUTE_SQL_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_LOWERCASE_DEF_ID            = "plsqleditor.lowerCase";
-    private static final String       PLSQLEDITOR_LOWERCASE_ID                = PLSQLEDITOR_LOWERCASE_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_UPPERCASE_DEF_ID            = "plsqleditor.upperCase";
-    private static final String       PLSQLEDITOR_UPPERCASE_ID                = PLSQLEDITOR_UPPERCASE_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_SHOWDEBUG_DEF_ID            = "plsqleditor.showDebugInfo";
-    private static final String       PLSQLEDITOR_SHOWDEBUG_ID                = PLSQLEDITOR_SHOWDEBUG_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_COMMIT_DEF_ID               = "plsql.db.commit";
-    private static final String       PLSQLEDITOR_COMMIT_ID                   = PLSQLEDITOR_COMMIT_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_ROLLBACK_DEF_ID             = "plsql.db.rollback";
-    private static final String       PLSQLEDITOR_ROLLBACK_ID                 = PLSQLEDITOR_ROLLBACK_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_COMMENT_DEF_ID              = "plsqleditor.commentblock";
-    private static final String       PLSQLEDITOR_COMMENT_ID                  = PLSQLEDITOR_COMMENT_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_UNCOMMENT_DEF_ID            = "plsqleditor.uncommentblock";
-    private static final String       PLSQLEDITOR_UNCOMMENT_ID                = PLSQLEDITOR_UNCOMMENT_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_FORMAT_DEF_ID               = "plsqleditor.formatSource";
-    private static final String       PLSQLEDITOR_FORMAT_ID                   = PLSQLEDITOR_FORMAT_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_GENERATE_PLDOC_DEF_ID       = "plsqleditor.generatePlDoc";
-    private static final String       PLSQLEDITOR_GENERATE_PLDOC_ID           = PLSQLEDITOR_GENERATE_PLDOC_DEF_ID
-                                                                                      + ".action";
-    private static final String       PLSQLEDITOR_CHANGE_SCHEMA_DEF_ID        = "plsqleditor.changeSchemaForPackage";
-    private static final String       PLSQLEDITOR_CHANGE_SCHEMA_ID            = PLSQLEDITOR_CHANGE_SCHEMA_DEF_ID
-                                                                                      + ".action";
+    private static final String       PLSQLEDITOR_LOADTODATABASE_DEF_ID            = "plsqleditor.loadToDatabase";
+    private static final String       PLSQLEDITOR_LOADTODATABASE_ID                = PLSQLEDITOR_LOADTODATABASE_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_REFRESH_ERROR_STATUS_DEF_ID      = "plsqleditor.refreshErrorStatus";
+    private static final String       PLSQLEDITOR_REFRESH_ERROR_STATUS_ID          = PLSQLEDITOR_REFRESH_ERROR_STATUS_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_GENERATEHEADER_DEF_ID            = "plsqleditor.generateHeader";
+    private static final String       PLSQLEDITOR_GENERATEHEADER_ID                = PLSQLEDITOR_GENERATEHEADER_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_EXECUTE_SQL_DEF_ID               = "plsql.file.executeSql";
+    private static final String       PLSQLEDITOR_EXECUTE_SQL_ID                   = PLSQLEDITOR_EXECUTE_SQL_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_LOWERCASE_DEF_ID                 = "plsqleditor.lowerCase";
+    private static final String       PLSQLEDITOR_LOWERCASE_ID                     = PLSQLEDITOR_LOWERCASE_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_UPPERCASE_DEF_ID                 = "plsqleditor.upperCase";
+    private static final String       PLSQLEDITOR_UPPERCASE_ID                     = PLSQLEDITOR_UPPERCASE_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_SHOWDEBUG_DEF_ID                 = "plsqleditor.showDebugInfo";
+    private static final String       PLSQLEDITOR_SHOWDEBUG_ID                     = PLSQLEDITOR_SHOWDEBUG_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_COMMIT_DEF_ID                    = "plsql.db.commit";
+    private static final String       PLSQLEDITOR_COMMIT_ID                        = PLSQLEDITOR_COMMIT_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_ROLLBACK_DEF_ID                  = "plsql.db.rollback";
+    private static final String       PLSQLEDITOR_ROLLBACK_ID                      = PLSQLEDITOR_ROLLBACK_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_COMMENT_DEF_ID                   = "plsqleditor.commentblock";
+    private static final String       PLSQLEDITOR_COMMENT_ID                       = PLSQLEDITOR_COMMENT_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_UNCOMMENT_DEF_ID                 = "plsqleditor.uncommentblock";
+    private static final String       PLSQLEDITOR_UNCOMMENT_ID                     = PLSQLEDITOR_UNCOMMENT_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_FORMAT_DEF_ID                    = "plsqleditor.formatSource";
+    private static final String       PLSQLEDITOR_FORMAT_ID                        = PLSQLEDITOR_FORMAT_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_GENERATE_PLDOC_DEF_ID            = "plsqleditor.generatePlDoc";
+    private static final String       PLSQLEDITOR_GENERATE_PLDOC_ID                = PLSQLEDITOR_GENERATE_PLDOC_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_CHANGE_SCHEMA_DEF_ID             = "plsqleditor.changeSchemaForPackage";
+    static final String               PLSQLEDITOR_CHANGE_SCHEMA_ID                 = PLSQLEDITOR_CHANGE_SCHEMA_DEF_ID
+                                                                                           + ".action";
+    private static final String       PLSQLEDITOR_MANAGE_CONNECTION_DETAILS_DEF_ID = "plsqleditor.manageConnectionDetails";
+    protected static final String     PLSQLEDITOR_MANAGE_CONNECTION_DETAILS_ID     = PLSQLEDITOR_MANAGE_CONNECTION_DETAILS_DEF_ID
+                                                                                           + ".action";
+
     private PlSqlContentOutlinePage   fOutlinePage;
     private ProjectionSupport         fProjectionSupport;
-    public static final String        NEW_LINE                                = System
-                                                                                      .getProperty("line.separator");
-    public static final String        FOLD_START                              = "--#startFolding";
-    public static final String        FOLD_END                                = "--#endFolding";
+    public static final String        NEW_LINE                                     = System
+                                                                                           .getProperty("line.separator");
+    public static final String        FOLD_START                                   = "--#startFolding";
+    public static final String        FOLD_END                                     = "--#endFolding";
 
 
     private Annotation[]              oldAnnotations;
@@ -115,9 +119,9 @@ public class PlSqlEditor extends TextEditor
         //
     }
 
-    public void updateTodoTags(List positions)
+    public void updateTodoTags(List<Position> positions)
     {
-        Map taskMap = TaskListIdentityStore.instance().getMarkers();
+        Map<String,Integer> taskMap = TaskListIdentityStore.instance().getMarkers();
 
         IEditorInput input = getEditorInput();
         if (input instanceof IFileEditorInput)
@@ -134,23 +138,21 @@ public class PlSqlEditor extends TextEditor
                 e.printStackTrace();
             }
             IDocument document = getDocumentProvider().getDocument(input);
-            for (Iterator it = positions.iterator(); it.hasNext();)
+            for (Position p : positions)
             {
                 try
                 {
-                    Position p = (Position) it.next();
                     String detail = document.get(p.offset, p.length);
                     Integer priority = new Integer(IMarker.PRIORITY_NORMAL);
-                    for (Iterator it2 = taskMap.keySet().iterator(); it2.hasNext();)
+                    for (String marker : taskMap.keySet())
                     {
-                        String marker = (String) it2.next();
                         if (detail.startsWith(marker))
                         {
-                            priority = (Integer) taskMap.get(marker);
+                            priority = taskMap.get(marker);
                             break;
                         }
                     }
-                    Map attributes = new HashMap();
+                    Map<String,Integer> attributes = new HashMap<String,Integer>();
                     // MarkerUtilities.setLineNumber(attributes, line + 1);
                     MarkerUtilities.setCharStart(attributes, p.offset);
                     MarkerUtilities.setCharEnd(attributes, p.offset + p.length);
@@ -184,13 +186,13 @@ public class PlSqlEditor extends TextEditor
         }
     }
 
-    public void updateFoldingStructure(List positions)
+    public void updateFoldingStructure(List<Position> positions)
     {
         Annotation[] annotations = new Annotation[positions.size()];
 
         // this will hold the new annotations along
         // with their corresponding positions
-        HashMap newAnnotations = new HashMap();
+        HashMap<ProjectionAnnotation,Position> newAnnotations = new HashMap<ProjectionAnnotation,Position>();
 
         for (int i = 0; i < positions.size(); i++)
         {
@@ -355,6 +357,11 @@ public class PlSqlEditor extends TextEditor
                 PLSQLEDITOR_CHANGE_SCHEMA_ID + ".", this);
         a.setActionDefinitionId(PLSQLEDITOR_CHANGE_SCHEMA_DEF_ID);
         setAction(PLSQLEDITOR_CHANGE_SCHEMA_ID, a);
+
+        a = new ManageConnectionDetailsAction(PlSqlEditorMessages.getResourceBundle(),
+                PLSQLEDITOR_MANAGE_CONNECTION_DETAILS_ID + ".", this);
+        a.setActionDefinitionId(PLSQLEDITOR_MANAGE_CONNECTION_DETAILS_DEF_ID);
+        setAction(PLSQLEDITOR_MANAGE_CONNECTION_DETAILS_ID, a);
     }
 
     public void doRevertToSaved()
@@ -467,7 +474,7 @@ public class PlSqlEditor extends TextEditor
         fAnnotationAccess = createAnnotationAccess();
         fOverviewRuler = createOverviewRuler(getSharedColors());
         ISourceViewer viewer = new PlSqlSourceViewer(parent, ruler, getOverviewRuler(),
-                                                    isOverviewRulerVisible(), styles, getPreferenceStore());
+                isOverviewRulerVisible(), styles, getPreferenceStore());
         getSourceViewerDecorationSupport(viewer);
         return viewer;
     }
@@ -514,7 +521,7 @@ public class PlSqlEditor extends TextEditor
             SchemaBrowserContentProvider.getInstance().refresh();
         }
         String[] scopes = getEditorSite().getKeyBindingService().getScopes();
-        List newScopes = new ArrayList();
+        List<String> newScopes = new ArrayList<String>();
         newScopes.add("plsql.editor");
         for (int i = 0; i < scopes.length; i++)
         {
@@ -527,5 +534,10 @@ public class PlSqlEditor extends TextEditor
         getEditorSite().getKeyBindingService().setScopes((String[]) newScopes
                 .toArray(new String[newScopes.size()]));
         super.setFocus();
+    }
+
+    public IFile getFile()
+    {
+        return ((IFileEditorInput) getEditorInput()).getFile();
     }
 }

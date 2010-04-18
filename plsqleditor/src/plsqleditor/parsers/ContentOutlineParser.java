@@ -29,7 +29,7 @@ public class ContentOutlineParser
         //
     }
     
-    public List parseFile(ParseType type,
+    public List<Segment> parseFile(ParseType type,
                           IDocument document,
                           String[] packageName,
                           SegmentType[] toIgnore) throws IOException
@@ -37,7 +37,7 @@ public class ContentOutlineParser
         return PlSqlParserManager.instance().getParser(type).parseFile(document, packageName, toIgnore);
     }
 
-    public List parseFile(ParseType type,
+    public List<Segment> parseFile(ParseType type,
                           IDocument document,
                           String[] packageName) throws IOException
     {

@@ -61,8 +61,6 @@ public class LoadToDatabaseAction extends TextEditorAction
 
                 checkSave(editor);
 
-                String name = file.getName();
-
                 IDocument doc = editor.getDocumentProvider().getDocument(input);
                 String toLoad = doc.get();
                 String packageName = ((Segment) PlsqleditorPlugin.getDefault().getSegments(file, doc, false).get(0))

@@ -4,6 +4,7 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.Plugin;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -16,6 +17,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.db.LoadPackageManager;
 import plsqleditor.db.ResultSetWrapper;
+import plsqleditor.editors.PlSqlEditor;
 import plsqleditor.parsers.StringLocationMap;
 import plsqleditor.util.Util;
 import plsqleditor.views.DbmsOutputView;
@@ -70,7 +72,7 @@ public class ExecuteScratchSqlAction extends SelectedTextAction
         ResultSetWrapper rsw = null;
         try
         {
-            rsw = theLoadPackageManager.loadCode(project, schema, toLoad);
+            rsw = theLoadPackageManager.loadCode(((PlSqlEditor)getTextEditor()).getFile(), project, schema, toLoad);
             DbmsOutputView.getInstance().addMessage(schema);
             if (rsw != null)
             {

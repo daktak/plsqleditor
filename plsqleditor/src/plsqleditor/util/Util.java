@@ -300,36 +300,24 @@ public class Util
      * For example:
      * <ol>
      * <li>
-     * 
      * <pre>
-     * 
      *     first = null
      *     second = &quot;a&quot;
      *     =&gt; result = {&quot;a&quot;}
-     *  
      * </pre>
-     * 
      * <li>
-     * 
      * <pre>
-     * 
      *     first = {&quot;a&quot;}
      *     second = null
      *     =&gt; result = {&quot;a&quot;}
-     *  
      * </pre>
-     * 
      * </li>
      * <li>
-     * 
      * <pre>
-     * 
      *     first = {&quot;a&quot;}
      *     second = {&quot;b&quot;}
      *     =&gt; result = {&quot;a&quot;, &quot;b&quot;}
-     *  
      * </pre>
-     * 
      * </li>
      * </ol>
      * 

@@ -3,7 +3,6 @@ package plsqleditor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.swt.widgets.Composite;
-import plsqleditor.objects.PlSqlModelException;
 
 public class Utils {
  /**
@@ -50,11 +49,6 @@ public class Utils {
      * Add a log entry
      */
     public static void log(Throwable e, String message) {
-        Throwable nestedException;
-        if (e instanceof PlSqlModelException 
-                && (nestedException = ((PlSqlModelException)e).getException()) != null) {
-            e = nestedException;
-        }
         IStatus status= new Status(
             IStatus.ERROR, 
             PlsqleditorPlugin.theId, 

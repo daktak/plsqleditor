@@ -23,30 +23,30 @@ import org.eclipse.ui.PlatformUI;
  */
 public class SchemaDetails implements Cloneable
 {
-    private static final String OPEN_SCHEMA_DETAILS  = "<SchemaDetails>";
-    private static final String CLOSE_SCHEMA_DETAILS = "</SchemaDetails>";
-    private static final String OPEN_NAME            = "<Name>";
-    private static final String CLOSE_NAME           = "</Name>";
-    private static final String OPEN_LOCATIONS       = "<Locations>";
-    private static final String CLOSE_LOCATIONS      = "</Locations>";
-    private static final String OPEN_LOCATION        = "<Location>";
-    private static final String CLOSE_LOCATION       = "</Location>";
-    private static final String OPEN_PASSWORD        = "<Password>";
-    private static final String CLOSE_PASSWORD       = "</Password>";
-    private static final String OPEN_PACKAGES        = "<Packages>";
-    private static final String CLOSE_PACKAGES       = "</Packages>";
+    private static final String  OPEN_SCHEMA_DETAILS  = "<SchemaDetails>";
+    private static final String  CLOSE_SCHEMA_DETAILS = "</SchemaDetails>";
+    private static final String  OPEN_NAME            = "<Name>";
+    private static final String  CLOSE_NAME           = "</Name>";
+    private static final String  OPEN_LOCATIONS       = "<Locations>";
+    private static final String  CLOSE_LOCATIONS      = "</Locations>";
+    private static final String  OPEN_LOCATION        = "<Location>";
+    private static final String  CLOSE_LOCATION       = "</Location>";
+    private static final String  OPEN_PASSWORD        = "<Password>";
+    private static final String  CLOSE_PASSWORD       = "</Password>";
+    private static final String  OPEN_PACKAGES        = "<Packages>";
+    private static final String  CLOSE_PACKAGES       = "</Packages>";
 
-    private String              myName;
-    private String              myPassword;
-    private List                myLocations;
-    private List                myPackageDetails;
+    private String               myName;
+    private String               myPassword;
+    private List<String>         myLocations;
+    private List<PackageDetails> myPackageDetails;
 
-    public SchemaDetails(String name, List locations, String password)
+    public SchemaDetails(String name, List<String> locations, String password)
     {
         myName = name;
         myLocations = locations;
         myPassword = password;
-        myPackageDetails = new ArrayList();
+        myPackageDetails = new ArrayList<PackageDetails>();
     }
 
     /**
@@ -54,7 +54,7 @@ public class SchemaDetails implements Cloneable
      * 
      * @return {@link #myLocations}.
      */
-    public List getLocations()
+    public List<String> getLocations()
     {
         return myLocations;
     }
@@ -62,9 +62,9 @@ public class SchemaDetails implements Cloneable
     public String getLocationString()
     {
         StringBuffer sb = new StringBuffer();
-        for (Iterator it = getLocations().iterator(); it.hasNext();)
+        for (Iterator<String> it = getLocations().iterator(); it.hasNext();)
         {
-            String loc = (String) it.next();
+            String loc = it.next();
             sb.append(loc).append(",");
         }
         if (sb.length() > 0)
@@ -146,9 +146,9 @@ public class SchemaDetails implements Cloneable
     public Object clone()
     {
         SchemaDetails det = new SchemaDetails(myName, myLocations, myPassword);
-        for (Iterator it = myPackageDetails.iterator(); it.hasNext();)
+        for (Iterator<PackageDetails> it = myPackageDetails.iterator(); it.hasNext();)
         {
-            PackageDetails pd = (PackageDetails) it.next();
+            PackageDetails pd = it.next();
             det.addPackage((PackageDetails) pd.clone());
         }
         return det;
@@ -160,7 +160,7 @@ public class SchemaDetails implements Cloneable
      */
     public PackageDetails[] getPackages()
     {
-        return (PackageDetails[]) myPackageDetails.toArray(new PackageDetails[myPackageDetails
+        return myPackageDetails.toArray(new PackageDetails[myPackageDetails
                 .size()]);
     }
 
@@ -182,9 +182,9 @@ public class SchemaDetails implements Cloneable
         sb.append(myName);
         sb.append(CLOSE_NAME);
         sb.append(OPEN_LOCATIONS);
-        for (Iterator it = myLocations.iterator(); it.hasNext();)
+        for (Object element : myLocations)
         {
-            String loc = (String) it.next();
+            String loc = (String) element;
             sb.append(OPEN_LOCATION);
             sb.append(loc);
             sb.append(CLOSE_LOCATION);
@@ -194,9 +194,9 @@ public class SchemaDetails implements Cloneable
         sb.append(myPassword);
         sb.append(CLOSE_PASSWORD).append("\n");
         sb.append(OPEN_PACKAGES).append("\n");
-        for (Iterator it = myPackageDetails.iterator(); it.hasNext();)
+        for (Iterator<PackageDetails> it = myPackageDetails.iterator(); it.hasNext();)
         {
-            PackageDetails p = (PackageDetails) it.next();
+            PackageDetails p = it.next();
             p.writeToBuffer(sb);
         }
         sb.append(CLOSE_PACKAGES).append("\n");
@@ -218,7 +218,7 @@ public class SchemaDetails implements Cloneable
             String locations = m.group(2);
             Pattern locPattern = Pattern.compile(OPEN_LOCATION + "([^<]*?)" + CLOSE_LOCATION);
             Matcher locMatcher = locPattern.matcher(locations);
-            myLocations = new ArrayList();
+            myLocations = new ArrayList<String>();
             while (locMatcher.find())
             {
                 myLocations.add(locMatcher.group(1));
@@ -244,8 +244,8 @@ public class SchemaDetails implements Cloneable
 
     /**
      * @param pd
-     * @return <code>true</code> if the package was added and
-     *         <code>false</code> otherwise.
+     * @return <code>true</code> if the package was added and <code>false</code>
+     *         otherwise.
      */
     public boolean addPackage(PackageDetails pd)
     {
@@ -253,9 +253,9 @@ public class SchemaDetails implements Cloneable
         PackageLocation[] newLocations = pd.getLocations();
         boolean[] alreadyThere = new boolean[newLocations.length];
         boolean somethingNew = false;
-        for (Iterator it = myPackageDetails.iterator(); it.hasNext();)
+        for (Iterator<PackageDetails> it = myPackageDetails.iterator(); it.hasNext();)
         {
-            PackageDetails details = (PackageDetails) it.next();
+            PackageDetails details = it.next();
             if (details.getName().equals(pdName))
             {
                 PackageLocation[] locations = details.getLocations();

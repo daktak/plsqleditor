@@ -19,6 +19,7 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.FileEditorInput;
 
 import plsqleditor.PlsqleditorPlugin;
+import plsqleditor.editors.MultiPagePlsqlEditor;
 import plsqleditor.editors.PlSqlCompletionProcessor;
 import plsqleditor.editors.PlSqlEditor;
 import plsqleditor.parsers.PlSqlParserManager;
@@ -85,9 +86,10 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
 
         try
         {
-            if (part instanceof PlSqlEditor)
+            if (part instanceof MultiPagePlsqlEditor)
             {
-                PlSqlEditor editor = (PlSqlEditor) part;
+                MultiPagePlsqlEditor mpe = (MultiPagePlsqlEditor) part;
+                PlSqlEditor editor = mpe.getEditor();
                 FileEditorInput input = (FileEditorInput) part.getEditorInput();
                 IDocument doc = editor.getDocumentProvider().getDocument(input);
 
@@ -221,7 +223,7 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
                         }
                         else // openLocType == OpenLocationType.Method
                         {
-                            List segments = plugin.getSegments(file, ((PlSqlEditor) epart).getDocumentProvider().getDocument(epart.getEditorInput()), false);
+                            List<?> segments = plugin.getSegments(file, ((MultiPagePlsqlEditor) epart).getEditor().getDocumentProvider().getDocument(epart.getEditorInput()), false);
                             if (navigateToSegment(epart, identifier, segments, 0))
                             {
                                 break;

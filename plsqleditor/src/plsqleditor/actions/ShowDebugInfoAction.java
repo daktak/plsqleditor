@@ -1,6 +1,5 @@
 package plsqleditor.actions;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -41,13 +40,13 @@ public class ShowDebugInfoAction extends SelectedTextAction
         
         String schema = plugin.getCurrentSchema();
         String currentFile = plugin.getCurrentFileName();
-        List openConnections = DbUtility.getCurrentConnectionPoolList();
+        List<String> openConnections = DbUtility.getCurrentConnectionPoolList();
         
         StringBuffer openConnectionsSb = new StringBuffer();
-        for (Iterator it = openConnections.iterator();it.hasNext();)
+        for (String openConn : openConnections)
         {
             openConnectionsSb.append("\n    ");
-            openConnectionsSb.append(it.next());
+            openConnectionsSb.append(openConn);
         }
         
         String details = "Debug Information:" +

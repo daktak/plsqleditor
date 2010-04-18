@@ -26,18 +26,18 @@ import plsqleditor.preferences.entities.SchemaDetails;
  * 
  * @version $Id$
  * 
- * Created on 4/03/2005
+ *          Created on 4/03/2005
  * 
  */
 public class SchemaRegistry
 {
-    private IPath               myFileStorePath;
-    private SchemaDetails[]     mySchemaMappings;
-    private List                myListeners;
-    private static final Object OPEN_SCHEMA_DETAILS_LIST  = "<SchemaDetailsList>";
-    private static final Object CLOSE_SCHEMA_DETAILS_LIST = "</SchemaDetailsList>";
-    private boolean             myIsUpdated               = false;
-    private String              myProjectName;
+    private IPath                        myFileStorePath;
+    private SchemaDetails[]              mySchemaMappings;
+    private List<RegistryUpdateListener> myListeners;
+    private static final Object          OPEN_SCHEMA_DETAILS_LIST  = "<SchemaDetailsList>";
+    private static final Object          CLOSE_SCHEMA_DETAILS_LIST = "</SchemaDetailsList>";
+    private boolean                      myIsUpdated               = false;
+    private String                       myProjectName;
 
     public interface RegistryUpdateListener
     {
@@ -51,7 +51,7 @@ public class SchemaRegistry
     {
         myProjectName = projectName;
         myFileStorePath = fileStorePath;
-        myListeners = new ArrayList();
+        myListeners = new ArrayList<RegistryUpdateListener>();
     }
 
     /**
@@ -60,8 +60,8 @@ public class SchemaRegistry
     public void setSchemaMappings(SchemaDetails[] schemaDetails)
     {
         myIsUpdated = true;
-        List schemaMappings = new ArrayList();
-        SortedSet names = new TreeSet();
+        List<SchemaDetails> schemaMappings = new ArrayList<SchemaDetails>();
+        SortedSet<String> names = new TreeSet<String>();
         for (int i = 0; i < schemaDetails.length; i++)
         {
             SchemaDetails sd = schemaDetails[i];
@@ -71,7 +71,7 @@ public class SchemaRegistry
                 names.add(sd.getName());
             }
         }
-        mySchemaMappings = (SchemaDetails[]) schemaMappings.toArray(new SchemaDetails[schemaMappings.size()]);
+        mySchemaMappings = schemaMappings.toArray(new SchemaDetails[schemaMappings.size()]);
     }
 
     /**
@@ -122,9 +122,8 @@ public class SchemaRegistry
      */
     private void updateListeners()
     {
-        for (Iterator it = myListeners.iterator(); it.hasNext();)
+        for (RegistryUpdateListener l : myListeners)
         {
-            RegistryUpdateListener l = (RegistryUpdateListener) it.next();
             l.registryUpdated();
         }
     }
@@ -139,7 +138,8 @@ public class SchemaRegistry
             try
             {
                 File f = getStorageFile();
-                BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(f)));
+                BufferedReader br = new BufferedReader(
+                        new InputStreamReader(new FileInputStream(f)));
                 StringBuffer sb = new StringBuffer();
                 String line = null;
                 while ((line = br.readLine()) != null)
@@ -150,18 +150,19 @@ public class SchemaRegistry
                     }
                 }
                 String buffer = sb.toString();
-                List details = new ArrayList();
+                List<SchemaDetails> details = new ArrayList<SchemaDetails>();
                 int location = 0;
                 while (location < buffer.length())
                 {
-                    SchemaDetails sd = new SchemaDetails("", new ArrayList(), "");
+                    SchemaDetails sd = new SchemaDetails("", new ArrayList<String> (), "");
                     location = sd.readFromBuffer(buffer, location);
                     if (sd.getName().trim().length() > 0)
                     {
                         details.add(sd);
                     }
                 }
-                mySchemaMappings = (SchemaDetails[]) details.toArray(new SchemaDetails[details.size()]);
+                mySchemaMappings = details.toArray(new SchemaDetails[details
+                        .size()]);
             }
             catch (IOException e)
             {

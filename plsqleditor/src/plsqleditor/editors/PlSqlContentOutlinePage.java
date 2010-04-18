@@ -11,6 +11,11 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.BadPositionCategoryException;
 import org.eclipse.jface.text.DefaultPositionUpdater;
@@ -22,8 +27,10 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.TreePathViewerSorter;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -44,7 +51,7 @@ import plsqleditor.parsers.SegmentType;
  * 
  * @author Toby Zines
  * 
- * Created on 22/02/2005
+ *         Created on 22/02/2005
  */
 public class PlSqlContentOutlinePage extends ContentOutlinePage
 {
@@ -53,7 +60,7 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
      * 
      * @author Toby Zines
      * 
-     * Created on 27/02/2005
+     *         Created on 27/02/2005
      */
     public class PlSqlContentLabelProvider extends LabelProvider implements IBaseLabelProvider
     {
@@ -74,7 +81,7 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
             if (element instanceof Segment)
             {
                 Segment segment = (Segment) element;
-                // FIX for feature 1387684  
+                // FIX for feature 1387684
                 // need private identifiers
                 String key = segment.getImageKey();
                 return PlsqleditorPlugin.getDefault().getImageRegistry().get(key);
@@ -87,6 +94,13 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
     protected Object            fInput;
     protected IDocumentProvider fDocumentProvider;
     protected ITextEditor       fTextEditor;
+    TreeViewer viewer;
+    private Action sortAction;
+    TreePathViewerSorter myDefaultSorter;
+    boolean myIsSorting = false;
+    private Action filterFieldsAction;
+    protected ViewerFilter myFieldFilter;
+    protected boolean myIsFiltering = false;
 
     class ContentProvider implements ITreeContentProvider
     {
@@ -146,7 +160,8 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
                             PackageSegment pkgSegment = (PackageSegment) segment;
                             PackageSegment clone = (PackageSegment) pkgSegment.clone();
                             List containedSegments = clone.getContainedSegments();
-                            List sortedContainedSegments = sortAndFilterSegments(clone.getContainedSegments(), document);
+                            List sortedContainedSegments = sortAndFilterSegments(clone
+                                    .getContainedSegments(), document);
                             containedSegments.clear();
                             containedSegments.addAll(sortedContainedSegments);
                             segmentsToReturn.add(clone);
@@ -246,7 +261,7 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
                 {
                     return fInput;
                 }
-                else 
+                else
                 {
                     return parent;
                 }
@@ -266,7 +281,7 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
             else if (element instanceof PackageSegment)
             {
                 PackageSegment pkgSegment = (PackageSegment) element;
-                return pkgSegment.getContainedSegments().toArray(); 
+                return pkgSegment.getContainedSegments().toArray();
             }
             else
             {
@@ -285,16 +300,104 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
     public void createControl(Composite parent)
     {
         super.createControl(parent);
-        TreeViewer viewer = getTreeViewer();
+        viewer = getTreeViewer();
         viewer.setContentProvider(new ContentProvider());
         viewer.setLabelProvider(new PlSqlContentLabelProvider(viewer.getControl().getDisplay()));
         viewer.addSelectionChangedListener(this);
+        myDefaultSorter = new TreePathViewerSorter();
+        myFieldFilter = new ViewerFilter()
+        {
+            @Override
+            public boolean select(Viewer viewer, Object parentElement, Object element)
+            {
+                if (element instanceof Segment)
+                {
+                    Segment segment = (Segment) element;
+                    SegmentType st = segment.getType();
+                    return (st.equals(SegmentType.Package_Body) || st.equals(SegmentType.Procedure) || st
+                            .equals(SegmentType.Function));
+                }
+                return true;
+            }
+        };
+        
         if (fInput != null)
         {
             viewer.setInput(fInput);
             // Fix to cause all outlines to have the tree opened at all times
             viewer.expandAll();
         }
+        createActions();
+        createMenu();
+        createToolbar();
+    }
+
+    public void createActions()
+    {
+        sortAction = new Action("Sort",IAction.AS_CHECK_BOX)
+        {
+            
+            public void run()
+            {
+                if (myIsSorting)
+                {
+                    viewer.setSorter(null);
+                    myIsSorting = false;
+                }
+                else
+                {
+                    viewer.setSorter(myDefaultSorter);
+                    myIsSorting = true;
+                }
+            }
+        };
+        sortAction.setImageDescriptor(PlsqleditorPlugin.getImageDescriptor("sort.gif"));
+        
+        filterFieldsAction = new Action("Filter Fields",IAction.AS_CHECK_BOX)
+        {
+            public void run()
+            {
+                if (myIsFiltering)
+                {
+                    viewer.removeFilter(myFieldFilter);
+                    myIsFiltering  = false;
+                }
+                else
+                {
+                    viewer.addFilter(myFieldFilter);
+                    myIsFiltering = true;
+                }
+            }
+        };
+        filterFieldsAction.setImageDescriptor(PlsqleditorPlugin.getImageDescriptor("filter.gif"));
+
+        // Add selection listener.
+//        viewer.addSelectionChangedListener(new ISelectionChangedListener()
+//        {
+//            public void selectionChanged(SelectionChangedEvent event)
+//            {
+//                updateActionEnablement();
+//            }
+//        });
+    }
+
+    /**
+     * Create menu.
+     */
+    private void createMenu()
+    {
+        //IMenuManager mgr = getViewSite().getActionBars().getMenuManager();
+        //mgr.add(someActionForTheMenu);
+    }
+
+    /**
+     * Create toolbar.
+     */
+    private void createToolbar()
+    {
+        IToolBarManager mgr = getSite().getActionBars().getToolBarManager();
+        mgr.add(sortAction);
+        mgr.add(filterFieldsAction);
     }
 
     public void selectionChanged(SelectionChangedEvent event)

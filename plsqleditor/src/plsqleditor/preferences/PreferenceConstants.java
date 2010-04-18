@@ -58,6 +58,7 @@ public class PreferenceConstants
     public static final String P_AUTO_COMMIT_ON_CLOSE             = "isAutoCommittingOnClose";
     public static final String P_NUM_RESULT_SET_ROWS              = "numResultSetRows";
 
+    public static final String P_SCHEMA_PACKAGE_DELIMITER         = "schemaPackageDelimiter";
     public static final String P_EDITOR_TAB_WIDTH                 = "plsqlTabWidth";
     public static final String P_SCHEMA_BROWSER_FILTER_LIST       = "plsqlSchemaBrowserFilterList";
 

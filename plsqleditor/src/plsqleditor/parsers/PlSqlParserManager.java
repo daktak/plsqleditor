@@ -24,7 +24,7 @@ public class PlSqlParserManager
     private PackageHeaderParser        myPackageHeaderParser        = new PackageHeaderParser();
     private PackageBodyParser          myPackageBodyParser          = new PackageBodyParser();
     private PackageHeaderAndBodyParser myPackageHeaderAndBodyParser = new PackageHeaderAndBodyParser();
-    private PlSqlParser                mySqlScriptParser            = new FullGrammarParser();
+    private PlSqlParser                mySqlScriptParser            = myPackageHeaderParser; //new FullGrammarParser();
 
     private Comparator                 thePositionComparator        = new Comparator()
                                                                     {

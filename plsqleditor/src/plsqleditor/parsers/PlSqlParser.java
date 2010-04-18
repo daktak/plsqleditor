@@ -9,13 +9,13 @@ import org.eclipse.jface.text.IDocument;
 
 public interface PlSqlParser
 {
-    public List parseFile(IDocument document, String[] packageName, SegmentType[] filters)
+    public List<Segment> parseFile(IDocument document, String[] packageName, SegmentType[] filters)
     throws IOException;
 
     public int parseBody(int currentLineOffset,
                           IDocument document,
                           BufferedReader br,
-                          List segments,
+                          List<Segment> segments,
                           Segment packageSegment) throws IOException, BadLocationException;
 
 }
