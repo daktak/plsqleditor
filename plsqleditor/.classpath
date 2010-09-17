@@ -1,20 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="test"/>
 	<classpathentry exported="true" kind="lib" path="libs/commons-lang.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/ojdbc14.jar"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/Libraries/lib/jax-qname.jar"/>
-	<classpathentry kind="lib" path="/Libraries/lib/xercesImpl.jar"/>
-	<classpathentry kind="lib" path="/Libraries/lib/relaxngDatatype.jar"/>
-	<classpathentry kind="lib" path="/Libraries/lib/namespace.jar"/>
-	<classpathentry kind="lib" path="/Libraries/jwsdp-1.5/jaxb/lib/jaxb-api.jar"/>
-	<classpathentry kind="lib" path="/Libraries/jwsdp-1.5/jaxb/lib/jaxb-impl.jar"/>
-	<classpathentry kind="lib" path="/Libraries/jwsdp-1.5/jaxb/lib/jaxb-libs.jar"/>
-	<classpathentry kind="lib" path="/plsql_code_checker/thirdparty/antlr-3.0.1.jar"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/plsql_code_checker"/>
 	<classpathentry kind="lib" path="/plsql_code_checker/thirdparty/antlr-runtime-3.0.1.jar"/>
-	<classpathentry kind="lib" path="/plsql_code_checker/dist/CodeChecker/CodeChecker.jar" sourcepath="/plsql_code_checker"/>
+	<classpathentry kind="lib" path="/plsql_code_checker/dist/CodeChecker/CodeChecker.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

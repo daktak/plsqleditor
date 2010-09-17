@@ -1,20 +1,21 @@
 /**
  * 
  */
-package plsqleditor.parsers;
+package plsqleditor.parsers.antlr;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.tree.Tree;
 import org.eclipse.jface.text.Position;
 
-import au.com.alcatel.fulfil.tools.codecheck.parser.PlSqlParser.start_rule_return;
+import plsqleditor.parsers.Segment;
 
 /**
- * This class is a Segment that is specifically an AST sub tree of an ANTLR parsed grammar tree.
- * This class wraps the Segment get methods and returns the values extracted from the internal antlr tree.
+ * This class is a Segment that is specifically an AST sub tree of an ANTLR
+ * parsed grammar tree. This class wraps the Segment get methods and returns the
+ * values extracted from the internal antlr tree.
  * 
  * @author Toby Zines
  */
@@ -25,13 +26,35 @@ public class AstSegment extends Segment
      */
     private Tree myTree;
 
-    public AstSegment(Tree tree)
+
+    /**
+     * This field will be FUNCTION_DECLARATION or PROCEDURE_DECLARATION
+     * indicating the type of declaration segment is is.
+     */
+    private String                      myType;
+
+
+    private CommonTokenStream myTokenStream;
+
+    public AstSegment(Tree tree, String type, CommonTokenStream tokenStream)
     {
-        super("AstSegment",new Position(tree.getTokenStartIndex(),tree.getTokenStopIndex() - tree.getTokenStartIndex())); // TODO check what segment type is needed
+        super("AstSegment", new Position(tree.getTokenStartIndex(), tree.getTokenStopIndex()
+                - tree.getTokenStartIndex())); // TODO check what segment type
+        // is needed
         setName(determineName(tree));
         myTree = tree;
+        myType = type;
+        myTokenStream = tokenStream;
     }
 
+    /**
+     * @return the tokenStream
+     */
+    protected CommonTokenStream getTokenStream()
+    {
+        return myTokenStream;
+    }
+    
     private String determineName(Tree tree)
     {
         // TODO Auto-generated method stub
@@ -44,20 +67,21 @@ public class AstSegment extends Segment
         return super.format();
     }
 
-    public static AstSegment generateSegment(Tree tree)
+    public static AstSegment generateSegment(Tree tree, CommonTokenStream stream)
     {
         AstSegment toReturn = null;
         String text = tree.getText();
         if (text != null)
         {
-            if (text.equals("CREATE_PACKAGE")) 
+            if (text.equals("CREATE_PACKAGE"))
             {
-                toReturn = new AstPackageSegment(tree);
-                // PACKAGE_NAME, PROCEDURE_BODY, PROCEDURE_BODY, PROCEDURE_BODY, FUNCTION_BODY
+                toReturn = new AstPackageDeclarationSegment(tree,stream);
+                // PACKAGE_NAME, PROCEDURE_BODY, PROCEDURE_BODY, PROCEDURE_BODY,
+                // FUNCTION_BODY
             }
             else if (text.equals("FUNCTION_BODY"))
             {
-                toReturn = new FunctionDeclarationSegment(tree);
+                toReturn = new FunctionDeclarationSegment(tree,stream);
                 // eg.
                 // FUNCTION_DECLARATION,
                 // VARIABLE_DECLARATION, VARIABLE_DECLARATION,
@@ -67,7 +91,7 @@ public class AstSegment extends Segment
             }
             else if (text.equals("PROCEDURE_BODY"))
             {
-                toReturn = new ProcedureDeclarationSegment(tree);
+                toReturn = new ProcedureDeclarationSegment(tree,stream);
                 // eg.
                 // PROCEDURE_DECLARATION,
                 // VARIABLE_DECLARATION, VARIABLE_DECLARATION,
@@ -75,16 +99,40 @@ public class AstSegment extends Segment
                 // IF_STATEMENT, CHAIN
                 // each := can have function calls (known as chains)
                 // each chain can be a function call, single word or other...
-            } 
+            }
+            else if (text.equals("CURSOR_DECLARATION"))
+            {
+                toReturn = new AstCursorDeclarationSegment(tree,text,stream);
+            }
+            else if (text.equals("VARIABLE_DECLARATION"))
+            {
+                toReturn = new AstVariableDeclarationSegment(tree,stream);
+            }
+            else if (text.equals("PLSQL_BLOCK"))
+            {
+                toReturn = new AstCodeSegment(tree, text,stream); 
+            }
+            else if (text.equals("RETURN_STATEMENT"))
+            {
+                toReturn = new AstCodeSegment(tree, text,stream); 
+            }
+            else if (text.equals("IF_STATEMENT"))
+            {
+                toReturn = new AstCodeSegment(tree, text,stream); 
+            }
+            else
+            {
+                toReturn = new AstSegment(tree); // Record these
+            }
         }
         else
         {
             toReturn = new AstSegment(tree);
         }
-        
+
         return toReturn;
     }
-    
+
     public List<Segment> getContainedSegments()
     {
         List<Segment> segments = new ArrayList<Segment>();
@@ -113,9 +161,11 @@ public class AstSegment extends Segment
     {
         myTree = tree;
     }
-    
+
     /**
-     * This method returns the start and end location in a file that this segment is in.
+     * This method returns the start and end location in a file that this
+     * segment is in.
+     * 
      * @return
      */
     public Position getLocation()
@@ -123,10 +173,10 @@ public class AstSegment extends Segment
         return null;
         // TODO implement this
     }
-    
+
     /**
-     * This method gets a particular segment contained within this segment contained at
-     * the identified location.
+     * This method gets a particular segment contained within this segment
+     * contained at the identified location.
      * 
      * @param location
      * @return The segment at the specified location
@@ -136,8 +186,8 @@ public class AstSegment extends Segment
         return null;
         // TODO implement this
     }
-    
-    
+
+
     /**
      * This method gets the documentation associated to this segment.
      */
@@ -145,5 +195,15 @@ public class AstSegment extends Segment
     {
         return null;
         // TODO implement this
+    }
+
+    public String toString()
+    {
+        return myTree.toStringTree();
+        // StringBuffer sb = new StringBuffer(500);
+        // for (Segment segment : getContainedSegments())
+        // {
+        // sb.append(segment.toString());
+        // }
     }
 }

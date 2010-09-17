@@ -75,7 +75,7 @@ public class Segment implements Comparable, Cloneable
      */
     private Object        myReferredData;
     
-    static class Parameter implements Comparable
+    protected static class Parameter implements Comparable
     {
         public String myParameter;
         public String myInOut;
@@ -293,7 +293,7 @@ public class Segment implements Comparable, Cloneable
      * 
      * @return The parameter list in the format (p1,p2,p3).
      */
-    String getParameterListAsString(boolean overrideParameterSettings)
+    public String getParameterListAsString(boolean overrideParameterSettings)
     {
         if (myParameterList.isEmpty())
         {
@@ -319,7 +319,7 @@ public class Segment implements Comparable, Cloneable
      * @return The parameter list (as {@link Segment}s) in the format
      *         (p1,p2,p3).
      */
-    public List<Segment> getParameterList()
+    public List<? extends Segment> getParameterList()
     {
         List<Segment> toReturn = new ArrayList<Segment>();
 
@@ -815,9 +815,9 @@ public class Segment implements Comparable, Cloneable
         return getType() + " " + getPresentationName(true, true, true);
     }
 
-    public List<Segment> getContainedSegments()
+    public List<? extends Segment> getContainedSegments()
     {
-        List<Segment> containedSegments = getParameterList();
+        List<? extends Segment> containedSegments = getParameterList();
         containedSegments.addAll(myFieldList);
         return containedSegments;
     }

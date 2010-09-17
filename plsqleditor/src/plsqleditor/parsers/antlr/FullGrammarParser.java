@@ -1,4 +1,4 @@
-package plsqleditor.parsers;
+package plsqleditor.parsers.antlr;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,6 +9,10 @@ import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+
+import plsqleditor.parsers.RootSegment;
+import plsqleditor.parsers.Segment;
+import plsqleditor.parsers.SegmentType;
 
 import au.com.alcatel.fulfil.tools.codecheck.parser.PlSqlLexer;
 import au.com.alcatel.fulfil.tools.codecheck.parser.PlSqlParser;
@@ -28,7 +32,7 @@ public class FullGrammarParser implements plsqleditor.parsers.PlSqlParser
         try
         {
             ptree = parser.start_rule();
-            toReturn.add(new RootSegment(ptree));
+            toReturn.add(new RootSegment(ptree, tokens));
         }
         catch (RecognitionException e)
         {

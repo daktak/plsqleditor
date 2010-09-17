@@ -4,12 +4,13 @@
 package plsqleditor.parsers;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
+import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.tree.Tree;
 import org.eclipse.jface.text.Position;
 
+import plsqleditor.parsers.antlr.AstSegment;
 import au.com.alcatel.fulfil.tools.codecheck.parser.PlSqlParser.start_rule_return;
 
 /**
@@ -41,30 +42,32 @@ public class RootSegment extends Segment
 
     private start_rule_return myParseTree;
 
-    private Segment [] myContainedSegments;
+    private List <Segment> myContainedSegments;
+
+    private CommonTokenStream myTokenList;
     
-    public RootSegment(start_rule_return ptree)
+    public RootSegment(start_rule_return ptree, CommonTokenStream tokenList)
     {
         super("RootSegment",new Position(0,0)); // TODO check what segment type is needed
         myParseTree = ptree;
+        myTokenList = tokenList;
     }
 
-    private Segment [] parseTree(start_rule_return tree)
+    private List <Segment> parseTree()
     {
         List <Segment> segments = new ArrayList<Segment>();
         
         Tree topTree = (Tree) myParseTree.getTree();
-        topTree.getText();
         topTree.getLine();
         topTree.getTokenStartIndex();
         topTree.getTokenStopIndex();
         for (int i = 0; i < topTree.getChildCount(); i++)
         {
             Tree child = topTree.getChild(i);
-            AstSegment segment = new AstSegment(child);
+            AstSegment segment = AstSegment.generateSegment(child, myTokenList);
             segments.add(segment);
         }
-        return segments.toArray(new Segment[segments.size()]);
+        return segments;
     }
     
     public String format()
@@ -73,10 +76,13 @@ public class RootSegment extends Segment
         return super.format();
     }
 
-    public List getContainedSegments()
+    public List<Segment> getContainedSegments()
     {
-        // TODO Auto-generated method stub
-        return super.getContainedSegments();
+        if (myContainedSegments == null)
+        {
+            myContainedSegments = parseTree();
+        }
+        return myContainedSegments;
     }
 
     public String getDocumentation()

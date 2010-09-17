@@ -1,22 +1,23 @@
 /**
  * 
  */
-package plsqleditor.parsers;
+package plsqleditor.parsers.antlr;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.tree.Tree;
 
 /**
  * @author Toby Zines
  *
  */
-public class AstPackageSegment extends AstDeclarationContainerSegment
+public class AstDefaultSQLSegment extends AstDeclarationSegment
 {
-    public AstPackageSegment(Tree tree)
+    public AstDefaultSQLSegment(Tree tree, String type, CommonTokenStream stream)
     {
-        super(tree, PACKAGE_NAME);
+        super(tree, type, stream); // TODO fix this to work as default, not "unknown"
     }
 
     public List<FunctionDeclarationSegment> getFunctions()
@@ -29,5 +30,11 @@ public class AstPackageSegment extends AstDeclarationContainerSegment
     {
         List<ProcedureDeclarationSegment> toReturn = new ArrayList<ProcedureDeclarationSegment>();
         return toReturn;
+    }
+
+    @Override
+    protected String getSegmentNameNodeName()
+    {
+        return "too generic to know for sure";
     }
 }

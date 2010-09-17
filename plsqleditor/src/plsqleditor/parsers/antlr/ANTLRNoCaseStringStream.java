@@ -1,4 +1,4 @@
-package plsqleditor.parsers;
+package plsqleditor.parsers.antlr;
 
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
