@@ -90,17 +90,6 @@ public class TemplateEditorUI
         }
         return myRegistry;
     }
-
-    /**
-     * This method forwards the image registry call to the PlsqleditorPlugin default instance
-     * 
-     * @return The plsqleditor plugin's image registry. 
-     */
-    public ImageRegistry getImageRegistry()
-    {
-        return PlsqleditorPlugin.getDefault().getImageRegistry();
-    }
-
     /**
      * Creates and returns a new image descriptor for an image file located
      * within the specified plug-in.

@@ -4,6 +4,9 @@
 package au.com.gts.data;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 import au.com.zinescom.util.UsefulOperations;
 
@@ -20,12 +23,15 @@ public class Column extends DatabaseEntity implements Serializable
      * This field represents the serial version uid.
      */
     private static final long serialVersionUID = 4048794563386816310L;
-    private Class myType;
+    private Class<?> myType;
 	private String mySQLTypeName;
 	private int mySize;
 	private int myPrecisionRadix;
 	private int myNumDecimalDigits;
 	private boolean myIsNullable;
+	
+	/** This field represents the constraints on this table. */
+	private List<Constraint> myConstraints;
 
 	private Table myTable;
 
@@ -35,10 +41,15 @@ public class Column extends DatabaseEntity implements Serializable
 	 */
 	private boolean myIsPrimaryKey;
 
+	public Column()
+	{
+		myConstraints = new ArrayList<Constraint>();
+	}
+	
 	/**
 	 * @return The type of this column as a java class.
 	 */
-	public Class getType()
+	public Class<?> getType()
 	{
 		return myType;
 	}
@@ -46,7 +57,7 @@ public class Column extends DatabaseEntity implements Serializable
 	/**
 	 * @param type The type of this column as a java class.
 	 */
-	public void setType(Class type)
+	public void setType(Class<?> type)
 	{
 		myType = type;
 	}
@@ -177,6 +188,16 @@ public class Column extends DatabaseEntity implements Serializable
 		myIsPrimaryKey = isPrimaryKey;
 	}
 
+	/**
+	 * This method adds a constraint this table.
+	 * 
+	 * @param constraint
+	 *            The constraint to add.
+	 */
+	public void addConstraint(Constraint constraint)
+	{
+		myConstraints.add(constraint);
+	}	
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -208,4 +229,30 @@ public class Column extends DatabaseEntity implements Serializable
 		return getName().hashCode() + getTable().getName().hashCode();
 	}
 
+	public Collection<? extends Constraint> getConstraints()
+	{
+		return myConstraints;
+	}
+
+	public String toString()
+	{
+		StringBuffer sb = new StringBuffer(1000);
+		for (Constraint constraint : myConstraints)
+		{
+			sb.append("\n" + constraint.toString());
+		}
+		StringBuffer sbToReturn = new StringBuffer("Column - " + getDisplayName());
+		UsefulOperations.insertDataString(sb, "   ", sb.toString(), true);
+		return sbToReturn.toString();
+	}
+	
+	public String getDisplayName()
+    {
+		StringBuffer sb = new StringBuffer();
+		if (mySQLTypeName != null)
+		{
+			sb.append(" : ").append(mySQLTypeName).append("(").append(mySize).append(")");
+		}
+    	return getName() + sb.toString(); 
+    }
 }

@@ -1,0 +1,17 @@
+TODO list for plsqleditor
+
+1. Extra Tab - done
+
+2. DB specifics
+Add types from the database (and other stuff that andrew added in the plsql stuff)
+Merge from DB
+Better schema browsing
+Better sql loading (from basic sql files)
+
+3. Complete parser stuff:
+Beautify
+Call trace up
+Call trace down
+Fix proposals (add global var, add package var, add parameter, add local var)
+Enhance lookup (include same named methods with diff parameters, no failed lookups)
+

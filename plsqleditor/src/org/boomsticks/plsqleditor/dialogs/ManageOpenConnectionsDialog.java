@@ -9,7 +9,6 @@ import org.boomsticks.plsqleditor.dialogs.openconnections.LiveConnectionSorter;
 import org.boomsticks.plsqleditor.dialogs.openconnections.OpenConnectionList;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.dialogs.IInputValidator;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckboxCellEditor;
 import org.eclipse.jface.viewers.ISelection;
@@ -60,19 +59,17 @@ public class ManageOpenConnectionsDialog extends Dialog
     private Table           table;
     TableViewer             tableViewer;
     // Create a ExampleTaskList and assign it to an instance variable
-    OpenConnectionList      liveConnectionList    = new OpenConnectionList();
+    OpenConnectionList      liveConnectionList;
     // Set the table column property names
     private final String    DEFAULT_SCHEMA_COLUMN = "IsDefault";
     private final String    URL_COLUMN            = "Url";
-    private final String    PROJECT_COLUMN        = "Project";
     private final String    FILE_NAME_COLUMN      = "Filename";
+    private final String    PROJECT_COLUMN        = "Project";
     private final String    USER_COLUMN           = "User";
 
     // Set column names
     private String[]        columnNames           = new String[]{DEFAULT_SCHEMA_COLUMN, URL_COLUMN,
-            PROJECT_COLUMN, FILE_NAME_COLUMN, USER_COLUMN};
-
-    private IInputValidator validator;
+    		FILE_NAME_COLUMN, PROJECT_COLUMN, USER_COLUMN};
 
     /**
      * InnerClass that acts as a proxy for the ExampleTaskList providing content
@@ -144,7 +141,7 @@ public class ManageOpenConnectionsDialog extends Dialog
 
         GridData gridData = new GridData(GridData.FILL_BOTH);
         gridData.grabExcessVerticalSpace = true;
-        gridData.horizontalSpan = 3;
+        gridData.horizontalSpan = 4;
         table.setLayoutData(gridData);
 
         table.setLinesVisible(true);
@@ -172,25 +169,25 @@ public class ManageOpenConnectionsDialog extends Dialog
 
         // 3rd column with Project
         column = new TableColumn(table, SWT.LEFT, 2);
-        column.setText("Project");
+        column.setText("File Associated");
         column.setWidth(100);
         column.addSelectionListener(new SelectionAdapter()
         {
             public void widgetSelected(SelectionEvent e)
             {
-                tableViewer.setSorter(new LiveConnectionSorter(LiveConnectionSorter.PROJECT));
+                tableViewer.setSorter(new LiveConnectionSorter(LiveConnectionSorter.LAST_FILE));
             }
         });
 
         // 4th column with file associated
         column = new TableColumn(table, SWT.CENTER, 3);
-        column.setText("File Associated");
+        column.setText("Project");
         column.setWidth(80);
         column.addSelectionListener(new SelectionAdapter()
         {
             public void widgetSelected(SelectionEvent e)
             {
-                tableViewer.setSorter(new LiveConnectionSorter(LiveConnectionSorter.LAST_FILE));
+                tableViewer.setSorter(new LiveConnectionSorter(LiveConnectionSorter.PROJECT));
             }
         });
 
@@ -246,7 +243,7 @@ public class ManageOpenConnectionsDialog extends Dialog
         // Set the cell modifier for the viewer
         // tableViewer.setCellModifier(new ExampleCellModifier(this));
         // Set the default sorter for the viewer
-        tableViewer.setSorter(new LiveConnectionSorter(LiveConnectionSorter.PROJECT));
+        tableViewer.setSorter(new LiveConnectionSorter(LiveConnectionSorter.LAST_FILE));
     }
 
     protected void createButtonsForButtonBar(Composite parent)
@@ -294,14 +291,6 @@ public class ManageOpenConnectionsDialog extends Dialog
     }
 
     /**
-     * Return the ExampleTaskList
-     */
-    public OpenConnectionList getTaskList()
-    {
-        return liveConnectionList;
-    }
-
-    /**
      * Return the parent composite
      */
     public Control getControl()
@@ -320,17 +309,16 @@ public class ManageOpenConnectionsDialog extends Dialog
      *            top-level shell
      * @param dialogTitle the dialog title, or <code>null</code> if none
      * @param dialogMessage the dialog message, or <code>null</code> if none
-     * @param validator an input validator, or <code>null</code> if none
      */
     public ManageOpenConnectionsDialog(Shell parentShell,
                                        String dialogTitle,
                                        String dialogMessage,
-                                       IInputValidator validator)
+                                       OpenConnectionList openConnectionlist)
     {
         super(parentShell);
         this.myTitle = dialogTitle;
         myMessage = dialogMessage;
-        this.validator = validator;
+        liveConnectionList = openConnectionlist;
     }
 
     /*
@@ -393,8 +381,7 @@ public class ManageOpenConnectionsDialog extends Dialog
         createTableViewer();
         tableViewer.setContentProvider(new LiveConnectionContentProvider());
         tableViewer.setLabelProvider(new LiveConnectionLabelProvider());
-        // The input for the table viewer is the instance of ExampleTaskList
-        liveConnectionList = new OpenConnectionList();
+        // The input for the table viewer is the liveConnectionList
         tableViewer.setInput(liveConnectionList);
 
         // create message

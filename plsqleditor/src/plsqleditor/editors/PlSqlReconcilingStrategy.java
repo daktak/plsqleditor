@@ -154,10 +154,13 @@ public class PlSqlReconcilingStrategy
         {
             public void run()
             {
-                List positions = (List) myPositionsTable.get(FOLDING_TAGS);
-                editor.updateFoldingStructure(positions);
-                positions = (List) myPositionsTable.get(TODO_TAGS);
-                editor.updateTodoTags(positions);
+            	if (editor != null)
+            	{
+	                List positions = (List) myPositionsTable.get(FOLDING_TAGS);
+	                editor.updateFoldingStructure(positions);
+	                positions = (List) myPositionsTable.get(TODO_TAGS);
+	                editor.updateTodoTags(positions);
+            	}
             }
 
         });

@@ -34,7 +34,7 @@ public class Perspective implements IPerspectiveFactory
         
         // Left side
         IFolderLayout left = layout.createFolder("left", IPageLayout.LEFT, 0.25f, editorArea);
-        left.addView(IPageLayout.ID_RES_NAV);
+        left.addView(IPageLayout.ID_PROJECT_EXPLORER);
         left.addView(SchemaBrowserView.theId);
 
         // Right side
@@ -51,21 +51,23 @@ public class Perspective implements IPerspectiveFactory
      */
     public void defineActions(IPageLayout layout) {
         // Add "new wizards".
+		layout.addNewWizardShortcut("plsqleditor.wizards.NewPackageBody");//$NON-NLS-1$
         layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.folder");//$NON-NLS-1$
         layout.addNewWizardShortcut("org.eclipse.ui.wizards.new.file");//$NON-NLS-1$
 
         // Add "show views".
-        layout.addShowViewShortcut(IPageLayout.ID_RES_NAV);
+        layout.addShowViewShortcut(IPageLayout.ID_PROJECT_EXPLORER);
         layout.addShowViewShortcut(IPageLayout.ID_BOOKMARKS);
         layout.addShowViewShortcut(IPageLayout.ID_OUTLINE);
         layout.addShowViewShortcut(IPageLayout.ID_PROP_SHEET);
         layout.addShowViewShortcut(IPageLayout.ID_PROBLEM_VIEW);
         layout.addShowViewShortcut(IPageLayout.ID_TASK_LIST);
-        
-        layout.addPerspectiveShortcut("org.eclipse.ui.resourcePerspective");
-        //layout.addPerspectiveShortcut("org.eclipse.jdt.ui.JavaPerspective");
+		layout.addShowViewShortcut(SchemaBrowserView.theId);
+		layout.addShowViewShortcut(ScratchPadView.theId);
+		layout.addShowViewShortcut(DbmsOutputView.theId);
 
+		layout.addPerspectiveShortcut("org.eclipse.ui.resourcePerspective");
+        
         layout.addActionSet(IPageLayout.ID_NAVIGATE_ACTION_SET);
     }
-
 }

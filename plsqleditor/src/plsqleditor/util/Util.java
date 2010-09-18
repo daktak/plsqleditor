@@ -74,8 +74,8 @@ public class Util
             return false;
         }
         int size = ary1.length;
-        Vector v1 = new Vector(size);
-        Vector v2 = new Vector(size);
+        Vector<Object> v1 = new Vector<Object>(size);
+        Vector<Object> v2 = new Vector<Object>(size);
         for (int i = 0; i < size; i++)
         {
             v1.addElement(ary1[i]);
@@ -118,21 +118,21 @@ public class Util
      * @return the list of tokens representing the current statement leading up
      *         to the <code>currentOffset</code>.
      */
-    public static List grabCurrentPlSqlTokens(IDocument document,
+    public static List<String> grabCurrentPlSqlTokens(IDocument document,
                                               int currentOffset,
                                               boolean emptyLineIsSeparator)
     {
         // this is the list of tokens representing the current statement leading
         // up to the
         // currentOffset
-        List tokenList = new ArrayList();
+        List<String> tokenList = new ArrayList<String>();
         String toParse = grabCurrentPlSqlStatement(document,
                                                    currentOffset,
                                                    emptyLineIsSeparator);
         StringTokenizer st = new StringTokenizer(toParse, " \t()\r\n,");
         while (st.hasMoreTokens())
         {
-            tokenList.add(st.nextElement());
+            tokenList.add(st.nextToken());
         }
         return tokenList;
     }

@@ -23,8 +23,6 @@ public class PlSqlActionContributor extends TextEditorActionContributor
 
     protected RetargetTextEditorAction fContentAssistProposal;
     protected RetargetTextEditorAction fContentAssistTip;
-//    protected RetargetTextEditorAction fLoadToDatabase;
-    protected TextEditorAction         fTogglePresentation;
 
     public PlSqlActionContributor()
     {
@@ -36,12 +34,6 @@ public class PlSqlActionContributor extends TextEditorActionContributor
                 "ContentAssistTip.");
         fContentAssistTip
                 .setActionDefinitionId("org.eclipse.ui.edit.text.contentAssist.contextInformation");
-
-//        fLoadToDatabase = new RetargetTextEditorAction(PlSqlEditorMessages.getResourceBundle(),
-//                "LoadToDatabase.");
-//        fLoadToDatabase.setActionDefinitionId("plsqleditor.loadToDatabase");
-
-        fTogglePresentation = new PresentationAction();
     }
 
     public void init(IActionBars bars)
@@ -55,12 +47,6 @@ public class PlSqlActionContributor extends TextEditorActionContributor
             editMenu.add(fContentAssistProposal);
             editMenu.add(fContentAssistTip);
         }
-        IToolBarManager toolBarManager = bars.getToolBarManager();
-        if (toolBarManager != null)
-        {
-            toolBarManager.add(new Separator());
-            toolBarManager.add(fTogglePresentation);
-        }
     }
 
     private void doSetActiveEditor(IEditorPart part)
@@ -73,8 +59,6 @@ public class PlSqlActionContributor extends TextEditorActionContributor
         }
         fContentAssistProposal.setAction(getAction(editor, "ContentAssistProposal"));
         fContentAssistTip.setAction(getAction(editor, "ContentAssistTip"));
-        fTogglePresentation.setEditor(editor);
-        fTogglePresentation.update();
     }
 
     public void setActiveEditor(IEditorPart part)

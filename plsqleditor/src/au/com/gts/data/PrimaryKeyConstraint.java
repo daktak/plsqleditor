@@ -17,9 +17,6 @@ public class PrimaryKeyConstraint extends Constraint
      */
     private static final long serialVersionUID = 3689626978315679288L;
 
-    /** This field represents the primary key of this constraint.*/
-    private Column myPrimaryKeyColumn;
-    
     /** This field represents the sequence number of this primary key. */
     private short  mySequenceNumber;
     
@@ -36,8 +33,7 @@ public class PrimaryKeyConstraint extends Constraint
      */
     public PrimaryKeyConstraint(String name, Column pkColumn, short seqNum)
     {
-        setName(name);
-        myPrimaryKeyColumn = pkColumn;
+    	super(name, pkColumn);
         mySequenceNumber   = seqNum;
     }
     /**
@@ -45,7 +41,7 @@ public class PrimaryKeyConstraint extends Constraint
      */
     public Column getPrimaryKeyColumn()
     {
-        return myPrimaryKeyColumn;
+        return getPrimaryColumn();
     }
     /**
      * @return Returns the sequenceNumber.
@@ -54,4 +50,14 @@ public class PrimaryKeyConstraint extends Constraint
     {
         return mySequenceNumber;
     }
+    
+	public String getDisplayName()
+    {
+    	return getName() + " Primary Key"; 
+    }
+	
+	public String toString()
+	{
+		return "Primary Key " + super.toString();
+	}
 }

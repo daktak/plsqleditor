@@ -55,7 +55,7 @@ public class ConnectionDetails
      * 
      * @param name The name to set.
      */
-    public void setName(String name)
+    protected void setName(String name)
     {
         myName = name;
     }
@@ -77,7 +77,7 @@ public class ConnectionDetails
      * 
      * @param password The password to set.
      */
-    public void setPassword(String password)
+    protected void setPassword(String password)
     {
         myPassword = password;
     }
@@ -187,7 +187,7 @@ public class ConnectionDetails
     /**
      * @param connectString the connectString to set
      */
-    public void setConnectString(String connectString)
+    protected void setConnectString(String connectString)
     {
         myConnectString = connectString;
     }
@@ -203,7 +203,7 @@ public class ConnectionDetails
     /**
      * @param schemaName the schemaName to set
      */
-    public void setSchemaName(String schemaName)
+    protected void setSchemaName(String schemaName)
     {
         mySchemaName = schemaName;
     }

@@ -18,7 +18,7 @@ import plsqleditor.PlsqleditorPlugin;
  * 
  * @author Toby Zines
  * 
- * Created on 22/02/2005
+ * @deprecated Not required any more
  */
 public class PlSqlDocumentSetupParticipant implements IDocumentSetupParticipant
 {

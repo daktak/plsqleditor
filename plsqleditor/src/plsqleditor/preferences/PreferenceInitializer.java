@@ -21,14 +21,14 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
     public void initializeDefaultPreferences()
     {
         IPreferenceStore store = PlsqleditorPlugin.getDefault().getPreferenceStore();
-        store.setDefault(PreferenceConstants.P_BACKGROUND_COLOUR, convert(IPlSqlColorConstants.WHITE));
-        store.setDefault(PreferenceConstants.P_COMMENT_COLOUR, convert(IPlSqlColorConstants.SINGLE_LINE_COMMENT));
-        store.setDefault(PreferenceConstants.P_CONSTANT_COLOUR, convert(IPlSqlColorConstants.CONSTANT));
-        store.setDefault(PreferenceConstants.P_JAVADOC_COLOUR, convert(IPlSqlColorConstants.MULTI_LINE_COMMENT));
-        store.setDefault(PreferenceConstants.P_KEYWORD_COLOUR, convert(IPlSqlColorConstants.KEYWORD));
-        store.setDefault(PreferenceConstants.P_OPERATOR_COLOUR, convert(IPlSqlColorConstants.OPERATOR));
-        store.setDefault(PreferenceConstants.P_STRING_COLOUR, convert(IPlSqlColorConstants.STRING));
-        store.setDefault(PreferenceConstants.P_TYPE_COLOUR, convert(IPlSqlColorConstants.TYPE));
+//        store.setDefault(PreferenceConstants.P_BACKGROUND_COLOUR, convert(IPlSqlColorConstants.WHITE));
+//        store.setDefault(PreferenceConstants.P_COMMENT_COLOUR, convert(IPlSqlColorConstants.SINGLE_LINE_COMMENT));
+//        store.setDefault(PreferenceConstants.P_CONSTANT_COLOUR, convert(IPlSqlColorConstants.CONSTANT));
+//        store.setDefault(PreferenceConstants.P_JAVADOC_COLOUR, convert(IPlSqlColorConstants.MULTI_LINE_COMMENT));
+//        store.setDefault(PreferenceConstants.P_KEYWORD_COLOUR, convert(IPlSqlColorConstants.KEYWORD));
+//        store.setDefault(PreferenceConstants.P_OPERATOR_COLOUR, convert(IPlSqlColorConstants.OPERATOR));
+//        store.setDefault(PreferenceConstants.P_STRING_COLOUR, convert(IPlSqlColorConstants.STRING));
+//        store.setDefault(PreferenceConstants.P_TYPE_COLOUR, convert(IPlSqlColorConstants.TYPE));
         store.setDefault(PreferenceConstants.P_EDITOR_TAB_WIDTH, 4);
 
         store.setDefault(PreferenceConstants.P_DRIVER,"oracle.jdbc.driver.OracleDriver");
@@ -40,6 +40,8 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
         store.setDefault(PreferenceConstants.P_NUM_RESULT_SET_ROWS,200);
         store.setDefault(PreferenceConstants.P_AUTO_COMMIT_ON_CLOSE,false);
         store.setDefault(PreferenceConstants.P_SCHEMA_BROWSER_FILTER_LIST,"\\w*SYS,SYSMAN,SYSTEM,XDB,DBSNMP,\\w+PLUGINS");
+        store.setDefault(MarkOccurrencesPreferences.MARK_OCCURRENCES, true);
+        PreferenceConstants.initializeDefaultValues(store);
     }
 
     private String convert(RGB rgb)

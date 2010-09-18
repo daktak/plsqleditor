@@ -31,268 +31,270 @@ import org.eclipse.ui.part.ViewPart;
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.actions.LookupFileAction;
 import plsqleditor.actions.OpenLocationType;
-import plsqleditor.parsers.Segment;
-import plsqleditor.views.schema.SchemaBrowserContentProvider.TreeObject;
-import plsqleditor.views.schema.SchemaBrowserContentProvider.TreeParent;
-
+import au.com.gts.data.ForeignKeyConstraint;
 
 /**
  * This view shows data obtained from the singleton
  * SchemaBrowserContentProvider.
- * <p>
- * 
- * <p>
  */
 
 public class SchemaBrowserView extends ViewPart
 {
-    public static final String theId = "plsqleditor.views.SchemaBrowserView";
-    TreeViewer                 viewer;
-    private DrillDownAdapter   drillDownAdapter;
-    private Action             goToFileAction;
-    private Action             showGrantsAction;
-    private Action             loadFromDatabaseAction;
-    Action                     doubleClickAction;
+	public static final String theId = "plsqleditor.views.SchemaBrowserView";
+	TreeViewer viewer;
+	private DrillDownAdapter drillDownAdapter;
+	private Action goToFileAction;
+	private Action refreshAction;
 
-    /*
-     * The content provider class is responsible for providing objects to the
-     * view. It can wrap existing objects in adapters or simply return objects
-     * as-is. These objects may be sensitive to the current input of the view,
-     * or ignore it and always show the same content (like Task List, for
-     * example).
-     */
+	/*
+	 * The content provider class is responsible for providing objects to the
+	 * view. It can wrap existing objects in adapters or simply return objects
+	 * as-is. These objects may be sensitive to the current input of the view,
+	 * or ignore it and always show the same content (like Task List, for
+	 * example).
+	 */
 
-    class ViewLabelProvider extends LabelProvider
-    {
+	class ViewLabelProvider extends LabelProvider
+	{
+		public String getText(Object obj)
+		{
+			if (obj != null && obj instanceof TreeObject)
+			{
+				return ((TreeObject) obj).getDisplayName();
+			}
+			return String.valueOf(obj);
+		}
 
-        public String getText(Object obj)
-        {
-            return obj.toString();
-        }
+		public Image getImage(Object obj)
+		{
+			PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
 
-        public Image getImage(Object obj)
-        {
-            PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
+			String imageKey = ISharedImages.IMG_OBJ_ELEMENT;
+			if (obj instanceof TreeParent)
+			{
+				TreeParent tp = (TreeParent) obj;
+				imageKey = tp.getImageKey();
+				if (imageKey == null)
+				{
+					imageKey = ISharedImages.IMG_OBJ_FOLDER;
+				}
+			}
+			else if (obj instanceof TreeObject)
+			{
+				TreeObject treeObj = (TreeObject) obj;
+				Image image = plugin.getImageRegistry().get(
+						treeObj.getImageKey());
+				if (image != null)
+				{
+					return image;
+				}
+			}
+			Image image = plugin.getImageRegistry().get(imageKey);
+			if (image == null)
+			{
+				image = PlatformUI.getWorkbench().getSharedImages().getImage(
+						imageKey);
+			}
+			return image;
+		}
+	}
 
-            String imageKey = ISharedImages.IMG_OBJ_ELEMENT;
-            if (obj instanceof TreeParent)
-            {
-                imageKey = ISharedImages.IMG_OBJ_FOLDER;
-            }
-            else if (obj instanceof TreeObject)
-            {
-                TreeObject treeObj = (TreeObject) obj;
-                Object containedObject = treeObj.getObject();
-                if (containedObject instanceof Segment)
-                {
-                    Segment seg = (Segment) containedObject;
-                    Image image = plugin.getImageRegistry()
-                            .get("Schema" + seg.getType().toString());
-                    if (image != null)
-                    {
-                        return image;
-                    }
-                }
-            }
-            return PlatformUI.getWorkbench().getSharedImages().getImage(imageKey);
-        }
-    }
+	/**
+	 * The constructor.
+	 */
+	public SchemaBrowserView()
+	{
+		//
+	}
 
-    class NameSorter extends ViewerSorter
-    {
-        //
-    }
+	/**
+	 * This is a callback that will allow us to create the viewer and initialize
+	 * it.
+	 */
+	public void createPartControl(Composite parent)
+	{
+		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
+		drillDownAdapter = new DrillDownAdapter(viewer);
+		viewer.setContentProvider(SchemaBrowserContentProvider.getInstance());
+		viewer.setLabelProvider(new ViewLabelProvider());
+		viewer.setSorter(new ViewerSorter());
+		viewer.setInput(getViewSite());
+		makeActions();
+		hookContextMenu();
+		hookDoubleClickAction();
+		contributeToActionBars();
+		getSite().setSelectionProvider(viewer);
+	}
 
-    /**
-     * The constructor.
-     */
-    public SchemaBrowserView()
-    {
-        //
-    }
+	private void hookContextMenu()
+	{
+		MenuManager menuMgr = new MenuManager("#PopupMenu");
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener()
+		{
+			public void menuAboutToShow(IMenuManager manager)
+			{
+				SchemaBrowserView.this.fillContextMenu(manager);
+			}
+		});
+		Menu menu = menuMgr.createContextMenu(viewer.getControl());
+		viewer.getControl().setMenu(menu);
+		getSite().registerContextMenu(menuMgr, viewer);
+	}
 
-    /**
-     * This is a callback that will allow us to create the viewer and initialize
-     * it.
-     */
-    public void createPartControl(Composite parent)
-    {
-        viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-        drillDownAdapter = new DrillDownAdapter(viewer);
-        viewer.setContentProvider(SchemaBrowserContentProvider.getInstance());
-        viewer.setLabelProvider(new ViewLabelProvider());
-        viewer.setSorter(new NameSorter());
-        viewer.setInput(getViewSite());
-        makeActions();
-        hookContextMenu();
-        hookDoubleClickAction();
-        contributeToActionBars();
-    }
+	private void contributeToActionBars()
+	{
+		IActionBars bars = getViewSite().getActionBars();
+		fillLocalPullDown(bars.getMenuManager());
+		fillLocalToolBar(bars.getToolBarManager());
+	}
 
-    private void hookContextMenu()
-    {
-        MenuManager menuMgr = new MenuManager("#PopupMenu");
-        menuMgr.setRemoveAllWhenShown(true);
-        menuMgr.addMenuListener(new IMenuListener()
-        {
-            public void menuAboutToShow(IMenuManager manager)
-            {
-                SchemaBrowserView.this.fillContextMenu(manager);
-            }
-        });
-        Menu menu = menuMgr.createContextMenu(viewer.getControl());
-        viewer.getControl().setMenu(menu);
-        getSite().registerContextMenu(menuMgr, viewer);
-    }
+	private void fillLocalPullDown(IMenuManager manager)
+	{
+		manager.add(goToFileAction);
+		manager.add(new Separator());
+	}
 
-    private void contributeToActionBars()
-    {
-        IActionBars bars = getViewSite().getActionBars();
-        fillLocalPullDown(bars.getMenuManager());
-        fillLocalToolBar(bars.getToolBarManager());
-    }
+	void fillContextMenu(IMenuManager manager)
+	{
+		manager.add(goToFileAction);
+		manager.add(new Separator());
 
-    private void fillLocalPullDown(IMenuManager manager)
-    {
-        manager.add(goToFileAction);
-        manager.add(new Separator());
-    }
+		drillDownAdapter.addNavigationActions(manager);
+		// Other plug-ins can contribute there actions here
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+	}
 
-    void fillContextMenu(IMenuManager manager)
-    {
-        manager.add(goToFileAction);
-        manager.add(new Separator());
-        boolean isSeparatorRequired = false;
+	private void fillLocalToolBar(IToolBarManager manager)
+	{
+		manager.add(refreshAction);
+		manager.add(goToFileAction);
+		manager.add(new Separator());
+		drillDownAdapter.addNavigationActions(manager);
+	}
 
-        ISelection selection = viewer.getSelection();
-        if (selection != null)
-        {
-            Object obj = ((IStructuredSelection) selection).getFirstElement();
-            if (obj instanceof TreeObject)
-            {
-                TreeObject treeObject = (TreeObject) obj;
-                String type = treeObject.getType();
-                String schema = treeObject.getNameForType("Schema");
-                if (schema != null && schema.length() > 0)
-                {
-                    loadFromDatabaseAction = SchemaBrowserContentProvider.getInstance()
-                            .getOpenDatabasePackageAction(viewer, schema);
-                    showGrantsAction = SchemaBrowserContentProvider.getInstance()
-                            .getShowGrantsAction(viewer, schema);
-                    if (type.equals("Package"))
-                    {
-                        isSeparatorRequired = true;
-                        manager.add(showGrantsAction);
-                    }
-                    if (type.equals("Package"))
-//                        && (treeObject instanceof TreeParent))
-//                            && ((TreeParent) treeObject).getChildren().length == 0)
-                    {
-                        isSeparatorRequired = true;
-                        manager.add(loadFromDatabaseAction);
-                    }
-                }
-            }
-            if (isSeparatorRequired)
-            {
-                manager.add(new Separator());
-            }
-        }
+	private void makeActions()
+	{
+		refreshAction = new Action()
+		{
+			public void run()
+			{
+				SchemaBrowserContentProvider provider = (SchemaBrowserContentProvider) viewer
+						.getContentProvider();
+				provider.refresh(true);
+				viewer.refresh();
+			}
+		};
+		refreshAction.setText("Refresh");
+		refreshAction.setToolTipText("Refresh the tree from the top");
+		refreshAction.setImageDescriptor(PlsqleditorPlugin
+				.getImageDescriptor("icons/NewSheet.gif"));
 
-        drillDownAdapter.addNavigationActions(manager);
-        // Other plug-ins can contribute there actions here
-        manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-    }
+		goToFileAction = new Action()
+		{
+			public void run()
+			{
+				goToFile();
+			}
+		};
+		goToFileAction.setText("Go to File");
+		goToFileAction
+				.setToolTipText("This takes you to the file if there is a file representing this object");
+		goToFileAction.setImageDescriptor(PlatformUI.getWorkbench()
+				.getSharedImages().getImageDescriptor(
+						SharedImages.IMG_OPEN_MARKER));
+	}
 
-    private void fillLocalToolBar(IToolBarManager manager)
-    {
-        manager.add(goToFileAction);
-        manager.add(new Separator());
-        drillDownAdapter.addNavigationActions(manager);
-    }
+	/**
+	 * This method navigates from the selected node in the schema browser to the
+	 * file that the node is backed by. If the node is not backed by a file, a
+	 * message will pop up indicating this.
+	 */
+	void goToFile()
+	{
+		ISelection selection = viewer.getSelection();
+		Object obj = ((IStructuredSelection) selection).getFirstElement();
+		if (obj instanceof TreeObject)
+		{
+			TreeObject treeObject = (TreeObject) obj;
+			IFile file = treeObject.getFile();
+			if (file != null)
+			{
+				IWorkbenchPart part = getSite().getPart();
+				String schemaName = treeObject.getNameForType("Schema");
+				String packageName = treeObject.getNameForType("Package");
 
-    private void makeActions()
-    {
-        goToFileAction = new Action()
-        {
-            public void run()
-            {
-                goToFile();
-            }
+				LookupFileAction.openEditor(part, treeObject.getName(),
+						OpenLocationType.Method, schemaName, packageName);
+			}
+			else
+			{
+				// TODO extend this to use the db loaded version if there is no
+				// file based one
+				showMessage("There is no file for the object [" + obj + "]");
+			}
+		}
+		else
+		{
+			showMessage("Not a tree object");
+		}
+	}
 
-        };
-        goToFileAction.setText("Go to File");
-        goToFileAction
-                .setToolTipText("This takes you to the file if there is a file representing this object");
-        goToFileAction.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages()
-                .getImageDescriptor(SharedImages.IMG_OPEN_MARKER));
+	private void hookDoubleClickAction()
+	{
+		viewer.addDoubleClickListener(new IDoubleClickListener()
+		{
+			public void doubleClick(DoubleClickEvent event)
+			{
+				ISelection selection = event.getSelection();
+				Object obj = ((IStructuredSelection) selection)
+						.getFirstElement();
+				if (obj instanceof TreeObject)
+				{
+					TreeObject treeObject = (TreeObject) obj;
+					String type = treeObject.getType();
+					if (type.equals("Package"))
+					{
+						// TODO extend this to deal with functions, procs,
+						// types, triggers
+						goToFile();
+					}
+					else if (type.equals("Segment"))
+					{
+						goToFile();						
+					}
+					else if (type.equals("Constraint"))
+					{
+						Object tobj = treeObject.getObject();
+						if (tobj instanceof ForeignKeyConstraint)
+						{
+							// TODO navigate to the pk column
+						}
+						else
+						{
+							showMessage("No navigation from this object");
+						}
+					}
+					else
+					{
+						showMessage("No navigation from this object");
+					}
+				}
+			}
+		});
+	}
 
-        doubleClickAction = new Action()
-        {
-            public void run()
-            {
-                goToFile();
-            }
-        };
-    }
+	void showMessage(String message)
+	{
+		MessageDialog.openInformation(viewer.getControl().getShell(),
+				"Schema Browser", message);
+	}
 
-    /**
-     * This method navigates from the selected node in the schema browser to the
-     * file that the node is backed by. If the node is not backed by a file, a
-     * message will pop up indicating this.
-     */
-    void goToFile()
-    {
-        ISelection selection = viewer.getSelection();
-        Object obj = ((IStructuredSelection) selection).getFirstElement();
-        if (obj instanceof TreeObject)
-        {
-            TreeObject treeObject = (TreeObject) obj;
-            IFile file = treeObject.getFile();
-            if (file != null)
-            {
-                IWorkbenchPart part = getSite().getPart();
-                String schemaName = treeObject.getNameForType("Schema");
-                String packageName = treeObject.getNameForType("Package");
-
-                LookupFileAction.openEditor(part,
-                                            treeObject.getName(),
-                                            OpenLocationType.Method,
-                                            schemaName,
-                                            packageName);
-            }
-            else
-            {
-                showMessage("There is no file for the object [" + obj + "]");
-            }
-        }
-        else
-        {
-            showMessage("Not a tree object");
-        }
-    }
-
-    private void hookDoubleClickAction()
-    {
-        viewer.addDoubleClickListener(new IDoubleClickListener()
-        {
-            public void doubleClick(DoubleClickEvent event)
-            {
-                doubleClickAction.run();
-            }
-        });
-    }
-
-    void showMessage(String message)
-    {
-        MessageDialog.openInformation(viewer.getControl().getShell(), "Schema Browser", message);
-    }
-
-    /**
-     * Passing the focus request to the viewer's control.
-     */
-    public void setFocus()
-    {
-        viewer.getControl().setFocus();
-    }
+	/**
+	 * Passing the focus request to the viewer's control.
+	 */
+	public void setFocus()
+	{
+		viewer.getControl().setFocus();
+	}
 }

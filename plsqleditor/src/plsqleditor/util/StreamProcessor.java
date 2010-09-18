@@ -27,8 +27,11 @@ public class StreamProcessor extends Thread
             String line = null;
             while ((line = br.readLine()) != null)
             {
-                PlsqleditorPlugin.getDefault().log(type + " Processor >" + line, null);
+            	String msg = type + " Processor > " + line;
+            	PlsqleditorPlugin.log(msg, null); // TODO remove this next release
+                PlsqleditorPlugin.getDefault().sendMessageToConsole(msg);
             }
+            PlsqleditorPlugin.getDefault().showConsole();
         }
         catch (IOException ioe)
         {

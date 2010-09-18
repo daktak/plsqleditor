@@ -47,7 +47,7 @@
     <template context="plsqleditor.template.pldoc"
 		description="%pldoc.closelistitem.desc"
 		id="plsqleditor.template.pldoc.closelistitem"
-		name="%pldoc.closelist.name">&lt;/li&gt;</template>
+		name="%pldoc.closelistitem.name">&lt;/li&gt;</template>
     <template context="plsqleditor.template.pldoc"
 		description="%pldoc.paragraph.desc"
 		id="plsqleditor.template.pldoc.paragraph"
@@ -134,6 +134,22 @@ END LOOP;</template>
     ${cursor} := ${arrayname}(n);
 END LOOP;</template>
 	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.whilehash.desc"
+		id="plsqleditor.template.plsql.whilehash"
+		name="%plsql.tasks.whilehash.name">${hash_key} := ${hashtable}.first;
+WHILE ${hash_key} IS NOT NULL LOOP
+    ${hash_value} := ${hashtable}(${hash_key});
+    ${cursor};
+    ${hash_key} :=  ${hashtable}.next(${hash_key});
+END LOOP;</template>
+	<template context="plsqleditor.template.plsql"
+		description="%plsql.tasks.whileloop.desc"
+		id="plsqleditor.template.plsql.whileloop"
+		name="%plsql.tasks.whileloop.name">${hash_key} := ${hashtable}.first;
+WHILE ${condition} LOOP
+    ${cursor}
+END LOOP;</template>
+	<template context="plsqleditor.template.plsql"
 		description="%plsql.tasks.beginwhen.desc"
 		id="plsqleditor.template.plsql.beginwhen"
 		name="%plsql.tasks.beginwhen.name">BEGIN 
@@ -156,7 +172,7 @@ END;</template>
 /**
  * This package represents ...
  *
- * @version $$Id${file_name},v 1.0 2005/04/21 00:51:42 tobyz Exp Exp $$
+ * @version $$Id${file_name},v 1.2 2008/06/29 06:00:18 tobyz Exp ${file_name},v 1.0 2005/04/21 00:51:42 tobyz Exp $$
  *
  * @headcom
  */

@@ -18,9 +18,6 @@ import plsqleditor.db.LoadPackageManager;
  */
 public class OpenConnectionList
 {
-
-    private final int                  COUNT           = 10;
-    private List<LiveConnection>       connections     = new ArrayList<LiveConnection>(COUNT);
     private Set<IConnectionListViewer> changeListeners = new HashSet<IConnectionListViewer>();
 
     /**
@@ -90,7 +87,6 @@ public class OpenConnectionList
      */
     public void removeConnection(LiveConnection conn)
     {
-        connections.remove(conn);
         if (conn.getType().equals(LiveConnection.DBA_CONNECTION))
         {
             DbUtility.closeDbaConnection(conn.getProject());

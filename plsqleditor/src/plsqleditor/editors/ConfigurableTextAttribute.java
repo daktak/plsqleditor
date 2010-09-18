@@ -8,9 +8,11 @@ package plsqleditor.editors;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
 import org.eclipse.jface.text.TextAttribute;
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 
 import plsqleditor.PlsqleditorPlugin;
+import plsqleditor.preferences.PreferenceConstants;
 
 /**
  * This class
@@ -22,16 +24,18 @@ import plsqleditor.PlsqleditorPlugin;
 public class ConfigurableTextAttribute extends TextAttribute
 {
     private String myForegroundString;
-    private String myBackGroundString;
+    //private String myBackGroundString;
+    private int myStyle;
+	private IPreferenceStore myStore;
 
     /**
      * This method
      * 
      * @return The preferences store.
      */
-    static IPreferenceStore prefs()
+    private IPreferenceStore prefs()
     {
-        return PlsqleditorPlugin.getDefault().getPreferenceStore();
+        return myStore;
     }
 
     static ColorManager cm()
@@ -44,12 +48,14 @@ public class ConfigurableTextAttribute extends TextAttribute
      * @param background
      * @param style
      */
-    public ConfigurableTextAttribute(String foreground, String background, int style)
+    public ConfigurableTextAttribute(IPreferenceStore store, String foreground, String background, int style)
     {
-        super(cm().getColor(PreferenceConverter.getColor(prefs(), foreground)), cm()
-                .getColor(PreferenceConverter.getColor(prefs(), background)), style);
+        super(cm().getColor(PreferenceConverter.getColor(store, foreground)), null,
+        		/*cm().getColor(PreferenceConverter.getColor(store, background)),*/ style);
         myForegroundString = foreground;
-        myBackGroundString = background;
+        //myBackGroundString = background;
+        myStore = store;
+        myStyle = style;
     }
 
     /**
@@ -67,8 +73,27 @@ public class ConfigurableTextAttribute extends TextAttribute
      * 
      * @return the attribute's background color
      */
-    public Color getBackground()
-    {
-        return cm().getColor(PreferenceConverter.getColor(prefs(), myBackGroundString));
-    }
+//    public Color getBackground()
+//    {
+//        return cm().getColor(PreferenceConverter.getColor(prefs(), myBackGroundString));
+//    }
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.text.TextAttribute#getStyle()
+	 */
+	@Override
+	public int getStyle()
+	{
+		if (myStyle == -1)
+		{
+	    	int style = SWT.NORMAL;
+	        String boldPref = myForegroundString + PreferenceConstants.EDITOR_BOLD_SUFFIX;
+	        if (prefs().getBoolean(boldPref))
+	        {
+	        	style = SWT.BOLD;
+	        }
+	        return style;
+		}
+		return myStyle;
+	}
 }

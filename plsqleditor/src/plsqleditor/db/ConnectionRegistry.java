@@ -13,8 +13,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IPath;
 
-import plsqleditor.editors.MultiPagePlsqlEditor;
-
 /**
  * This class represents the stored connection details that can be used by
  * anyone to reconnect to a remembered database as a particular user.

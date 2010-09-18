@@ -11,6 +11,8 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import plsqleditor.editors.MultiPagePlsqlEditor;
+
 /**
  * This class
  * 
@@ -64,11 +66,15 @@ public abstract class AbstractMenuAction implements IActionDelegate
             if (page != null)
             {
                 IEditorPart editor = page.getActiveEditor();
-                if (editor != null && (editor instanceof ITextEditor))
+                if (editor != null)
                 {
                     if (editor instanceof ITextEditor)
                     {
                         myEditor = (ITextEditor) editor;
+                    }
+                    else if (editor instanceof MultiPagePlsqlEditor)
+                    {
+                    	myEditor = ((MultiPagePlsqlEditor) editor).getEditor();
                     }
                 }
                 else

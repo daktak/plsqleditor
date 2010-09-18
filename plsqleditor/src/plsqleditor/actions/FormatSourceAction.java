@@ -29,11 +29,11 @@ public class FormatSourceAction extends SelectedTextAction
         Shell shell = new Shell();
 
         String [] packageName = new String[1];
-        List segments = null;
+        List<Segment> segments = null;
         try
         {
             segments = theBodyParser.parseFile(doc, packageName, new SegmentType[0]);
-            for (Iterator it = segments.iterator(); it.hasNext();)
+            for (Iterator<Segment> it = segments.iterator(); it.hasNext();)
             {
                 Segment seg = (Segment) it.next();
                 System.out.println(seg.format());

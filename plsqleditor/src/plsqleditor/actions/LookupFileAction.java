@@ -149,7 +149,7 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
                 }
                 else
                 {
-                    List segments = plugin.getSegments(input.getFile(), doc, false);
+                    List<Segment> segments = plugin.getSegments(input.getFile(), doc, false);
                     navigateToSegment(part, identifier, segments, documentOffset);
                 }
             }
@@ -173,14 +173,17 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
      * 
      * @return <code>true</code> if the segment was found in the document, and false otherwise.
      */
-    private static boolean navigateToSegment(IEditorPart part, String identifier, List segments, int documentOffset)
+    private static boolean navigateToSegment(IEditorPart part, String identifier, List<Segment> segments, int documentOffset)
     {
+    	// TODO differentiate between methods of the same name
         Segment s = PlSqlParserManager.instance().findNamedSegment(segments, identifier, documentOffset);
         if (s != null)
         {
-            // TODO differentiate between methods of the same name
+        	MultiPagePlsqlEditor mpe = (MultiPagePlsqlEditor) part;
+
             Position p = s.getPosition();
-            part.getSite().getSelectionProvider().setSelection(new TextSelection(p.getOffset(), p.getLength()));
+            mpe.selectAndReveal(p.getOffset(), p.length);
+            //part.getSite().getSelectionProvider().setSelection(new TextSelection(p.getOffset(), p.getLength()));
             return true;
         }
         return false;
@@ -223,7 +226,7 @@ public class LookupFileAction implements IWorkbenchWindowActionDelegate
                         }
                         else // openLocType == OpenLocationType.Method
                         {
-                            List<?> segments = plugin.getSegments(file, ((MultiPagePlsqlEditor) epart).getEditor().getDocumentProvider().getDocument(epart.getEditorInput()), false);
+                            List<Segment> segments = plugin.getSegments(file, ((MultiPagePlsqlEditor) epart).getEditor().getDocumentProvider().getDocument(epart.getEditorInput()), false);
                             if (navigateToSegment(epart, identifier, segments, 0))
                             {
                                 break;

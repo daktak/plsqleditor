@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?NLS TYPE="org.eclipse.help.toc"?>
+
+<toc label="Concepts" link_to="toc.xml#concepts"> 
+	<topic label="File Management"  href="html/concepts/doc/how_to_use.html"> 
+		<topic label="Editing Files" href="html/concepts/editing_files.html" /> 
+		<topic label="Todo Lists" href="html/concepts/todo_lists.html" /> 
+		<topic label="FAQ" href="html/concepts/doc/faq.html" /> 
+	</topic>
+	<topic label="Database Management" href="html/concepts/dbcon/db_access_and_updating_the_db.html">
+		<topic label="Database Connectivity" href="html/concepts/dbcon/database_connectivity.html" /> 
+		<topic label="Schema Browser" href="html/concepts/schema_browser.html" /> 
+		<topic label="File Specific Database Connections" href="html/concepts/file_specific_connections.html" /> 
+	</topic> 
+</toc>

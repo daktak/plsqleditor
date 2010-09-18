@@ -1,0 +1,185 @@
+DROP TABLE msg_info;
+CREATE TABLE msg_info (
+   msgcode INTEGER,
+   msgtype VARCHAR2(30),
+   msgtext VARCHAR2(2000),
+   msgname VARCHAR2(30),
+   description VARCHAR2(2000)
+   );
+-- don't comment above this line.. (using /**/)
+-- this problem may be resolved in future releases
+-- this is a demo file of what a pkg file must look like to work properly
+-- any issues that you have with the format of this file should be raised
+-- as bug requests :-)
+CREATE OR REPLACE PACKAGE msginfo IS
+/*
+ * This comment here is VITAL - without this the parse will not work properly. 
+ */
+/**
+ * @param code_in
+ * @param type_in
+ * @param use_sqlerrm
+ * @param param
+ * @param return
+ * @return VARCHAR2
+ */
+   FUNCTION text (
+      code_in IN INTEGER, 
+      type_in IN VARCHAR2, 
+      use_sqlerrm IN BOOLEAN := TRUE) 
+      RETURN VARCHAR2;
+
+/**
+ * @param code_in
+ * @param type_in
+ * @param name_in
+ * @param oradev_use
+ * @param END
+ * @return VARCHAR2
+ */
+   FUNCTION name (
+      code_in IN INTEGER,
+      type_in IN VARCHAR2) 
+      RETURN VARCHAR2;
+   /**
+    * @param name_in
+    * @param oradev_use
+    * @param END
+    */
+   PROCEDURE genpkg (
+      name_in IN VARCHAR2,
+      oradev_use IN BOOLEAN := FALSE);
+END msginfo;
+/
+
+-- no comments here either
+-- put them after the create or replace line
+CREATE OR REPLACE PACKAGE BODY msginfo IS
+/*
+ * 
+ */
+
+/**
+ * @param code_in
+ * @param type_in
+ * @return msg_info
+ */
+FUNCTION msgrow (
+      code_in IN INTEGER,
+      type_in IN VARCHAR2) 
+      RETURN msg_info%ROWTYPE
+   IS
+      CURSOR msg_cur IS
+         SELECT * 
+           FROM msg_info
+          WHERE msgtype = type_in
+            AND msgcode = code_in;
+
+      msg_rec msg_info%ROWTYPE;
+   BEGIN
+      OPEN msg_cur;
+      FETCH msg_cur INTO msg_rec;
+      CLOSE msg_cur;
+      RETURN msg_rec;
+   END;
+
+/**
+ * @param code_in
+ * @param type_in
+ * @param use_sqlerrm
+ * @return VARCHAR2
+ */
+   FUNCTION text (
+      code_in IN INTEGER,
+      type_in IN VARCHAR2, 
+      use_sqlerrm IN BOOLEAN := TRUE) 
+      RETURN VARCHAR2
+   IS
+      msg_rec msg_info%ROWTYPE := msgrow (code_in, type_in);
+   BEGIN
+      IF msg_rec.msgtext IS NULL
+         AND
+         use_sqlerrm
+      THEN 
+         msg_rec.msgtext := SQLERRM (code_in); 
+      END IF;
+
+      RETURN msg_rec.msgtext;
+   END;
+
+/**
+ * @param code_in
+ * @param type_in
+ * @return VARCHAR2
+ */
+   FUNCTION name (
+      code_in IN INTEGER,
+      type_in IN VARCHAR2) 
+      RETURN VARCHAR2
+   IS
+      msg_rec msg_info%ROWTYPE := msgrow (code_in, type_in);
+   BEGIN
+      RETURN msg_rec.msgname;
+   END;
+
+PROCEDURE genpkg (
+      name_in IN VARCHAR2,
+      oradev_use IN BOOLEAN := FALSE) 
+      IS
+      CURSOR exc_20000 
+      IS
+         SELECT * 
+           FROM msg_info 
+          WHERE msgcode BETWEEN -20999 AND -20000
+            AND msgtype = 'EXCEPTION';
+   BEGIN
+      /* Simple generator, based on DBMS_OUTPUT. */
+      p.l ('CREATE OR REPLACE PACKAGE ' || name_in);
+      p.l ('IS ');
+      FOR msg_rec IN exc_20000 
+      LOOP
+         IF exc_20000%ROWCOUNT > 1
+         THEN
+            p.l (' ');
+         END IF;
+          
+         p.l ('   exc_' || msg_rec.msgname || ' EXCEPTION;');
+         p.l ('   en_' || msg_rec.msgname || 
+            ' CONSTANT INTEGER := ' || msg_rec.msgcode || ';');
+         p.l ('   PRAGMA EXCEPTION_INIT (exc_' || 
+              msg_rec.msgname || ', ' || 
+              msg_rec.msgcode || ');');
+
+         IF oradev_use
+         THEN
+            p.l ('   FUNCTION ' || msg_rec.msgname || ' RETURN INTEGER;');
+         END IF;
+      END LOOP;
+      p.l ('END ' || name_in || ';');
+      p.l ('/');
+
+      IF oradev_use
+      THEN
+         p.l ('CREATE OR REPLACE PACKAGE BODY ' || name_in);
+         p.l ('IS ');
+         FOR msg_rec IN exc_20000 
+         LOOP
+            p.l ('   FUNCTION ' || msg_rec.msgname || ' RETURN INTEGER');
+            p.l ('   IS BEGIN RETURN en_' || msg_rec.msgname || '; END;');
+            p.l ('   ');
+         END LOOP;
+         p.l ('END ' || name_in || ';');
+         p.l ('/');
+      END IF;
+   END;
+END msginfo;
+/ 
+ 
+/* Sample data to be used in package generation. */
+
+INSERT INTO msg_info VALUES 
+   (-20100, 'EXCEPTION', 'Balance too low', 'bal_too_low', 'Description');
+INSERT INTO msg_info VALUES 
+   (-20200, 'EXCEPTION', 'Employee too young', 'emp_too_young', 'Description');
+
+COMMIT;

@@ -1,0 +1,346 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Main Topic</title>
+</head>
+
+<body>
+<P>How to Use Toby's PL/SQL Editor. </P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0cm"><B>An example of a package body file</B> This example of
+	a <A HREF="tmp_fake.pkb">package body file</A> is not complete, but
+	it should give you an idea of how to write a package body file that
+	has the correct outline and parsing etc. 
+	<LI><P STYLE="margin-bottom: 0cm"><B>An example of a package body file to be wrapped</B> 
+	This example of	a <A HREF="tmp_fakewrapped.pkb">package body file to be wrapped</A>
+	should give you an idea of how to write a package body file that requires the comment to 
+	occur before the package name and will still have the correct outline and parsing etc. 
+	</P>
+	<LI><P STYLE="margin-bottom: 0cm"><B>An example of a pkg file (that
+	contains both header and body in one)</B> can be seen <A HREF="tmp_fakepkg.pkg">here</A>.</P>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Directory structure for you pl
+	sql code.</B> The best thing you can do is have your schemas in
+	separate directories - one directory per schema. This way it will be
+	easy for the editor to find all of your packages per schema. 
+	</P>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Package Naming Format</B> The
+	editor expects your package files to be named
+	schemaname_pkgname.pkb. If you don't name them in this way, there is
+	no guarantee that the editor will correctly assign your package to
+	its schema. You can override this by going to the preferences and
+	assigning particular packages to particular files. 
+	</P>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Database access support.</B>
+	There are several components of database access support. 
+	</P>
+	<OL>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Configuring default access to
+		the database</B> These connection details will be used by each
+		project if you do not set project specific connection settings.
+		They can be overridden by specifying project specific properties.
+		This involves navigating to the Database Connectivity Setup
+		Preference Page within the PL/SQL Preferences. Once you have
+		navigated there, you must specify an Oracle driver. The default
+		driver that is supplied with the plugin is
+		&quot;oracle.jdbc.driver.OracleDriver&quot;. You must also specify
+		the database connect url. It must be in the format
+		&quot;jdbc:oracle:thin:@hostname:1521:SID&quot; where the hostname
+		is the name of your database host (or localhost if local), the 1521
+		should map to your database port (although usually 1521 is the
+		correct port - it is the default) and SID is your Service
+		Identifier, the database id if you will. You can leave the initial
+		and max connections as 1 and 1, since I don't think it should be
+		possible to use more than one at a time within the eclipse
+		architecture. This is built in for future enhancements where the
+		same connection might be used for separate purposes. 
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Configuring the dba user for
+		database procedure/function content assist</B> This involves
+		modifying the user name and password on the same Database
+		Connectivity Setup Preferences Page. This can also be overridden
+		per project on the project properties Database Connectivity Setup
+		<I>Properties</I> Page. The user name and password here should have
+		dba access so they can query the schema, package and procedure
+		tables to allow content assist to present these methods to the
+		user. 
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Configuring each schema to
+		allow upload of code to the database.</B> 
+		The way that this had to be done prior to release 0.4.0 involved modifying
+		the schema objects in the Schema Mapping Preference Page screen
+		located on the properties page of a PlSql project. Each project may
+		have different schemas, so each project will need to be configured
+		individually. Each schema has a name, a list of comma separated
+		locations and a password. The schema name is the user and the
+		password is the password for that user. The database connection
+		string is the same as the dba database connection string and the
+		driver is the same too. By setting the password for a schema, you
+		allow yourself to upload code for that schema.<BR>If this
+		description is too brief, try a <A HREF="../dbcon/database_connectivity.html">visually
+		guided walkthrough</A>.
+		<b>HOWEVER, NEW FEATURE!</b> As of 0.4.0 you can right click in the editor of the open file you wish to 
+        set to a new schema and select the &lt;Change Schema for Package&gt; item from the popup menu.
+        This will allow you to specify the name of the package (which you can change to whatever package 
+        name you want, although it will be defaulted to the name it believes is correct) and the schema.
+        This will update the schema mappings to allow code loading and schema DML to be executed.
+        The old way still works, but the new way is much easier.
+		</P>
+	</OL>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Database Execution</B> 
+	</P>
+	<OL>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Executing sql to the database</B>
+		You can execute the selected block of text as a set of commands to
+		the database by selecting the block of text and pressing Ctrl-Alt-E
+		or right clicking and selecting Execute PL/SQL from the immediate
+		menu. You may also execute a block separated by empty lines above
+		and below by having the cursor on the block between the empty lines
+		and pressing Ctrl-Alt-E or right clicking and selecting Execute
+		PL/SQL from the immediate menu. 
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Loading a file to the database</B>
+		The editor allows you to load the package body or header that is currently open
+		to the database.
+		In the main preferences page (seen <A HREF="images/main_preferences.png">here</A>)
+		you can choose whether the load to database action should ask you to save
+		a dirty file before continuing. 
+		There are three options
+		<ul>
+			<li> Don't ask - This means the load to database will take the current file
+			without saving it</li>
+			<li> Always save - This means the load to database will always save a dirty file
+			before generating the header.</li>
+			<li> Prompt for save - This means that if the file is dirty the action will
+			ask the user if s/he wants to save prior to continuing. If the user says yes
+			the file will be saved, otherwise it will not, but the action will continue regardless</li>
+		</ul>
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Viewing DBMS Output</B> You
+		can turn dbms output on for each schema in which you are working.
+		In order to see (turn on) any dbms output you must open a file that
+		refers to that schema (and you can check this by pressing the
+		&ldquo;Display Debug Information&rdquo; button (<IMG SRC="images/target.gif" NAME="DebugIcon" ALIGN=BOTTOM WIDTH=16 HEIGHT=16 BORDER=0>).
+		Then you must open the DbmsOutput view (in Show View). Once this is
+		open you must press the button to turn it on (seen in this <A HREF="images/dbms_output_turn_on.png">image</A>)
+		and respond yes to the <A HREF="images/turn_on_dbms_msg.png">dialog</A>
+		asking you if you want to turn on that dbms output. This can be
+		used a a double check to ensure you are turning on dbms output for
+		the right schema. Turning it off simply uses the other button on
+		the view. 
+		</P>
+	</OL>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Code Editing</B> 
+	</P>
+	<OL>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Code Folding</B> Currently the
+		plsqleditor provides code folding so that you can right click on a
+		selected block and make it folding. You can also specify a code
+		fold by typing in the correct format folding. This is in the format
+		of the string &quot;--#startFolding&quot; <B>on a line all by
+		itself</B> to start and the string &quot;--#endFolding&quot; <B>on
+		a line all by itself</B> to finish. <BR>Code folding will be
+		updated eventually when I have implemented a parser, so that code
+		folding will also fold on blocks, ifs, loops, functions etc. 
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Uppercasing</B> You can
+		uppercase by pressing the uppercase button on the toolbar, or right
+		clicking and selecting uppercase from the PlSqlEdit menu, or
+		pressing Ctrl-Alt-U while you have selected the block to uppercase.
+				</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Lowercasing</B> You can
+		lowercase by pressing the lowercase button on the toolbar, or right
+		clicking and selecting lowercase from the PlSqlEdit menu, or
+		pressing Ctrl-Alt-O while you have selected the block to lowercase.
+				</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Commenting Code</B> You can
+		add a comment (--) to a line, or series of lines by right clicking
+		and selecting &quot;add a single comment to the beginning of the
+		line&quot; from the PlSqlEdit menu, or pressing Ctrl-/ while you
+		have the cursor over the line you want commented, or you have
+		selected a block to comment. 
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Uncommenting Code</B> You can
+		remove a comment (--) from a line, or series of lines by right
+		clicking and selecting &quot;remove a single comment from the
+		beginning of the line&quot; from the PlSqlEdit menu, or pressing
+		Ctrl-Shift-/ while you have the cursor over the line you want
+		uncommented, or you have selected a block to uncomment. 
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Shifting Code left and right</B> 
+		You can shift a set of lines of code right by selecting the block of 
+		code you wish shifted and pressing Tab. The functionality is also
+		available in the right click popup menu under the name &quot;Shift Right&quot;.
+		This will shift the code one tab to the right. You can shift the 
+		code to the left similarly by pressing Shift-Tab, or selecting the
+		&quot;Shift Left&quot; action from the right click popup menu.
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Generating Headers for package
+		bodies</B>
+		The editor allows you to generate headers for package body files.
+		In the main preferences page (seen <A HREF="images/main_preferences.png">here</A>)
+		you can choose whether the header generation action should ask you to save
+		a dirty file before continuing. 
+		There are three options
+		<ul>
+			<li> Don't ask - This means the header generation will take the current file
+			without saving it</li>
+			<li> Always save - This means the header generation will always save a dirty file
+			before generating the header.</li>
+			<li> Prompt for save - This means that if the file is dirty the action will
+			ask the user if s/he wants to save prior to continuing. If the user says yes
+			the file will be saved, otherwise it will not, but the action will continue regardless</li>
+		</ul>
+		Details<br>
+		<ul>
+		<li>Generating the headers requires that you correctly pldoc the procedures and functions
+		    that you wish to be part of the header. If you wish to pldoc a private function or
+		    procedure, you can mark it as private by placing an &quot;@private&quot; tag in the
+		    documentation.</li>
+		<li>If you need a package to have a non standard authid, you can place an 
+		    &quot;@authid current_user&quot; tag in the comment section that contains the
+		    header details. The example identified at the top of this documentation contains
+		    this example.
+		</li>
+		<li>If you need a procedure or method to have a pragma statement attached to the generated
+		    header, you can use the &quot;@pragma&quot; tag with the pragma statement after it.
+		    The example pkb file contains this.
+		</li>
+		</ul>
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Auto completing procedures and functions</B>
+		You can auto complete functions with the standard Ctrl-Space content assist.
+		The format that these come out in depends on the settings you select from
+		the Formatting Preferences (seen <A HREF="images/formatting_preferences.png">here</A>).
+		<ul>
+		<li> The &quot;Put Semi colon after proc/func calls&quot; allows the content assist
+		     to generate the semi colon after completion.</li>
+		<li> The &quot;Align the assignment arrows in proc/func calls&quot; allows the
+		     content assist to ensure all the assignment arrows (=%gt;) to be in the 
+		     same column.</li>
+		<li> The &quot;For procedure and function auto completion, use parameter Names
+		     instead of types&quot; allows the content assist to generate
+		     &quot;pis_name =&gt; pis_name&quot; instead of &quot;pis_name =&gt; blah%TYPE&quot; 
+		     </li>
+		<li> The &quot;For procedure and function auto completion, put parameters on
+		     new line&quot; allows the content assist to put each parameter declaration
+		     on a new line.</li>
+		<li> The &quot;For procedure and function auto completion, put commas on
+		     new line&quot; allows the content assist to put the commas in front of
+		     each parameter rather than after, i.e 
+		     &quot;,pis_name =&gt; t_type&quot; instead of &quot;pis_name =&gt; t_type,&quot; 
+		     </li>
+		</ul>
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>todo and fixme tasks</B>
+		You can add todo and fixme tags to a file. These will pop up in the task list
+		when you open the file, and you will see them marked in the ruler section of the editor.
+		<ul>
+		<li> TODO tasks will be medium priority</li>
+		<li> FIXME tasks will be high priority</li>
+		</ul>
+		</P>
+	</OL>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Pl Documentation Generation</B></P>
+</UL>
+<P STYLE="margin-left: 2cm; margin-bottom: 0cm">You can generate PL
+Doc documentation within the plsqleditor plugin. In order to do this,
+you must already have downloaded pldoc from somewhere. A possible
+site is <A HREF="http://pldoc.sourceforge.net/">http://pldoc.sourceforge.net/</A>
+</P>
+<P STYLE="margin-left: 2cm; margin-bottom: 0cm">Once you have
+downloaded the pldoc tool, you can configure it using the Pldoc
+Preferences <A HREF="images/pldoc_prefs_bare.png">page</A>,
+located under the PL/SQL Preferences section of the Eclipse
+Preferences.</P>
+<P STYLE="margin-left: 2cm; margin-bottom: 0cm">Most of the fields to
+enter are fairly obvious. 
+</P>
+<OL>
+	<LI><P STYLE="margin-bottom: 0cm">The Path should be the directory
+	that contains the pldoc.bat or pldoc.sh script.</P>
+	<LI><P STYLE="margin-bottom: 0cm">The Use of the output directory
+	Radio Group allows you to configure the output directory in one of
+	three ways:</P>
+	<OL>
+		<LI><P STYLE="margin-bottom: 0cm">Absolute &ndash; this means that
+		ALL files you execute pldoc on will be output to the same
+		directory. I don't recommend this, but if you are in a hurry, or
+		wish to specify something very specific for some purpose, you can
+		do this.</P>
+		<LI><P STYLE="margin-bottom: 0cm">Local File System Relative. This
+		assumes that the value you supply in the Output Directory field is
+		a <B>fully qualified </B><SPAN STYLE="font-weight: medium">directory.
+		It treats that values as a base directory</SPAN>. Then underneath
+		this base directory, it will append a copycat set of directories to
+		mimic the directory structure under the project owning the file
+		(including the project directory). So, if you have a project at
+		&ldquo;<FONT COLOR="#ff3366">DRIVE:/dev/eclipse/workspace/my_project</FONT>&rdquo;
+		and you specify an output directory called &ldquo;<FONT COLOR="#23ff23">DRIVE:/pldoc</FONT>&rdquo;,
+		and you try to generate pldoc for a file located at
+		&ldquo;<FONT COLOR="#0066cc">myschema/myschema_mypackage.pkh</FONT>&rdquo;
+		then the output files will be generated at 
+		&ldquo;<FONT COLOR="#23ff23">DRIVE:/pldoc</FONT><FONT COLOR="#ff3366">/my_project</FONT>/<FONT COLOR="#0066cc">myschema</FONT>&rdquo;.</P>
+		<LI><P STYLE="margin-bottom: 0cm">Project Relative. This will take
+		whatever value you supply in the Output Directory field and append
+		it as a directory (or set of directories) to the project that
+		contains the file. Then underneath this base directory, it will
+		append a copycat set of directories to mimic the directory
+		structure under the project owning the file (not including the
+		project directory, which is already higher up). So, if you have a
+		project at &ldquo;<FONT COLOR="#ff3366">DRIVE:/dev/eclipse/workspace/my_project</FONT>&rdquo;
+		and you specify an output directory called &ldquo;<FONT COLOR="#23ff23">pldoc</FONT>&rdquo;,
+		and you try to generate pldoc for a file located at
+		&ldquo;<FONT COLOR="#0066cc">myschema/myschema_mypackage.pkh</FONT>&rdquo;
+		then the output files will be generated at 
+		&ldquo;<FONT COLOR="#ff3366">DRIVE:/dev/eclipse/workspace/my_project</FONT>/<FONT COLOR="#23ff23">pldoc</FONT>/<FONT COLOR="#0066cc">myschema</FONT>&rdquo;.</P>
+	</OL>
+</OL>
+<P STYLE="margin-left: 2cm; margin-bottom: 0cm">PlDoc will only be
+executable from header files (pkh files).</P>
+<P STYLE="margin-left: 2cm; margin-bottom: 0cm">PLEASE NOTE that
+pldoc does not like the SHOW ERRORS command to be at the end of your
+file.  If you have that at the end of your header files, you may have
+to remove that for the process to work.</P>
+<UL>
+	<LI><P STYLE="margin-bottom: 0cm"><B>Schema Browsing</B> 
+	</P>
+	<P>It ought to be noted that the schema browser will run a query
+	against the database and make an attempt to retrieve information
+	concerning every schema and package in the database. This is
+	computationally and i/o operation intensive. Consequently, it is
+	useful to filter out the schemas whose packages you do not need to
+	see in the schema browser. These can be filtered by specifying a
+	list of regular expressions that, if matched will cause those
+	matched schemas to be ignored (for the purpose of displaying the
+	packages). It is useful for packages such as the SYS and CTX
+	schemas. 
+	</P>
+	<P>This list of filters is specified on the Database Connectivity
+	Setup page of the Preferences. An image of the default configuration
+	is supplied <A HREF="images/filter_properties.png">here</A>. 
+	</P>
+	<OL>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Viewing Grants</B> To View
+		grants on a particular Package (only packages at the moment) you
+		can right click on a package and select Show Grants from the drop
+		down menu. An example of this can be seen in the following <A HREF="images/show_grants.png">image</A>.
+				</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Loading Code into an editor
+		from the database</B> To load code from the database (that was not
+		originally in your editor) for a particular Package (only packages
+		at the moment) you can right click on a package and select Open
+		Package from the drop down menu. An example of this can be seen in
+		the following <A HREF="images/open_package.png">image</A> 
+		</P>
+		<LI><P STYLE="margin-bottom: 0cm"><B>Navigating to a file</B> You
+		can navigate to a file from the schema browser view. To do this you
+		must right click on a function, procedure or field inside a package
+		and choose the &quot;Go to File&quot; action from the drop down
+		menu. An example of this can be seen in the following <A HREF="images/go_to_file.png">image</A>.
+				</P>
+	</OL>
+</UL>
+</body>
+</html>

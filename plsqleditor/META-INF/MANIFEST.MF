@@ -2,10 +2,13 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Toby's PL SQL Editor
 Bundle-SymbolicName: plsqleditor; singleton:=true
-Bundle-Version: 0.5.1
+Bundle-Version: 0.5.4
 Bundle-ClassPath: plsqleditor.jar,
  libs/commons-lang.jar,
- libs/ojdbc14.jar
+ libs/ojdbc14.jar,
+ libs/jdom-1.1.jar,
+ .,
+ libs/ant.jar
 Bundle-Activator: plsqleditor.PlsqleditorPlugin
 Bundle-Vendor: Toby Zines
 Bundle-Localization: plugin
@@ -71,5 +74,11 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.core.resources,
  org.junit,
- org.eclipse.compare;bundle-version="3.5.0"
-Eclipse-LazyStart: true
+ org.eclipse.compare;bundle-version="3.5.0",
+ org.eclipse.core.expressions;bundle-version="3.4.100",
+ org.eclipse.debug.core;bundle-version="3.5.0",
+ org.eclipse.debug.ui;bundle-version="3.5.1",
+ org.eclipse.core.variables;bundle-version="3.2.200",
+ org.eclipse.ui.console;bundle-version="3.4.0"
+Bundle-ActivationPolicy: lazy
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6

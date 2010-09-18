@@ -1,7 +1,5 @@
 package org.boomsticks.plsqleditor.dialogs.openconnections;
 
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.swt.graphics.Image;
@@ -19,27 +17,8 @@ public class LiveConnectionLabelProvider extends LabelProvider implements ITable
 {
 
     // Names of images used to represent checkboxes
-    public static final String   CHECKED_IMAGE   = "checked";
-    public static final String   UNCHECKED_IMAGE = "unchecked";
-
-    // For the checkbox images
-    private static ImageRegistry imageRegistry   = new ImageRegistry();
-
-    /**
-     * Note: An image registry owns all of the image objects registered with it,
-     * and automatically disposes sof them the SWT Display is disposed.
-     */
-    static
-    {
-        String iconPath = "icons/";
-        imageRegistry.put(CHECKED_IMAGE, ImageDescriptor.createFromFile(PlsqleditorPlugin.class,
-                                                                        iconPath + CHECKED_IMAGE
-                                                                                + ".gif"));
-        imageRegistry.put(UNCHECKED_IMAGE, ImageDescriptor.createFromFile(PlsqleditorPlugin.class,
-                                                                          iconPath
-                                                                                  + UNCHECKED_IMAGE
-                                                                                  + ".gif"));
-    }
+    public static final String   CHECKED_IMAGE   = "tick";
+    public static final String   UNCHECKED_IMAGE = "cross";
 
     /**
      * Returns the image with the given key, or <code>null</code> if not found.
@@ -47,7 +26,7 @@ public class LiveConnectionLabelProvider extends LabelProvider implements ITable
     private Image getImage(boolean isSelected)
     {
         String key = isSelected ? CHECKED_IMAGE : UNCHECKED_IMAGE;
-        return imageRegistry.get(key);
+        return PlsqleditorPlugin.getDefault().getImageRegistry().get(key);
     }
 
     /**
@@ -60,7 +39,8 @@ public class LiveConnectionLabelProvider extends LabelProvider implements ITable
         LiveConnection conn = (LiveConnection) element;
         switch (columnIndex)
         {
-            case 0 : // COMPLETED_COLUMN
+            case 0 : // type is schema based
+            	result = conn.getType();
                 break;
             case 1 :
                 result = conn.getUrl();
@@ -71,6 +51,9 @@ public class LiveConnectionLabelProvider extends LabelProvider implements ITable
             case 3 :
                 result = conn.getProject()+ "";
                 break;
+            case 4 :
+            	result = conn.getUser();
+            	break;
             default :
                 break;
         }
@@ -83,7 +66,7 @@ public class LiveConnectionLabelProvider extends LabelProvider implements ITable
      */
     public Image getColumnImage(Object element, int columnIndex)
     {
-        return (columnIndex == 0) ? // COMPLETED_COLUMN?
+        return (columnIndex == 0) ? // 
                 getImage(!((LiveConnection) element).getType().equals(MultiPagePlsqlEditor.SCHEMA_DEFAULT))
                 : null;
     }

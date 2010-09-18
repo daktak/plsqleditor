@@ -89,11 +89,11 @@ public class PlDocTemplateCompletionProcessor extends TemplateCompletionProcesso
      */
     protected Image getImage(Template template)
     {
-        ImageRegistry registry = TemplateEditorUI.getDefault().getImageRegistry();
+        ImageRegistry registry = PlsqleditorPlugin.getDefault().getImageRegistry();
         Image image = registry.get(DEFAULT_IMAGE);
         if (image == null)
         {
-            ImageDescriptor desc = TemplateEditorUI
+            ImageDescriptor desc = PlsqleditorPlugin
                     .imageDescriptorFromPlugin(PlsqleditorPlugin.theId, DEFAULT_IMAGE); //$NON-NLS-1$
             registry.put(DEFAULT_IMAGE, desc);
             image = registry.get(DEFAULT_IMAGE);

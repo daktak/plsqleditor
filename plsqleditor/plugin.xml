@@ -1,26 +1,25 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.0"?>
+<?eclipse version="3.4"?>
 <plugin>
-
      <extension
          point="org.eclipse.ui.editors">
       <editor
             name="PL-SQL Editor"
-            extensions="pkb,sql,pks,prc,pkh,pkdb,pkg"
+            extensions="pkb,sql,pks,prc,pkh,pkdb,pkg,ora,pck"
             icon="icons/at_no_alpha.png"
             contributorClass="plsqleditor.editors.MultiPagePlsqlEditorContributor"
             class="plsqleditor.editors.MultiPagePlsqlEditor"
             id="plsqleditor.editors.PlSqlEditor">
       </editor>
    </extension>
-   <extension
+   <!--extension
          id="PlSqlDocumentSetupParticipant"
          name="PL SQL Document Setup"
          point="org.eclipse.core.filebuffers.documentSetup">
       <participant
             class="plsqleditor.editors.PlSqlDocumentSetupParticipant"
-            extensions="pkb,PKB,sql,SQL,pks,PKS,prc,PRC,pkh,PKH,pkdb,pkg,PKG"/>
-   </extension>
+            extensions="pkb,PKB,sql,SQL,pks,PKS,prc,PRC,pkh,PKH,pkdb,pkg,PKG,ora,ORA"/>
+   </extension-->
    <extension
          point="org.eclipse.ui.preferencePages">
       <page
@@ -33,6 +32,27 @@
             id="plsqleditor.preferences.DbSetupPreferencePage"
             name="Database Connectivity Setup"/>
       <page
+            name="Editor"
+            category="plsqleditor.preferences.PlSqlPreferencePage"
+            class="plsqleditor.preferences.PlsqlEditorPreferencePage"
+            id="plsqleditor.preferences.PlsqlEditorPreferencePage">
+      </page>
+      <page
+            category="plsqleditor.preferences.PlsqlEditorPreferencePage"
+            class="plsqleditor.preferences.FormattingPreferencePage"
+            id="plsqleditor.preferences.PlSqlPreferencePage"
+            name="Formatting Preferences"/>
+      <page
+            category="plsqleditor.preferences.PlsqlEditorPreferencePage"
+            class="plsqleditor.preferences.MarkOccurrencesPreferencePage"
+            id="plsqleditor.editor.preferences.MarkOccurrencesPreferencePage"
+            name="Mark Occurrences" />
+      <page
+            category="plsqleditor.preferences.PlsqlEditorPreferencePage"
+            class="plsqleditor.preferences.FoldingPreferencePage"
+            id="plsqleditor.editor.preferences.FoldingPreferencePage" 
+            name="Folding" />
+      <page
             category="plsqleditor.preferences.PlSqlPreferencePage"
             class="plsqleditor.preferences.TemplatesPreferencePage"
             id="plsqleditor.preferences.TemplatesPreferencePage"
@@ -42,11 +62,6 @@
             class="plsqleditor.preferences.PlDocPreferencePage"
             id="plsqleditor.preferences.PlDocPreferencePage"
             name="PlDoc Preferences"/>
-      <page
-            category="plsqleditor.preferences.PlSqlPreferencePage"
-            class="plsqleditor.preferences.FormattingPreferencePage"
-            id="plsqleditor.preferences.PlSqlPreferencePage"
-            name="Formatting Preferences"/>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
@@ -54,25 +69,6 @@
    </extension>
    <extension
          point="org.eclipse.ui.popupMenus">
-      <objectContribution
-            id="plsqleditor.headerfileresourcepopups"
-            nameFilter="*.pkh"
-            objectClass="org.eclipse.core.resources.IFile">
-         <menu
-               id="plsqleditor.menu2"
-               label="PL/SQL Header"
-               path="additions">
-            <groupMarker name="group2"/>
-         </menu>
-         <action
-               class="plsqleditor.popup.actions.ExecutePlDocAction"
-               definitionId="plsqleditor.generatePlDoc"
-               enablesFor="+"
-               icon="icons/generatePlDoc.gif"
-               id="plsqleditor.generatePlDoc.action"
-               label="Generate PlDoc"
-               menubarPath="plsqleditor.menu2/group2"/>
-      </objectContribution>
       <objectContribution
             id="plsqleditor.bodyfileresourcepopups"
             nameFilter="*.pkb"
@@ -87,7 +83,7 @@
                class="plsqleditor.popup.actions.GenerateHeaderAction"
                definitionId="plsqleditor.generateHeader"
                enablesFor="+"
-               icon="icons/grrarr.gif"
+               icon="icons/pencil.gif"
                id="plsqleditor.generateHeader.action"
                label="Generate Header"
                menubarPath="plsqleditor.menu3/group3"/>
@@ -106,7 +102,7 @@
                class="plsqleditor.actions.ResourceMenuOpenFileAction"
                definitionId="plsqleditor.loadToDatabase"
                enablesFor="1"
-               icon="icons/transfer.gif"
+               icon="icons/database_down.png"
                id="plsqleditor.loadToDatabase.action"
                label="Load to Database"
                menubarPath="plsqleditor.menu/group1"/>
@@ -117,6 +113,14 @@
                icon="icons/togglepresentation.gif"
                id="plsqleditor.refreshErrorStatus.action"
                label="Refresh Error Status"
+               menubarPath="plsqleditor.menu/group1"/>
+         <action
+               class="plsqleditor.popup.actions.ExecutePlDocAction"
+               definitionId="plsqleditor.generatePlDoc"
+               enablesFor="+"
+               icon="icons/generatePlDoc.gif"
+               id="plsqleditor.generatePlDoc.action"
+               label="Generate PlDoc"
                menubarPath="plsqleditor.menu/group1"/>
          <action
                class="plsqleditor.actions.EditorMenuAction"
@@ -184,6 +188,11 @@
    <extension
          point="org.eclipse.ui.commands">
       <command
+	        categoryId="org.eclipse.ui.category.navigate"
+	        description="Matching Bracket"
+	        id="plsqleditor.commands.jumpToBracket"
+	        name="Matching Bracket" />
+      <command
             categoryId="plsql.editor"
             description="Causes a PL/SQL File lookup to be executed"
             id="plsql.file.lookup"
@@ -242,10 +251,36 @@
             id="plsqleditor.changeSchemaForPackage"
             name="Change Schema for Package"/>
       <command
-      	    id="plsqleditor.generateHeaderAndLoadBoth"
+            categoryId="plsql.editor"
+            id="plsqleditor.generateHeaderAndLoadBoth"
             name="GenerateHeaderAndLoadBoth">
       </command>
       	
+      <command
+            categoryId="plsql.editor"
+            id="boomsticks.plsqleditor.loadSchema"
+            name="LoadSchema">
+      </command>
+      <command
+            categoryId="plsql.editor"
+            id="boomsticks.plsqleditor.loadSourceFromDb"
+            name="LoadSourceFromDb">
+      </command>
+      <command
+            categoryId="plsql.editor"
+            id="boomsticks.plsqleditor.showGrants"
+            name="ShowGrants">
+      </command>
+      <command
+            categoryId="plsql.editor"
+            id="boomsticks.plsqleditor.compareToDb"
+            name="CompareToDb">
+      </command>
+      <command
+            categoryId="plsql.editor"
+            id="boomsticks.plsqleditor.showDetails"
+            name="ShowDetails">
+      </command>
    </extension>
    <extension
          point="org.eclipse.ui.actionSets">
@@ -343,8 +378,9 @@
          point="org.eclipse.ui.contexts">
       <context
             id="plsql.editor"
-            name="PlSql Editor Context"
-            parentId="org.eclipse.ui.contexts.window"/>
+            name="Editing PlSql"
+            description="PlSql Editor Context"
+            parentId="org.eclipse.ui.textEditorScope"/>
    </extension>
    <extension
          point="org.eclipse.ui.views">
@@ -464,6 +500,16 @@
             contextId="plsql.editor"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="Ctrl+Alt+D"/>
+      <key
+            commandId="plsqleditor.commands.jumpToBracket"
+            contextId="plsql.editor"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            sequence="Ctrl+Shift+P" />            
+      <!--key
+            sequence="M1+M2+P"
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
+            commandId="plsqleditor.commands.jumpToBracket"
+            contextId="plsql.editor" /-->            
    </extension>
    <extension
          point="org.eclipse.ui.editors.templates">
@@ -496,13 +542,85 @@
    <extension
          point="org.eclipse.ui.menus">
          <menuContribution
-            locationURI="popup:org.eclipse.jdt.ui.PackageExplorer">
+            locationURI="popup:org.eclipse.ui.views.ResourceNavigator">
          <command
                commandId="plsqleditor.generateHeaderAndLoadBoth"
                label="Generate Header and Load both to Database"
                style="push">
+               <visibleWhen checkEnabled="false">
+				    <iterate ifEmpty="false">
+				       <adapt type="org.eclipse.core.resources.IFile">
+				          <test property="org.eclipse.core.resources.name" 
+				                value="*.pkb"/>
+				       </adapt>
+				    </iterate>
+				</visibleWhen>
          </command>
-      </menuContribution>
+         </menuContribution>
+         <menuContribution
+               locationURI="popup:org.eclipse.ui.views.ResourceNavigator">
+            <command
+                  commandId="boomsticks.plsqleditor.loadSchema"
+                  label="Load Schema"
+                  style="push">
+            </command> 
+         </menuContribution>
+         <menuContribution
+               locationURI="popup:org.eclipse.ui.views.ResourceNavigator">
+            <command
+                  commandId="boomsticks.plsqleditor.compareToDb"
+                  label="Compare to Project Default DB"
+                  style="push">
+				<!--visibleWhen checkEnabled="false">
+				      <reference
+ 				        definitionId="TBD">
+				      </reference>
+ 				</visibleWhen-->
+             </command>
+         </menuContribution>         
+         <menuContribution
+               locationURI="popup:plsqleditor.views.SchemaBrowserView">
+            <command
+                  commandId="boomsticks.plsqleditor.loadSourceFromDb"
+                  label="Load Source from DB"
+                  style="push">
+                  <visibleWhen checkEnabled="false">
+                      <reference
+ 				        definitionId="isSourceLoadableFromTreeObject">
+				      </reference>
+				    <!--iterate ifEmpty="false"> ... this works
+				       <adapt type="plsqleditor.views.schema.IPackageData">
+				       </adapt>
+				    </iterate-->
+				</visibleWhen>
+            </command> 
+         </menuContribution>
+         <menuContribution
+               locationURI="popup:plsqleditor.views.SchemaBrowserView">
+            <command
+                  commandId="boomsticks.plsqleditor.showGrants"
+                  label="Show Grants"
+                  style="push">
+				<visibleWhen checkEnabled="false">
+				      <reference
+ 				        definitionId="isGrantLoadableFromTreeObject">
+				      </reference>
+ 				</visibleWhen>
+             </command>
+         </menuContribution>
+         <menuContribution
+               locationURI="popup:plsqleditor.views.SchemaBrowserView">
+            <command
+                  commandId="boomsticks.plsqleditor.showDetails"
+                  label="Show Details"
+                  style="push">
+				<visibleWhen checkEnabled="false">
+				      <reference
+ 				        definitionId="isDetailsAvailableFromTreeObject">
+				      </reference>
+ 				</visibleWhen>
+             </command>
+         </menuContribution>
    </extension>
    <extension
          id="tz"
@@ -512,6 +630,169 @@
             class="plsqleditor.actions.GenerateHeaderAndLoadBothToDatabaseAction"
             commandId="plsqleditor.generateHeaderAndLoadBoth">
       </handler>
+      <handler
+            class="plsqleditor.actions.LoadSchemaToDb"
+            commandId="boomsticks.plsqleditor.loadSchema">
+      </handler>
+      <handler
+            class="plsqleditor.actions.schemabrowser.LoadSourceFromDb"
+            commandId="boomsticks.plsqleditor.loadSourceFromDb">
+            <activeWhen>
+	        <reference
+	          definitionId="isSourceLoadableFromTreeObject">
+	        </reference>
+	      </activeWhen>
+      </handler>
+      <handler
+            class="plsqleditor.actions.schemabrowser.ShowGrants"
+            commandId="boomsticks.plsqleditor.showGrants">
+          <activeWhen>
+	        <reference
+	          definitionId="isGrantLoadableFromTreeObject">
+	        </reference>
+	      </activeWhen>
+      </handler>
+      <handler
+            class="plsqleditor.actions.schemabrowser.ShowDetails"
+            commandId="boomsticks.plsqleditor.showDetails">
+          <activeWhen>
+	        <reference
+	          definitionId="isDetailsAvailableFromTreeObject">
+	        </reference>
+	      </activeWhen>
+      </handler>
+      <handler
+            class="plsqleditor.actions.CompareToDb"
+            commandId="boomsticks.plsqleditor.compareToDb">
+          <!--activeWhen>
+	        <reference
+	          definitionId="someDefinitionTBD">
+	        </reference>
+	      </activeWhen-->
+      </handler>
+   </extension>
+   <extension
+         point="org.eclipse.help.toc">
+      <toc
+            file="toc.xml"
+            primary="true">
+      </toc>
+      <toc
+            file="tocconcepts.xml">
+      </toc>
+      <toc
+            file="tocgettingstarted.xml">
+      </toc>
+      <toc
+            file="tocreference.xml">
+      </toc>
+      <toc
+            file="tocsamples.xml">
+      </toc>
+      <toc
+            file="toctasks.xml">
+      </toc>
+   </extension>
+   <extension
+         point="org.eclipse.ui.newWizards">
+      <category
+            name="PLSQL Editor Wizards"
+            id="plsqleditor.wizards">
+      </category>
+      <wizard
+            name="New PLSQL File"
+            icon="icons/at.png"
+            category="plsqleditor.wizards"
+            class="plsqleditor.wizards.NewPackageBody"
+            id="plsqleditor.wizards.NewPackageBody">
+      </wizard>
    </extension>
    
+   <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+	  <propertyTester
+	    class="plsqleditor.views.schema.DatabaseEntityTypeTester"
+	    id="plsqleditor.views.schema.propertyTester.DatabaseEntityTypeTester"
+	    namespace="plsqleditor.views.schema"
+	    properties="isGrantLoadable,isSourceLoadable,isDetailsAvailable"
+	    type="plsqleditor.views.schema.TreeObject">
+	  </propertyTester>
+   </extension>
+   
+   <extension
+     point="org.eclipse.core.expressions.definitions">
+     <definition
+       id="isGrantLoadableFromTreeObject">
+       <with variable="selection">
+         <iterate
+           ifEmpty="false"
+           operator="and">
+           <adapt
+            type="plsqleditor.views.schema.TreeObject">
+           </adapt>
+           <test
+             forcePluginActivation="true"
+             property="plsqleditor.views.schema.isGrantLoadable">
+           </test>
+         </iterate>
+       </with>
+     </definition>
+     <definition
+       id="isDetailsAvailableFromTreeObject">
+       <with variable="selection">
+         <iterate
+           ifEmpty="false"
+           operator="and">
+           <adapt
+            type="plsqleditor.views.schema.TreeObject">
+           </adapt>
+           <test
+             forcePluginActivation="true"
+             property="plsqleditor.views.schema.isDetailsAvailable">
+           </test>
+         </iterate>
+       </with>
+     </definition>
+     <definition
+       id="isSourceLoadableFromTreeObject">
+       <with variable="selection">
+         <iterate
+           ifEmpty="false"
+           operator="and">
+           <adapt
+            type="plsqleditor.views.schema.TreeObject">
+           </adapt>
+           <test
+             forcePluginActivation="true"
+             property="plsqleditor.views.schema.isSourceLoadable">
+           </test>
+         </iterate>
+       </with>
+     </definition>
+   </extension>
+   <extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
+        <specification
+            annotationType="plsqleditor.occurrence"
+            label="Occurrences"
+            icon="icons/srch.gif"
+            textPreferenceKey="occurrenceIndication"
+            textPreferenceValue="false"
+            highlightPreferenceKey="occurrenceHighlighting"
+            highlightPreferenceValue="true"
+            contributesToHeader="false"
+            overviewRulerPreferenceKey="occurrenceIndicationInOverviewRuler"
+            overviewRulerPreferenceValue="true"
+            verticalRulerPreferenceKey="occurrenceIndicationInVerticalRuler"
+            verticalRulerPreferenceValue="false"
+            colorPreferenceKey="occurrenceIndicationColor"
+            colorPreferenceValue="255,248,147"
+            presentationLayer="4"
+            showInNextPrevDropdownToolbarActionKey="showOccurrenceInNextPrevDropdownToolbarAction"
+            showInNextPrevDropdownToolbarAction="true"
+            isGoToNextNavigationTargetKey="isOccurrenceGoToNextNavigationTarget"
+            isGoToNextNavigationTarget="false"
+            isGoToPreviousNavigationTargetKey="isOccurrenceGoToPreviousNavigationTarget"
+            isGoToPreviousNavigationTarget="false">
+        </specification>
+    </extension>
 </plugin>

@@ -29,20 +29,48 @@ package au.com.gts.data;
  */
 public class DataConstraint extends Constraint
 {
-    /**
+	private String myType;
+	
+    public DataConstraint(String name, Column primaryColumn, String type, String constraintText)
+	{
+		super(name, primaryColumn);
+		myType = type;
+		setConstraintText(constraintText);
+	}
+
+	/**
      * This is the serial version uid.
      */
     private static final long serialVersionUID = 3256439222540974135L;
 
-    private String myRegularExpression;
+    private String myConstraintText;
 
-	public String getRegularExpression()
+	public String getConstraintText()
 	{
-		return myRegularExpression;
+		return myConstraintText;
 	}
 
-	public void setRegularExpression(String myRegularExpression)
+	public void setConstraintText(String constraintText)
 	{
-		this.myRegularExpression = myRegularExpression;
+		this.myConstraintText = constraintText;
+	}
+
+	/**
+	 * @return the type
+	 */
+	public String getType()
+	{
+		return myType;
+	}
+	
+	public String getDisplayName()
+    {
+    	return getName() + " is " + getConstraintText(); 
+    }
+	
+	public String toString()
+	{
+		return "Data " + super.toString() + 
+		"\nConstraint Text: " + getConstraintText();
 	}
 }

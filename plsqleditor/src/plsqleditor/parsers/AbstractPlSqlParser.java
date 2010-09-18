@@ -84,7 +84,7 @@ public abstract class AbstractPlSqlParser implements PlSqlParser
     protected int grabHeaderDetails(int currentLineOffset,
                                     IDocument document,
                                     BufferedReader file,
-                                    List details) throws IOException, BadLocationException
+                                    List<Segment> details) throws IOException, BadLocationException
     {
         String line = null;
         boolean isCommenting = false;
@@ -159,7 +159,7 @@ public abstract class AbstractPlSqlParser implements PlSqlParser
                 }
             }
         }
-        for (Iterator it = details.iterator(); it.hasNext();)
+        for (Iterator<Segment> it = details.iterator(); it.hasNext();)
         {
             Segment element = (Segment) it.next();
             element.setPublic(true);
@@ -172,7 +172,7 @@ public abstract class AbstractPlSqlParser implements PlSqlParser
      * @param comments
      * @param offset
      */
-    protected void addCommentsToList(List segments, StringBuffer comments, int offset)
+    protected void addCommentsToList(List<Segment> segments, StringBuffer comments, int offset)
     {
         if (comments.length() > 0)
         {
@@ -200,7 +200,7 @@ public abstract class AbstractPlSqlParser implements PlSqlParser
     protected int parseHeader(int currentLineOffset,
                               IDocument document,
                               BufferedReader file,
-                              List details,
+                              List<Segment> details,
                               String[] packageName) throws IOException, BadLocationException
     {
         boolean isInHeader = false;
@@ -245,7 +245,7 @@ public abstract class AbstractPlSqlParser implements PlSqlParser
             else if (!processedStartOfFile
                     && !(tmpLine = line.replaceFirst(prefix + "(.*)", "$1")).equals(line))
             {
-                // TODO sort out correct behaviour here
+                // TODO sort out correct behaviour here - this is for axiom style files
                 offset += line.indexOf(prefix) + prefix.length();
                 packageSegment = createPackageSegment("TempName", offset);
                 details.add(packageSegment);
@@ -269,11 +269,11 @@ public abstract class AbstractPlSqlParser implements PlSqlParser
             	}
             	else
             	{
-// TODO put this into the next release (properly)
-//            		if (!(tmpLine = line.replaceFirst(".*@schema\\W+([\\w_\\d]+).*", "$1")).equals(line))
-//            		{
-//            			packageSegment.setSchemaName(tmpLine);
-//            		}
+            		if (!(tmpLine = line.replaceFirst(".*?@schema\\W+(\\w+).*", "$1")).equals(line)
+            				&& packageSegment != null /* takes care of bad parse earlier */)
+            		{
+            			packageSegment.setSchemaName(tmpLine);
+            		}
             		addCode(details, offset, line);
             	}
                 if (isEndingComment(line))
@@ -399,7 +399,7 @@ public abstract class AbstractPlSqlParser implements PlSqlParser
      * @param offset The location of the beginning of the supplied
      *            <code>line</code> in the document.
      */
-    protected void addCode(List segments, int offset, String line)
+    protected void addCode(List<Segment> segments, int offset, String line)
     {
         Segment lastSegment = null;
         if (!segments.isEmpty())
@@ -489,7 +489,7 @@ public abstract class AbstractPlSqlParser implements PlSqlParser
      * @return <code>false</code> if the details have all been grabbed and
      *         <code>true</code> otherwise.
      */
-    boolean grabType(String line, Segment currentSegment, List details)
+    boolean grabType(String line, Segment currentSegment, List<Segment> details)
     {
         String documentation = currentSegment.getDocumentation();
         int commentIndex = line.indexOf("--");
@@ -887,10 +887,10 @@ public abstract class AbstractPlSqlParser implements PlSqlParser
      * @return The string representation of the whole package header.
      * @throws IOException
      */
-    List parseBodyReader(IDocument document, BufferedReader br, String[] packageName)
+    List<Segment> parseBodyReader(IDocument document, BufferedReader br, String[] packageName)
             throws IOException
     {
-        List segments = new ArrayList();
+        List<Segment> segments = new ArrayList<Segment>();
         int currentLineOffset = 0;
         try
         {
@@ -907,31 +907,31 @@ public abstract class AbstractPlSqlParser implements PlSqlParser
             e.printStackTrace();
         }
         br.close();
-        for (Iterator it = segments.iterator(); it.hasNext();)
+        for (Iterator<Segment> it = segments.iterator(); it.hasNext();)
         {
-            Segment segment = (Segment) it.next();
-            List containedSegments = segment.getContainedSegments();
+            Segment segment = it.next();
+            List<Segment> containedSegments = segment.getContainedSegments();
             fixSegments(segment, containedSegments);
         }
         return segments;
     }
 
-    private void fixSegments(Segment parent, List containedSegments)
+    private void fixSegments(Segment parent, List<Segment> containedSegments)
     {
         if (!containedSegments.isEmpty())
         {
-            for (Iterator it = containedSegments.iterator(); it.hasNext();)
+            for (Iterator<Segment> it = containedSegments.iterator(); it.hasNext();)
             {
-                Segment containedSegment = (Segment) it.next();
+                Segment containedSegment = it.next();
                 containedSegment.setParent(parent);
                 fixSegments(containedSegment, containedSegment.getContainedSegments());
             }
         }
     }
 
-    public static PackageSegment getPackageSegment(List segments, String packageName)
+    public static PackageSegment getPackageSegment(List<Segment> segments, String packageName)
     {
-        for (Iterator it = segments.iterator(); it.hasNext();)
+        for (Iterator<Segment> it = segments.iterator(); it.hasNext();)
         {
             Segment segment = (Segment) it.next();
             if (segment.getName().equals(packageName) && segment instanceof PackageSegment)
@@ -942,17 +942,17 @@ public abstract class AbstractPlSqlParser implements PlSqlParser
         return null;
     }
 
-    public List parseFile(IDocument document, String[] packageName, SegmentType[] filters)
+    public List<Segment> parseFile(IDocument document, String[] packageName, SegmentType[] filters)
             throws IOException
     {
         String wholeText = document.get();
         ByteArrayInputStream input = new ByteArrayInputStream(wholeText.getBytes());
         BufferedReader br = new BufferedReader(new InputStreamReader(input));
-        List toFilter = parseBodyReader(document, br, packageName);
-        List toReturn = new ArrayList();
+        List<Segment> toFilter = parseBodyReader(document, br, packageName);
+        List<Segment> toReturn = new ArrayList<Segment>();
         boolean add = true;
         // TODO add filtering at layers below the first level
-        for (Iterator it = toFilter.iterator(); it.hasNext();)
+        for (Iterator<Segment> it = toFilter.iterator(); it.hasNext();)
         {
             Segment segment = (Segment) it.next();
             add = true;

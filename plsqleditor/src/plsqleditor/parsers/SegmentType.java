@@ -4,7 +4,7 @@ package plsqleditor.parsers;
  * @author Toby Zines
  *
  */
-public class SegmentType implements Comparable
+public class SegmentType implements Comparable<Object>
 {
     private int myId;
     

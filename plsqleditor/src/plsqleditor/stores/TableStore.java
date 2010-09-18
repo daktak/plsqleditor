@@ -1,12 +1,14 @@
 package plsqleditor.stores;
 
 import java.sql.SQLException;
-import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.resources.IProject;
 
 import plsqleditor.db.DBMetaDataGatherer;
+import plsqleditor.db.OracleDbMetaDataGatherer;
+import au.com.gts.data.Grant;
 import au.com.gts.data.Schema;
 import au.com.gts.data.Table;
 
@@ -16,8 +18,7 @@ import au.com.gts.data.Table;
  */
 public class TableStore
 {
-    private Map myDbMetaGatherers;
-    private IProject myProject;
+    private DBMetaDataGatherer myDbMetaGatherer;
 
     /**
      * This constructor creates the store using the supplied connection to retrieve
@@ -25,8 +26,14 @@ public class TableStore
      */
     public TableStore(IProject project)
     {
-        myProject = project;
-        myDbMetaGatherers = new HashMap();
+        try
+		{
+			myDbMetaGatherer = new OracleDbMetaDataGatherer(project);
+		}
+		catch (SQLException e)
+		{
+			throw new IllegalStateException("Failed to initialise db meta data gatherer", e);
+		}
     }
 
     /**
@@ -36,7 +43,7 @@ public class TableStore
      */
     public Schema [] getSchemas()
     {
-        return Schema.getSchemas();
+        return Schema.getSchemas(myDbMetaGatherer);
     }
     
     /**
@@ -49,34 +56,39 @@ public class TableStore
      */
     public Table [] getTables(String schemaName)
     {
-        DBMetaDataGatherer mdg =  (DBMetaDataGatherer) myDbMetaGatherers.get(schemaName);
-        Schema schema = null;
-        if (mdg == null)
-        {
-            try
-            {
-                mdg = new DBMetaDataGatherer(myProject, schemaName);
-                myDbMetaGatherers.put(schemaName,mdg);
-                schema = mdg.getSchema();
-            }
-            catch (IllegalStateException e)
-            {
-                // do nothing
-            }
-            catch (SQLException e)
-            {
-                e.printStackTrace();
-            }
-        }
-        else
-        {
-            schema = mdg.getSchema(schemaName);
-        }
+    	Schema schema = myDbMetaGatherer.getSchema(schemaName);
         if (schema != null)
         {
-            Map tableMap = schema.getTables();
-            return (Table[]) tableMap.values().toArray(new Table[tableMap.size()]);
+            Map<String, Table> tableMap = schema.getTables();
+            return tableMap.values().toArray(new Table[tableMap.size()]);
         }
         return new Table[0];
     }
+
+	public Table getTable(String schemaName, String tableName)
+	{
+		Schema schema = myDbMetaGatherer.getSchema(schemaName);
+        if (schema != null)
+        {
+        	return schema.getTables().get(tableName);
+        }
+		return null;
+	}
+
+	public Schema getSchema(String schema)
+	{
+		return myDbMetaGatherer.getSchema(schema);
+	}
+	
+	public List<Grant> getGrants(String schemaName, String objectName)
+	{
+		try
+		{
+			return myDbMetaGatherer.getGrants(schemaName, objectName);
+		}
+		catch (SQLException e)
+		{
+			throw new IllegalStateException("Failed to get grants for [" + schemaName + "." + objectName + "]", e);
+		}
+	}
 }

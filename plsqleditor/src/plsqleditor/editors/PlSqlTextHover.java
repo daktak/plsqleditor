@@ -26,7 +26,7 @@ import au.com.zinescom.util.UsefulOperations;
 
 public class PlSqlTextHover implements ITextHover
 {
-    private List         myCurrentSegments;
+    private List<Segment>         myCurrentSegments;
     public static char[] searchTextDelimiters = new char[]{' ', '\t', '(', ';', ',', ')', '\r', '\n', '|'};
     PlsqleditorPlugin myPluginRef = PlsqleditorPlugin.getDefault();
 

@@ -30,7 +30,7 @@ public class PlSqlPreferencePage extends FieldEditorPreferencePage implements IW
      */
     public void createFieldEditors()
     {
-        addField(new IntegerFieldEditor(PreferenceConstants.P_EDITOR_TAB_WIDTH, "Tab Width", getFieldEditorParent()));
+        //addField(new IntegerFieldEditor(PreferenceConstants.P_EDITOR_TAB_WIDTH, "Tab Width", getFieldEditorParent()));
         addField(new StringFieldEditor(PreferenceConstants.P_SCHEMA_PACKAGE_DELIMITER, "Schema to Package Delimiter", getFieldEditorParent()));
         addField(new BooleanFieldEditor(PreferenceConstants.P_IS_SHOWING_PARAMETER_LIST,
                 "Show Parameter &List in Outline", getFieldEditorParent()));
@@ -60,21 +60,23 @@ public class PlSqlPreferencePage extends FieldEditorPreferencePage implements IW
                         {"Prompt for Save before loading to Database", PreferenceConstants.C_LOAD_TO_DB_PROMPT_FOR_SAVE}},
                 getFieldEditorParent(), true));
 
-        addField(new ColorFieldEditor(PreferenceConstants.P_BACKGROUND_COLOUR, "Colour of &Background",
-                getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_KEYWORD_COLOUR, "Colour of &Keywords",
-                getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_OPERATOR_COLOUR, "Colour of &Operators",
-                getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_TYPE_COLOUR, "Colour of &Types", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_CONSTANT_COLOUR, "Colour of Con&stants",
-                getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_COMMENT_COLOUR, "Colour of Co&mments",
-                getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_JAVADOC_COLOUR, "Colour of Pl&doc", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_STRING_COLOUR, "Colour of Strin&gs", getFieldEditorParent()));
-        addField(new ColorFieldEditor(PreferenceConstants.P_BUILT_IN_FUNCS_COLOUR, "Colour of Built In &Functions",
-                getFieldEditorParent()));
+//        addField(new ColorFieldEditor(PreferenceConstants.P_BACKGROUND_COLOUR, "Colour of &Background",
+//                getFieldEditorParent()));
+//        addField(new ColorFieldEditor(PreferenceConstants.P_KEYWORD_COLOUR, "Colour of &Keywords",
+//                getFieldEditorParent()));
+//        addField(new ColorFieldEditor(PreferenceConstants.P_OPERATOR_COLOUR, "Colour of &Operators",
+//                getFieldEditorParent()));
+//        addField(new ColorFieldEditor(PreferenceConstants.P_TYPE_COLOUR, "Colour of &Types", getFieldEditorParent()));
+//        addField(new ColorFieldEditor(PreferenceConstants.P_CONSTANT_COLOUR, "Colour of Con&stants",
+//                getFieldEditorParent()));
+//        addField(new ColorFieldEditor(PreferenceConstants.P_COMMENT_COLOUR, "Colour of Co&mments",
+//                getFieldEditorParent()));
+//        addField(new ColorFieldEditor(PreferenceConstants.P_JAVADOC_COLOUR, "Colour of Pl&doc", getFieldEditorParent()));
+//        addField(new ColorFieldEditor(PreferenceConstants.P_STRING_COLOUR, "Colour of Strin&gs", getFieldEditorParent()));
+//        addField(new ColorFieldEditor(PreferenceConstants.P_BUILT_IN_FUNCS_COLOUR, "Colour of Built In &Functions",
+//                getFieldEditorParent()));
+//        addField(new ColorFieldEditor(PreferenceConstants.P_DEFAULT_CODE_COLOUR, "Colour of Basic &Code Foreground",
+//                getFieldEditorParent()));
     }
 
     /*

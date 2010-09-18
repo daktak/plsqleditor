@@ -46,9 +46,11 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
     private PlSqlCodeScanner          codeScanner;
     private PlSqlDocScanner           fDocScanner;
     private PlSqlEditor               myEditor;
+	private IPreferenceStore          myStore;
 
-    public PlSqlConfiguration(PlSqlEditor editor)
+    public PlSqlConfiguration(IPreferenceStore store, PlSqlEditor editor)
     {
+    	myStore = store;
         myEditor = editor;
     }
 
@@ -72,9 +74,7 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
         if (codeScanner == null)
         {
             ColorManager provider = PlsqleditorPlugin.getDefault().getPlSqlColorProvider();
-            codeScanner = new PlSqlCodeScanner(provider);
-            codeScanner.setDefaultReturnToken(new Token(new TextAttribute(provider
-                    .getColor(IPlSqlColorConstants.DEFAULT))));
+            codeScanner = new PlSqlCodeScanner(provider, myStore);
         }
         return codeScanner;
     }
@@ -90,8 +90,7 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
         {
             ColorManager provider = PlsqleditorPlugin.getDefault().getPlSqlColorProvider();
             fDocScanner = new PlSqlDocScanner(provider);
-            fDocScanner.setDefaultReturnToken(new Token(new TextAttribute(provider
-                    .getColor(IPlSqlColorConstants.JAVADOC_DEFAULT))));
+            fDocScanner.setDefaultReturnToken(new Token(new ConfigurableTextAttribute(myStore, PreferenceConstants.P_JAVADOC_COLOUR, null, -1)));
         }
         return fDocScanner;
     }
@@ -121,14 +120,11 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
         assistant.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
         assistant.setContentAssistProcessor(new PlSqlCompletionProcessor(),
                                             IDocument.DEFAULT_CONTENT_TYPE);
-        // assistant.setContentAssistProcessor(new
-        // PlSqlTemplateCompletionProcessor(), IDocument.DEFAULT_CONTENT_TYPE);
         assistant.setContentAssistProcessor(new PlSqlDocCompletionProcessor(),
                                             PlSqlPartitionScanner.PL_DOC);
-        IPreferenceStore prefs = PlsqleditorPlugin.getDefault().getPreferenceStore();
-        assistant.enableAutoInsert(prefs
+        assistant.enableAutoInsert(myStore
                 .getBoolean(PreferenceConstants.P_CONTENT_ASSIST_AUTO_INSERT));
-        boolean autoActivation = prefs
+        boolean autoActivation = myStore
                 .getBoolean(PreferenceConstants.P_CONTENT_ASSIST_AUTO_ACTIVATION);
         assistant.enableAutoActivation(autoActivation);
         if (autoActivation)
@@ -152,7 +148,7 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
 
     public String[] getIndentPrefixes(ISourceViewer sourceViewer, String contentType)
     {
-        List list = new ArrayList();
+        List<String> list = new ArrayList<String>();
         int tabWidth = getTabWidth(sourceViewer);
         boolean useSpaces = true;
         for (int i = 0; i <= tabWidth; i++)
@@ -193,12 +189,13 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
     {
         PresentationReconciler reconciler = new PresentationReconciler();
         reconciler.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
+        
         DefaultDamagerRepairer dr = new DefaultDamagerRepairer(getPlSqlCodeScanner());
         reconciler.setDamager(dr, IDocument.DEFAULT_CONTENT_TYPE);
         reconciler.setRepairer(dr, IDocument.DEFAULT_CONTENT_TYPE);
 
         // added for for bug 1295164
-        dr = new DefaultDamagerRepairer(new SingleTokenScanner(new ConfigurableTextAttribute(
+        dr = new DefaultDamagerRepairer(new SingleTokenScanner(new ConfigurableTextAttribute(myStore,
                 PreferenceConstants.P_STRING_COLOUR, PreferenceConstants.P_BACKGROUND_COLOUR, 0)));
         reconciler.setDamager(dr, PlSqlPartitionScanner.SQL_STRING);
         reconciler.setRepairer(dr, PlSqlPartitionScanner.SQL_STRING);
@@ -207,7 +204,8 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
         dr = new DefaultDamagerRepairer(getPlDocScanner());
         reconciler.setDamager(dr, PlSqlPartitionScanner.PL_DOC);
         reconciler.setRepairer(dr, PlSqlPartitionScanner.PL_DOC);
-        dr = new DefaultDamagerRepairer(new SingleTokenScanner(new ConfigurableTextAttribute(
+        
+        dr = new DefaultDamagerRepairer(new SingleTokenScanner(new ConfigurableTextAttribute(myStore,
                 PreferenceConstants.P_COMMENT_COLOUR, PreferenceConstants.P_BACKGROUND_COLOUR, 0)));
         // dr = new DefaultDamagerRepairer(new
         // CommentScanner(PlsqleditorPlugin.getDefault().getPlSqlColorProvider()));
@@ -218,8 +216,7 @@ public class PlSqlConfiguration extends SourceViewerConfiguration
 
     public int getTabWidth(ISourceViewer sourceViewer)
     {
-        return PlsqleditorPlugin.getDefault().getPreferenceStore()
-                .getInt(PreferenceConstants.P_EDITOR_TAB_WIDTH);
+        return myStore.getInt(PreferenceConstants.P_EDITOR_TAB_WIDTH);
     }
 
     public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType)

@@ -57,7 +57,7 @@ public class PlSqlDocScanner extends RuleBasedScanner
         IToken link = new Token(
                 new TextAttribute(cm.getColor(IPlSqlColorConstants.JAVADOC_LINK)));
 
-        List list = new ArrayList();
+        List<IRule> list = new ArrayList<IRule>();
 
         // Add rule for tags.
         list.add(new SingleLineRule("<", ">", tag)); 

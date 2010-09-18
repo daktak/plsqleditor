@@ -4,7 +4,6 @@ import java.sql.SQLException;
 import java.util.ResourceBundle;
 
 import org.eclipse.core.resources.IProject;
-import org.eclipse.core.runtime.Plugin;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -65,10 +64,8 @@ public class ExecuteScratchSqlAction extends SelectedTextAction
         {
             e.printStackTrace();
         }
-        //TODO add bug id for removing single line comments
-        //toLoad = StringLocationMap.replacePlSqlSingleLineComments(toLoad);
-        toLoad = StringLocationMap.replaceNewLines(toLoad).trim();
 
+        toLoad = StringLocationMap.replaceNewLines(toLoad).trim();
         ResultSetWrapper rsw = null;
         try
         {

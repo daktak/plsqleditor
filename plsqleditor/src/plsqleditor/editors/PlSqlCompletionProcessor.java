@@ -53,14 +53,16 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
     public static char[]           autoCompleteDelimiters = new char[]{' ', '\t', '(', ';', ',',
             '|'                                           };
 
-    private static final String[]  fgProposals;
-    private static final SortedSet ACS;
+	private static boolean isIllegalStateLogged = false; 
 
-    private static final List      BUILT_IN_FUNCTIONS     = new ArrayList();
+    private static final String[]  fgProposals;
+    private static final SortedSet<String> ACS;
+
+    private static final List<Segment>      BUILT_IN_FUNCTIONS     = new ArrayList<Segment>();
 
     static
     {
-        ACS = new TreeSet();
+        ACS = new TreeSet<String>();
 
         addStrings(ACS, PlSqlCodeScanner.CONSTANTS);
         addStrings(ACS, PlSqlCodeScanner.DATATYPES);
@@ -318,7 +320,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
         BUILT_IN_FUNCTIONS.add(seg);
     }
 
-    private static void addStrings(Set toAddTo, String[] toAddFrom)
+    private static void addStrings(Set<String> toAddTo, String[] toAddFrom)
     {
         for (int i = 0; i < toAddFrom.length; i++)
         {
@@ -410,7 +412,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
 
             String previousWord = getPreviousWord(lineOfText, lastNonUsableCharacter);
 
-            List completions = new ArrayList();
+            List<Segment> completions = new ArrayList<Segment>();
             currText = computeCompletionSegments(completions,
                                                  currText,
                                                  documentOffset,
@@ -422,7 +424,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
             int index = 0;
             int currTextLength = currText.length();
 
-            for (Iterator it = completions.iterator(); it.hasNext();)
+            for (Iterator<Segment> it = completions.iterator(); it.hasNext();)
             {
                 Segment proposal = (Segment) it.next();
 
@@ -653,14 +655,14 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
      * @param completions
      * @return the current myOutputText
      */
-    private String computeCompletionSegments(List completions,
+    private String computeCompletionSegments(List<Segment> completions,
                                              String currentWord,
                                              int documentOffset,
                                              IDocument doc,
                                              String previousWord)
     {
         PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
-        List thisDocsSegments = plugin.getCurrentSegments(doc);
+        List<Segment> thisDocsSegments = plugin.getCurrentSegments(doc);
 
         return computeMatchedSegments(completions,
                                       documentOffset,
@@ -675,7 +677,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
      * @param completions
      * @return the current myOutputText
      */
-    public String computeCompletionSegments(List completions,
+    public String computeCompletionSegments(List<Segment> completions,
                                             String currentWord,
                                             int documentOffset,
                                             IDocument doc)
@@ -693,12 +695,12 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
      * @param exactMatch
      * @return
      */
-    public static String computeMatchedSegments(List completions,
+    public static String computeMatchedSegments(List<Segment> completions,
                                                 int documentOffset,
                                                 IDocument doc,
                                                 String currText,
                                                 String previousWord,
-                                                List thisDocsSegments,
+                                                List<Segment> thisDocsSegments,
                                                 boolean exactMatch)
     {
         /*
@@ -722,8 +724,8 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
                 int index = prior.lastIndexOf(".");
                 String schema = prior.substring(0, index);
                 String packageName = prior.substring(index + 1);
-                List segments = plugin.getSegments(schema, packageName);
-                for (Iterator it = segments.iterator(); it.hasNext();)
+                List<Segment> segments = plugin.getSegments(schema, packageName);
+                for (Iterator<Segment> it = segments.iterator(); it.hasNext();)
                 {
                     Segment segment = (Segment) it.next();
                     checkSegment(documentOffset, currText, completions, segment, false, exactMatch);
@@ -744,14 +746,14 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
 
                 String schema = null;
                 String packageName = null;
-                SortedSet schemas = plugin.getSchemas(project);
+                SortedSet<String> schemas = plugin.getSchemas(project);
                 if (schemas.contains(prior))
                 {
                     // prior is a schema
                     schema = prior;
 
                     // add packages for the schema
-                    for (Iterator it = plugin.getPackages(schema, false).iterator(); it.hasNext();)
+                    for (Iterator<String> it = plugin.getPackages(schema, false).iterator(); it.hasNext();)
                     {
                         String str = (String) it.next();
                         if (str != null)
@@ -777,8 +779,8 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
 
                     if (packageName != null)
                     {
-                        List segments = plugin.getSegments(schema, packageName);
-                        for (Iterator it = segments.iterator(); it.hasNext();)
+                        List<Segment> segments = plugin.getSegments(schema, packageName);
+                        for (Iterator<Segment> it = segments.iterator(); it.hasNext();)
                         {
                             Segment segment = (Segment) it.next();
                             // try to add the packages for the current schema
@@ -838,7 +840,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
             }
             if (!isEndProcSpecified)
             {
-                for (Iterator it = plugin.getSchemas(project).iterator(); it.hasNext();)
+                for (Iterator<String> it = plugin.getSchemas(project).iterator(); it.hasNext();)
                 {
                     String str = (String) it.next();
                     if (str != null)
@@ -853,7 +855,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
                 String schema = plugin.getCurrentSchema();
                 if (schema != null)
                 {
-                    for (Iterator it = plugin.getPackages(schema, true).iterator(); it.hasNext();)
+                    for (Iterator<String> it = plugin.getPackages(schema, true).iterator(); it.hasNext();)
                     {
                         String str = (String) it.next();
                         str = str.toUpperCase();
@@ -877,7 +879,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
                                         exactMatch);
                 if (thisDocsSegments != null)
                 {
-                    for (Iterator it = thisDocsSegments.iterator(); it.hasNext();)
+                    for (Iterator<Segment> it = thisDocsSegments.iterator(); it.hasNext();)
                     {
                         Segment segment = (Segment) it.next();
                         checkSegment(documentOffset,
@@ -888,12 +890,12 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
                                      exactMatch);
                     }
                 }
-                for (Iterator it = BUILT_IN_FUNCTIONS.iterator(); it.hasNext();)
+                for (Iterator<Segment> it = BUILT_IN_FUNCTIONS.iterator(); it.hasNext();)
                 {
                     Segment segment = (Segment) it.next();
                     checkSegment(documentOffset, currText, completions, segment, false, exactMatch);
                 }
-                for (Iterator it = ACS.iterator(); it.hasNext();)
+                for (Iterator<String> it = ACS.iterator(); it.hasNext();)
                 {
                     String string = (String) it.next();
                     Segment segment = new Segment(string, dummyPosition, SegmentType.Label);
@@ -1049,7 +1051,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
      *            be equal to the column name, rather than just the beginning of
      *            it.
      */
-    private static void storeQualifiedColumns(List completions,
+    private static void storeQualifiedColumns(List<Segment> completions,
                                               String currText,
                                               Position dummyPosition,
                                               TableStore tableStore,
@@ -1060,46 +1062,57 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
                                               boolean exactMatch)
     {
         // TODO should make the emptyLineIsSeparator dependent on the file type
-        List tokens = Util.grabCurrentPlSqlTokens(document, currentOffset, false);
-        String actualTableName = null;
+        try
+		{
+			List<String> tokens = Util.grabCurrentPlSqlTokens(document, currentOffset, false);
+			String actualTableName = null;
 
-        int size = tokens.size();
+			int size = tokens.size();
 
-        // search backwards through the file to locate the most local occurrence
-        for (int i = size - 1; i > 0; i--)
-        {
-            String token = (String) tokens.get(i);
-            if (token.equals(proxiedTableName))
-            {
-                if (i > 0)
-                {
-                    actualTableName = (String) tokens.get(i - 1);
-                }
-                break;
-            }
-        }
-        if (actualTableName != null)
-        {
-            // found the real definition
-            Table foundTable = getTable(tableStore, actualTableName, schema);
-            if (foundTable != null)
-            {
-                List columns = foundTable.getColumns();
+			// search backwards through the file to locate the most local occurrence
+			for (int i = size - 1; i > 0; i--)
+			{
+			    String token = (String) tokens.get(i);
+			    if (token.equals(proxiedTableName))
+			    {
+			        if (i > 0)
+			        {
+			            actualTableName = (String) tokens.get(i - 1);
+			        }
+			        break;
+			    }
+			}
+			if (actualTableName != null)
+			{
+			    // found the real definition
+			    Table foundTable = getTable(tableStore, actualTableName, schema);
+			    if (foundTable != null)
+			    {
+			        List<Column> columns = foundTable.getColumns();
 
-                for (Iterator it = columns.iterator(); it.hasNext();)
-                {
-                    Column c = (Column) it.next();
-                    String columnName = c.getName();
-                    if (exactMatch ? columnName.toUpperCase().equals(currText) : columnName
-                            .startsWith(currText))
-                    {
-                        Segment segment = new Segment(columnName, dummyPosition, SegmentType.Column);
-                        segment.setReferredData(c);
-                        completions.add(segment);
-                    }
-                }
-            }
-        }
+			        for (Iterator<Column> it = columns.iterator(); it.hasNext();)
+			        {
+			            Column c = (Column) it.next();
+			            String columnName = c.getName();
+			            if (exactMatch ? columnName.toUpperCase().equals(currText) : columnName
+			                    .startsWith(currText))
+			            {
+			                Segment segment = new Segment(columnName, dummyPosition, SegmentType.Column);
+			                segment.setReferredData(c);
+			                completions.add(segment);
+			            }
+			        }
+			    }
+			}
+		}
+		catch (IllegalStateException e)
+		{
+			if (!isIllegalStateLogged)
+			{
+				PlsqleditorPlugin.log("Failed to get qualified columns", e);
+				isIllegalStateLogged = true;
+			}
+		}
     }
 
     /**
@@ -1140,7 +1153,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
      *            be equal to the column name, rather than just the beginning of
      *            it.
      */
-    private static void storeUnqualifiedColumns(List completions,
+    private static void storeUnqualifiedColumns(List<Segment> completions,
                                                 String currText,
                                                 Position dummyPosition,
                                                 TableStore tableStore,
@@ -1149,18 +1162,18 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
                                                 int currentOffset,
                                                 boolean exactMatch)
     {
-        List tokens = Util.grabCurrentPlSqlTokens(document, currentOffset, true);
+        List<String> tokens = Util.grabCurrentPlSqlTokens(document, currentOffset, true);
 
         boolean isStarted = false;
         boolean isPastWhere = false;
 
-        List possibleTablesList = new ArrayList();
+        List<String> possibleTablesList = new ArrayList<String>();
 
         // search through the statement, looking for the first WHERE (to stop
         // at, and become valid)
-        for (Iterator it = tokens.iterator(); it.hasNext();)
+        for (Iterator<String> it = tokens.iterator(); it.hasNext();)
         {
-            String token = (String) it.next();
+            String token = it.next();
             if (isStarted)
             {
                 if (token.equalsIgnoreCase("WHERE"))
@@ -1178,15 +1191,15 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
         if (isPastWhere)
         {
             // found the real definition
-            for (Iterator it = possibleTablesList.iterator(); it.hasNext();)
+            for (Iterator<String> it = possibleTablesList.iterator(); it.hasNext();)
             {
                 String possibleTableName = (String) it.next();
                 Table foundTable = getTable(tableStore, possibleTableName, schema);
                 if (foundTable != null)
                 {
-                    List columns = foundTable.getColumns();
+                    List<Column> columns = foundTable.getColumns();
 
-                    for (Iterator columnIterator = columns.iterator(); columnIterator.hasNext();)
+                    for (Iterator<Column> columnIterator = columns.iterator(); columnIterator.hasNext();)
                     {
                         Column c = (Column) columnIterator.next();
                         String columnName = c.getName();
@@ -1255,28 +1268,39 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
      * 
      * @param schema The schema name we will use to narrow the table search.
      */
-    private static void storeTables(List completions,
+    private static void storeTables(List<Segment> completions,
                                     String currText,
                                     Position dummyPosition,
                                     TableStore tStore,
                                     String schema,
                                     boolean exactMatch)
     {
-        if (tStore != null)
-        {
-            Table[] tables = tStore.getTables(schema);
-            for (int i = 0; i < tables.length; i++)
-            {
-                Table t = tables[i];
-                String tableName = t.getName().toUpperCase();
-                if (exactMatch ? tableName.equals(currText) : tableName.startsWith(currText))
-                {
-                    Segment s = new Segment(t.getName(), dummyPosition, SegmentType.Table);
-                    s.setReferredData(t);
-                    completions.add(s);
-                }
-            }
-        }
+        try
+		{
+			if (tStore != null)
+			{
+			    Table[] tables = tStore.getTables(schema);
+			    for (int i = 0; i < tables.length; i++)
+			    {
+			        Table t = tables[i];
+			        String tableName = t.getName().toUpperCase();
+			        if (exactMatch ? tableName.equals(currText) : tableName.startsWith(currText))
+			        {
+			            Segment s = new Segment(t.getName(), dummyPosition, SegmentType.Table);
+			            s.setReferredData(t);
+			            completions.add(s);
+			        }
+			    }
+			}
+		}
+		catch (IllegalStateException e)
+		{
+			if (!isIllegalStateLogged)
+			{
+				PlsqleditorPlugin.log("Failed to store tables", e);
+				isIllegalStateLogged = true;
+			}
+		}
     }
 
     /**
@@ -1296,7 +1320,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
      * @param schema The schema name we will use to narrow the table column
      *            search.
      */
-    private static void storeColumns(List completions,
+    private static void storeColumns(List<Segment> completions,
                                      String currText,
                                      Position dummyPosition,
                                      TableStore tStore,
@@ -1305,44 +1329,55 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
                                      boolean exactMatch)
     {
         packageName = packageName.toUpperCase();
-        if (tStore != null)
-        {
-            Table[] tables = tStore.getTables(schema);
-            for (int i = 0; i < tables.length; i++)
-            {
-                Table t = tables[i];
-                if (t.getName().toUpperCase().equals(packageName))
-                {
-                    List cols = t.getColumns();
-                    for (Iterator it = cols.iterator(); it.hasNext();)
-                    {
-                        Column col = (Column) it.next();
-                        String colName = col.getName().toUpperCase();
-                        if (exactMatch ? colName.equals(currText) : colName.startsWith(currText))
-                        {
-                            Segment s = new Segment(col.getName(), new Position(0),
-                                    SegmentType.Column);
-                            s.setReferredData(col);
-                            completions.add(s);
-                        }
-                    }
-                }
-            }
-        }
+        try
+		{
+			if (tStore != null)
+			{
+			    Table[] tables = tStore.getTables(schema);
+			    for (int i = 0; i < tables.length; i++)
+			    {
+			        Table t = tables[i];
+			        if (t.getName().toUpperCase().equals(packageName))
+			        {
+			            List<Column> cols = t.getColumns();
+			            for (Iterator<Column> it = cols.iterator(); it.hasNext();)
+			            {
+			                Column col = (Column) it.next();
+			                String colName = col.getName().toUpperCase();
+			                if (exactMatch ? colName.equals(currText) : colName.startsWith(currText))
+			                {
+			                    Segment s = new Segment(col.getName(), new Position(0),
+			                            SegmentType.Column);
+			                    s.setReferredData(col);
+			                    completions.add(s);
+			                }
+			            }
+			        }
+			    }
+			}
+		}
+		catch (IllegalStateException e)
+		{
+			if (!isIllegalStateLogged)
+			{
+				PlsqleditorPlugin.log("Failed to store columns", e);
+				isIllegalStateLogged = true;
+			}
+		}
     }
 
     private static void checkSegment(int documentOffset,
                                      String currText,
-                                     List completions,
+                                     List<Segment> completions,
                                      Segment segment,
                                      boolean addLocals,
                                      boolean exactMatch)
     {
         if (segment instanceof PackageSegment)
         {
-            for (Iterator it = segment.getContainedSegments().iterator(); it.hasNext();)
+            for (Iterator<Segment> it = segment.getContainedSegments().iterator(); it.hasNext();)
             {
-                Segment seg2 = (Segment) it.next();
+                Segment seg2 = it.next();
                 checkSegment(documentOffset, currText, completions, seg2, addLocals, exactMatch);
             }
         }
@@ -1365,13 +1400,13 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
 
     private static void addLocals(int documentOffset,
                                   String currText,
-                                  List completions,
+                                  List<Segment> completions,
                                   Segment segment,
                                   boolean exactMatch)
     {
         if (segment.contains(documentOffset))
         {
-            for (Iterator it = segment.getFieldList().iterator(); it.hasNext();)
+            for (Iterator<Segment> it = segment.getFieldList().iterator(); it.hasNext();)
             {
                 Segment local = (Segment) it.next();
                 String lName = local.getName().toUpperCase();
@@ -1380,7 +1415,7 @@ public class PlSqlCompletionProcessor implements IContentAssistProcessor
                     completions.add(local);
                 }
             }
-            for (Iterator it = segment.getParameterList().iterator(); it.hasNext();)
+            for (Iterator<Segment> it = segment.getParameterList().iterator(); it.hasNext();)
             {
                 Segment parameter = (Segment) it.next();
                 String pName = parameter.getName().toUpperCase();

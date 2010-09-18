@@ -1,6 +1,5 @@
 package plsqleditor.actions;
 
-import org.boomsticks.plsqleditor.dialogs.ManageConnectionDetailsDialog;
 import org.boomsticks.plsqleditor.dialogs.ManageOpenConnectionsDialog;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -8,6 +7,8 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowActionDelegate;
+
+import plsqleditor.PlsqleditorPlugin;
 
 public class ManageLiveConnectionsAction implements IWorkbenchWindowActionDelegate
 {
@@ -58,7 +59,7 @@ public class ManageLiveConnectionsAction implements IWorkbenchWindowActionDelega
         try
         {
             ManageOpenConnectionsDialog dialog = new ManageOpenConnectionsDialog(shell,
-                    "Manage Live Connections", "View and Disconnect Live Connections", null);
+                    "Manage Live Connections", "View and Disconnect Live Connections", PlsqleditorPlugin.getDefault().getOpenConnectionList());
             dialog.open();
         }
         catch (RuntimeException e)

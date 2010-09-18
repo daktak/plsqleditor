@@ -22,7 +22,7 @@ public class ExecutePlDocAction implements IObjectActionDelegate
     private IWorkbenchPart myWorkBenchPart;
 
     /**
-     * Constructor for Action1.
+     * Constructor for ExecutePlDocAction.
      */
     public ExecutePlDocAction()
     {
@@ -57,13 +57,13 @@ public class ExecutePlDocAction implements IObjectActionDelegate
                     if (selection instanceof IStructuredSelection)
                     {
                         IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-                        List filelist = new ArrayList();
+                        List<IFile> filelist = new ArrayList<IFile>();
                         for (Iterator it = structuredSelection.iterator(); it.hasNext();)
                         {
                             Object o = it.next();
                             if (o instanceof IFile)
                             {
-                                filelist.add(o);
+                                filelist.add((IFile)o);
                             }
                         }
                         IFile[] files = (IFile[]) filelist.toArray(new IFile[filelist.size()]);

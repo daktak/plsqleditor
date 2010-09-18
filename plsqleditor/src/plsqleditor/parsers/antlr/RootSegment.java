@@ -1,7 +1,7 @@
 /**
  * 
  */
-package plsqleditor.parsers;
+package plsqleditor.parsers.antlr;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.tree.Tree;
 import org.eclipse.jface.text.Position;
 
-import plsqleditor.parsers.antlr.AstSegment;
+import plsqleditor.parsers.Segment;
 import au.com.alcatel.fulfil.tools.codecheck.parser.PlSqlParser.start_rule_return;
 
 /**

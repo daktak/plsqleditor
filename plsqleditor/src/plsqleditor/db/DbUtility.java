@@ -76,6 +76,22 @@ public class DbUtility
         {
             connection = conn;
         }
+
+		public void closeConnection()
+		{
+			if (connection != null)
+			{
+				try
+				{
+					connection.close();
+				}
+				catch (SQLException e)
+				{
+					e.printStackTrace();
+				}
+				connection = null;
+			}
+		}
     }
 
     public interface DbPrefsUpdateListener
@@ -111,12 +127,13 @@ public class DbUtility
     private static ConnectionPool initDbaConnectionPool(IProject project)
     {
         ConnectionPool dbaConnPool = theDbaConnectionPools.get(project);
+    	String connType = "DBA connection pool for project [" + project + "]";
 
         if (dbaConnPool == null)
         {
             if (thePrefs == null)
             {
-                throw new IllegalStateException("Prefs have not been set");
+                throw new IllegalStateException("Prefs have not been set for " + connType);
             }
             try
             {
@@ -196,27 +213,27 @@ public class DbUtility
 
                 if (driver == null || driver.trim().length() == 0)
                 {
-                    throw new IllegalStateException("The driver class has not been selected");
+                    throw new IllegalStateException("The driver class has not been selected for " + connType);
                 }
                 if (url == null || url.trim().length() == 0)
                 {
-                    throw new IllegalStateException("The url has not been selected");
+                    throw new IllegalStateException("The url has not been selected for " + connType);
                 }
                 if (user == null || user.trim().length() == 0)
                 {
-                    throw new IllegalStateException("The user has not been defined");
+                    throw new IllegalStateException("The user has not been defined for " + connType);
                 }
                 if (passwd == null || passwd.trim().length() == 0)
                 {
-                    throw new IllegalStateException("The password has not been defined");
+                    throw new IllegalStateException("The password has not been defined for " + connType);
                 }
                 if (initConns == 0)
                 {
-                    throw new IllegalStateException("initial number of connections is invalid");
+                    throw new IllegalStateException("initial number of connections is invalid for " + connType);
                 }
                 if (maxConns == 0)
                 {
-                    throw new IllegalStateException("maximum number of connections is invalid");
+                    throw new IllegalStateException("maximum number of connections is invalid for " + connType);
                 }
 
                 dbaConnPool = new ConnectionPool(driver, url, user, passwd, initConns, maxConns,
@@ -226,12 +243,11 @@ public class DbUtility
             }
             catch (SQLException e)
             {
-                String msg = "Failed to initialise connection pool: " + e;
+                String msg = "Failed to initialise " + connType + ": " + e;
                 System.out.println(msg);
 
                 // fix for 1437124 - Techie error message when password not
                 // supplied
-                String connType = "DBA connection for project [" + project + "]";
                 String propsLocation = "project properties or dba preferences.";
                 checkBadUserOrPwd(msg, connType, propsLocation);
                 throw new IllegalStateException(msg);

@@ -15,6 +15,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.editors.PlSqlEditor;
+import plsqleditor.parsers.PlSqlParserManager;
 import plsqleditor.parsers.Segment;
 import plsqleditor.stores.PackageStore;
 
@@ -46,9 +47,13 @@ public class ChangeSchemaForPackageAction extends SelectedTextAction
             }
             else
             {
-                PlsqleditorPlugin.log(("Failed to find packagename for file [" + plugin.getCurrentFileName() + 
-                        "]. Assuming a package name of 'scratch'"), null);
-                packageName = "scratch";
+            	packageName = PlSqlParserManager.getPackageName(file);
+            	if (packageName == null)
+            	{
+	                PlsqleditorPlugin.log(("Failed to find packagename for file [" + plugin.getCurrentFileName() + 
+	                        "]. Assuming a package name of 'scratch'"), null);
+	                packageName = "scratch";
+            	}
             }
                 
             String schemaName = plugin.getCurrentSchema();

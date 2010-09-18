@@ -77,8 +77,6 @@ public class GenerateHeaderAction extends TextEditorAction
     public static String generateHeader(IFile file, ITextEditor editor) throws IOException,
             CoreException
     {
-        // fix for bug 1455136 - header generation fails at folder level
-        IContainer parent = file.getParent();
         /*
          * Support for Feature 1430732 - Save before Load to database
          */ 
@@ -110,7 +108,18 @@ public class GenerateHeaderAction extends TextEditorAction
                 }
             }
         }
-        String filename = file.getName().replaceFirst("\\.pkb", ".pkh");
+        String filename = generateHeader(file);
+        return filename;
+    }
+
+	static String generateHeader(IFile file) throws IOException,
+			CoreException {
+		// fix for bug 1455136 - header generation fails at folder level
+        IContainer parent = file.getParent();
+        String filename = file.getName();
+        int extensionIndex = filename.lastIndexOf(".");
+        //String filename = file.getName().replaceFirst("\\.pkb", ".pkh");
+        filename = filename.substring(0,extensionIndex) + ".pkh";
         // fix for bug 1455136 - header generation fails at folder level
         IFile pkhFile = parent.getFile(new Path(filename));
         String result = theHeaderGenerator.parseBodyFile(file.getContents());
@@ -124,8 +133,8 @@ public class GenerateHeaderAction extends TextEditorAction
         {
             pkhFile.create(resultingInputStream, true, null);
         }
-        return filename;
-    }
+		return filename;
+	}
 
     public static String generateHeader(IFile file, IWorkbenchSite site) throws IOException,
             CoreException

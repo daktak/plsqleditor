@@ -36,6 +36,11 @@ public abstract class DatabaseEntity implements Serializable
 {
 
 	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -4341167337574379966L;
+
+	/**
 	 * This field represents any remarks that have been entered into the 
 	 * database concerning this object.  It is merely for comments explaining 
 	 * this object.
@@ -92,5 +97,10 @@ public abstract class DatabaseEntity implements Serializable
         {
             return super.toString();
         }
+    }
+    
+    public String getDisplayName()
+    {
+    	return toString();
     }
 }

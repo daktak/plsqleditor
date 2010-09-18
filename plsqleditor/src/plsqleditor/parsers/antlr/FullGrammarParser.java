@@ -10,7 +10,6 @@ import org.antlr.runtime.RecognitionException;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
-import plsqleditor.parsers.RootSegment;
 import plsqleditor.parsers.Segment;
 import plsqleditor.parsers.SegmentType;
 

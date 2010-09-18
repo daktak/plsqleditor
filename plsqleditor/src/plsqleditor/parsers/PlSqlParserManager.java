@@ -7,6 +7,8 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeSet;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
@@ -92,6 +94,51 @@ public class PlSqlParserManager
         return ParseType.SqlScript;
     }
 
+    
+    /**
+     * This method gets the package name from the file. If this is not a package header or body, then null is returned.
+     * 
+     * @param file The file whose package name is sought.
+     * 
+     * @return The name of the package.
+     */
+    public static String getPackageName(IFile file)
+    {
+    	Pattern headerStart = Pattern.compile("\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] \\W*(\\w+).*");
+    	Pattern bodyStart = Pattern.compile("\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] +[Bb][Oo][Dd][Yy] \\W*(\\w+).*");
+    	String packageName = null;
+        try
+        {
+            BufferedReader br = new BufferedReader(new InputStreamReader(file.getContents()));
+            String line = null;
+            while ((line = br.readLine()) != null)
+            {
+            	Matcher headerM = headerStart.matcher(line);
+            	Matcher bodyM = bodyStart.matcher(line);
+            	if (bodyM.matches())
+            	{
+            		packageName = bodyM.group(1);
+            		break;
+            	}
+            	else if (headerM.matches())
+            	{
+            		packageName = headerM.group(1);
+            		break;
+            	}
+            }
+            br.close();
+        }
+        catch (CoreException e)
+        {
+            e.printStackTrace();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return packageName;
+    }
+
     public synchronized static PlSqlParserManager instance()
     {
         if (theInstance == null)
@@ -137,14 +184,9 @@ public class PlSqlParserManager
         {
             return ParseType.Package_Header_And_Body;
         }
-        else if (filename.indexOf(".sql") != -1)
+        else 
         {
-
             return getTypeFromContext(file);
-        }
-        else
-        {
-            return ParseType.SqlScript;
         }
     }
 

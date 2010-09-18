@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.resources.IFile;
@@ -12,7 +11,7 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Preferences;
+import org.eclipse.jface.preference.IPreferenceStore;
 
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.preferences.PreferenceConstants;
@@ -44,7 +43,7 @@ public class PlDocProcessExecutor
         String styleSheetFile = "";
         String namesCase = "";
 
-        Preferences prefs = PlsqleditorPlugin.getDefault().getPluginPreferences();
+        IPreferenceStore prefs = PlsqleditorPlugin.getDefault().getPreferenceStore();
         
         IWorkspaceRoot workspaceRoot = ResourcesPlugin.getWorkspace().getRoot();
         
@@ -83,8 +82,7 @@ public class PlDocProcessExecutor
         String pldocPath = prefs.getString(PreferenceConstants.P_PLDOC_PATH);
         if (pldocPath.length() == 0)
         {
-            PlsqleditorPlugin.getDefault()
-                    .log(("Failed to execute Pldoc because pldoc path is not set"), null);
+            PlsqleditorPlugin.log(("Failed to execute Pldoc because pldoc path is not set"), null);
         }
         String extraParams = prefs.getString(PreferenceConstants.P_PLDOC_EXTRA_PARAMS);
 
@@ -124,11 +122,10 @@ public class PlDocProcessExecutor
             {
                 outputDirString = workspacePath;
             }
-            HashMap gatheredFiles = gatherFiles(files);
-            for (Iterator it = gatheredFiles.keySet().iterator(); it.hasNext();)
-            {
-                String folderName = (String) it.next();
-                List filelist = (List) gatheredFiles.get(folderName);
+            HashMap<String,List<IFile>> gatheredFiles = gatherFiles(files);
+            for (String folderName : gatheredFiles.keySet())
+			{
+                List<IFile> filelist = gatheredFiles.get(folderName);
                 IFile file = (IFile) filelist.get(0);
                 String outputDir = null;
                 if (outputDirectoryUse.equals(PreferenceConstants.C_OUTPUTDIR_FS_RELATIVE))
@@ -232,29 +229,29 @@ public class PlDocProcessExecutor
                     + definesFile + styleSheetFile + namesCase + extraParams + fileNamesBuffer;
         }
 
-        PlsqleditorPlugin.getDefault().log("Executing command: " + cmd[2], null);
+        PlsqleditorPlugin.log("Executing command: " + cmd[2], null);
 
         Runtime rt = Runtime.getRuntime();
         try
         {
             Process proc = rt.exec(cmd);
             StreamProcessor errorProcessor = new StreamProcessor(proc.getErrorStream(),
-                    "Standard Error");
+                    "Std  Error");
             StreamProcessor outputProcessor = new StreamProcessor(proc.getInputStream(),
-                    "Standard Output");
+                    "Std Output");
 
             errorProcessor.start();
             outputProcessor.start();
             int exitVal = proc.waitFor();
-            PlsqleditorPlugin.getDefault().log(("Process exitValue: " + exitVal), null);
+            PlsqleditorPlugin.log(("Process exitValue: " + exitVal), null);
         }
         catch (IOException e)
         {
-            PlsqleditorPlugin.getDefault().log("PlDoc execution error", e);
+            PlsqleditorPlugin.log("PlDoc execution error", e);
         }
         catch (Exception e)
         {
-            PlsqleditorPlugin.getDefault().log("PlDoc execution error", e);
+            PlsqleditorPlugin.log("PlDoc execution error", e);
         }
     }
 
@@ -266,17 +263,17 @@ public class PlDocProcessExecutor
      * 
      * @return A map of folderName -=> list of IFiles.
      */
-    private HashMap gatherFiles(IFile[] files)
+    private HashMap<String,List<IFile>> gatherFiles(IFile[] files)
     {
-        HashMap map = new HashMap();
+        HashMap<String,List<IFile>> map = new HashMap<String,List<IFile>>();
         for (int i = 0; i < files.length; i++)
         {
             IFile file = files[i];
             String folderName = file.getParent().toString();
-            List filesInFolder = (List) map.get(folderName);
+            List<IFile> filesInFolder = map.get(folderName);
             if (filesInFolder == null)
             {
-                filesInFolder = new ArrayList();
+                filesInFolder = new ArrayList<IFile>();
                 map.put(folderName, filesInFolder);
             }
             filesInFolder.add(file);
