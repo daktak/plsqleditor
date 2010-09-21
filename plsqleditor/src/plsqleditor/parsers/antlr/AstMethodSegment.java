@@ -12,11 +12,11 @@ import plsqleditor.parsers.Segment;
 public abstract class AstMethodSegment extends AstDeclarationSegment
 {
     /** The name (and name only) of the method */
-    private String                              myMethodName;
-    private List<ParameterDeclarationSegment>   myParameterList;
-    private List<AstVariableDeclarationSegment> myFieldList;
-    private boolean                             isExceptionHandlerRetrieved = false;
-    private AstCodeSegment                      myExceptionHandler;
+    private String         myMethodName;
+    private List<Segment>  myParameterList; // ParameterDeclarationSegment
+    private List<Segment>  myFieldList; //AstVariableDeclarationSegment
+    private boolean        isExceptionHandlerRetrieved = false;
+    private AstCodeSegment myExceptionHandler;
 
     public AstMethodSegment(Tree tree, String type, CommonTokenStream stream)
     {
@@ -36,9 +36,9 @@ public abstract class AstMethodSegment extends AstDeclarationSegment
             return "";
         }
         StringBuffer sb = new StringBuffer("(");
-        for (Iterator<ParameterDeclarationSegment> it = myParameterList.iterator(); it.hasNext();)
+        for (Iterator<Segment> it = myParameterList.iterator(); it.hasNext();)
         {
-            ParameterDeclarationSegment p = it.next();
+            ParameterDeclarationSegment p = (ParameterDeclarationSegment) it.next();
             // sb.append(p.toString(overrideParameterSettings));
             if (it.hasNext())
             {
@@ -55,11 +55,11 @@ public abstract class AstMethodSegment extends AstDeclarationSegment
      * @return The parameter list (as {@link Segment}s) in the format
      *         (p1,p2,p3).
      */
-    public List<? extends Segment> getParameterList()
+    public List<Segment> getParameterList()
     {
         if (myParameterList == null)
         {
-            myParameterList = new ArrayList<ParameterDeclarationSegment>();
+            myParameterList = new ArrayList<Segment>();
             int childCount = getTree().getChildCount();
             for (int i = 0; i < childCount; i++)
             {
@@ -67,7 +67,8 @@ public abstract class AstMethodSegment extends AstDeclarationSegment
                 String childText = child.getText();
                 if (childText != null && childText.equals("PARAMETER_DECLARATION"))
                 {
-                    ParameterDeclarationSegment pds = new ParameterDeclarationSegment(child, getTokenStream());
+                    ParameterDeclarationSegment pds = new ParameterDeclarationSegment(child,
+                            getTokenStream());
                     myParameterList.add(pds);
                 }
             }
@@ -80,7 +81,7 @@ public abstract class AstMethodSegment extends AstDeclarationSegment
      * 
      * @return {@link #myFieldList}.
      */
-    public List<? extends Segment> getFieldList()
+    public List<Segment> getFieldList()
     {
         // FIELD_DECLARATION (maybe),VARIABLE_DECLARATION or others?
         return myFieldList;
@@ -89,6 +90,7 @@ public abstract class AstMethodSegment extends AstDeclarationSegment
     protected void setMethodName(String methodName)
     {
         myMethodName = methodName;
+        setName(methodName);
     }
 
     /**

@@ -1,5 +1,0 @@
-type information (for types added to the database can be found in
-dba_types.
-if the type is a collection, look in dba_coll_types.
-if the type is an object with fields, look in dba_type_attrs.
-if the type is in a package header, use the package information.

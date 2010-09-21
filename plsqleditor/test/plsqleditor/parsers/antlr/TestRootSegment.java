@@ -6,18 +6,16 @@ package plsqleditor.parsers.antlr;
 import java.io.IOException;
 import java.util.List;
 
-import org.antlr.runtime.CommonToken;
+import junit.framework.TestCase;
+
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.RecognitionException;
 import org.antlr.runtime.tree.Tree;
 
-import plsqleditor.parsers.RootSegment;
 import plsqleditor.parsers.Segment;
-
 import au.com.alcatel.fulfil.tools.codecheck.parser.ANTLRNoCaseFileStream;
 import au.com.alcatel.fulfil.tools.codecheck.parser.PlSqlLexer;
 import au.com.alcatel.fulfil.tools.codecheck.parser.PlSqlParser;
-import junit.framework.TestCase;
 
 /**
  * @author Toby
@@ -104,7 +102,6 @@ public class TestRootSegment extends TestCase
 
             final PlSqlParser.start_rule_return ptree;
             ptree = parser.start_rule();
-            // RootSegment rs = new RootSegment(ptree);
             Tree tree = (Tree) ptree.getTree();
             processTree(tree, "");
         }
@@ -138,7 +135,24 @@ public class TestRootSegment extends TestCase
             List<Segment> segments = rs.getContainedSegments();
             for (Segment segment : segments)
             {
-                System.out.println(segment.toString());
+                if (segment instanceof AstPackageDeclarationSegment)
+                {
+                    AstPackageDeclarationSegment pkg = (AstPackageDeclarationSegment) segment;
+                    List<FunctionDeclarationSegment> funcs = pkg.getFunctions(false);
+                    for (FunctionDeclarationSegment func : funcs)
+                    {
+                        System.out.println(func.toString());
+                    }
+                    List<ProcedureDeclarationSegment> procs = pkg.getProcedures(false);
+                    for (ProcedureDeclarationSegment proc : procs)
+                    {
+                        System.out.println(proc.toString());
+                    }
+                }
+                else
+                {
+                    System.out.println(segment.toString());
+                }
             }
         }
         catch (IOException e)

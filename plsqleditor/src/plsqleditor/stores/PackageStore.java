@@ -256,6 +256,10 @@ public class PackageStore implements SchemaRegistry.RegistryUpdateListener,
 			List<Segment> segments;
 			ParseType type = PlSqlParserManager.getType(file);
 			PlSqlPackage pkg = myFileNameToPackageMap.get(filename);
+            // fix for 3071548 - null schema means file fails to open
+            // a bit bodgy though, shouldn't be setting this everywhere
+            PlsqleditorPlugin.getDefault().setProject(file.getProject());
+            // end fix
 			segments = myParser.parseFile(type, document, packageName);
 			String schemaFromSegments = getSchemaNameFromSegments(segments);
 			if (pkg != null)

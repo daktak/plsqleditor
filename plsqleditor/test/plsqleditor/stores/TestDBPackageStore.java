@@ -243,7 +243,7 @@ public class TestDBPackageStore extends TestCase {
 	
 	public void testGetSource() throws SQLException
 	{
-		String s = dbps.getSource("SVCMDL","INTERFACE");
+		String s = dbps.getSource("SVCMDL","INTERFACE","PACKAGE BODY");
 		System.out.println(s);
 		assertTrue(s.startsWith("PACKAGE"));
 	}

@@ -106,8 +106,7 @@ public class SourceFile
 
 	public synchronized void parse()
 	{
-		this.mySegments = PlsqleditorPlugin.getDefault().getPackageStore(file)
-				.getSegments(file, doc, false);
+		this.mySegments = PlsqleditorPlugin.getDefault().getSegments(file, doc, false);
 		// TODO eventually the primary parse should be in here.
 		// after that the content outline can get the segments from here
 		// and anyone else who needs them can get them from here

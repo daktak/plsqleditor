@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.antlr.runtime.CommonTokenStream;
+import org.antlr.runtime.Token;
 import org.antlr.runtime.tree.Tree;
 import org.eclipse.jface.text.Position;
 
@@ -24,17 +25,20 @@ public class AstSegment extends Segment
     /**
      * This is the antlr tree that the AstSegment is wrapping.
      */
-    private Tree myTree;
+    private Tree              myTree;
 
 
     /**
      * This field will be FUNCTION_DECLARATION or PROCEDURE_DECLARATION
      * indicating the type of declaration segment is is.
      */
-    private String                      myType;
+    private String            myType;
 
 
     private CommonTokenStream myTokenStream;
+
+
+    private List<Segment>     mySegments;
 
     public AstSegment(Tree tree, String type, CommonTokenStream tokenStream)
     {
@@ -54,7 +58,7 @@ public class AstSegment extends Segment
     {
         return myTokenStream;
     }
-    
+
     private String determineName(Tree tree)
     {
         // TODO Auto-generated method stub
@@ -75,13 +79,13 @@ public class AstSegment extends Segment
         {
             if (text.equals("CREATE_PACKAGE"))
             {
-                toReturn = new AstPackageDeclarationSegment(tree,stream);
+                toReturn = new AstPackageDeclarationSegment(tree, stream);
                 // PACKAGE_NAME, PROCEDURE_BODY, PROCEDURE_BODY, PROCEDURE_BODY,
                 // FUNCTION_BODY
             }
             else if (text.equals("FUNCTION_BODY"))
             {
-                toReturn = new FunctionDeclarationSegment(tree,stream);
+                toReturn = new FunctionDeclarationSegment(tree, stream);
                 // eg.
                 // FUNCTION_DECLARATION,
                 // VARIABLE_DECLARATION, VARIABLE_DECLARATION,
@@ -91,7 +95,7 @@ public class AstSegment extends Segment
             }
             else if (text.equals("PROCEDURE_BODY"))
             {
-                toReturn = new ProcedureDeclarationSegment(tree,stream);
+                toReturn = new ProcedureDeclarationSegment(tree, stream);
                 // eg.
                 // PROCEDURE_DECLARATION,
                 // VARIABLE_DECLARATION, VARIABLE_DECLARATION,
@@ -102,32 +106,32 @@ public class AstSegment extends Segment
             }
             else if (text.equals("CURSOR_DECLARATION"))
             {
-                toReturn = new AstCursorDeclarationSegment(tree,text,stream);
+                toReturn = new AstCursorDeclarationSegment(tree, text, stream);
             }
             else if (text.equals("VARIABLE_DECLARATION"))
             {
-                toReturn = new AstVariableDeclarationSegment(tree,stream);
+                toReturn = new AstVariableDeclarationSegment(tree, stream);
             }
             else if (text.equals("PLSQL_BLOCK"))
             {
-                toReturn = new AstCodeSegment(tree, text,stream); 
+                toReturn = new AstCodeSegment(tree, text, stream);
             }
             else if (text.equals("RETURN_STATEMENT"))
             {
-                toReturn = new AstCodeSegment(tree, text,stream); 
+                toReturn = new AstCodeSegment(tree, text, stream);
             }
             else if (text.equals("IF_STATEMENT"))
             {
-                toReturn = new AstCodeSegment(tree, text,stream); 
+                toReturn = new AstCodeSegment(tree, text, stream);
             }
             else
             {
-                toReturn = new AstSegment(tree); // Record these
+                toReturn = new AstSegment(tree, text, stream); // Record these
             }
         }
         else
         {
-            toReturn = new AstSegment(tree);
+            toReturn = new AstSegment(tree, text, stream);
         }
 
         return toReturn;
@@ -135,15 +139,18 @@ public class AstSegment extends Segment
 
     public List<Segment> getContainedSegments()
     {
-        List<Segment> segments = new ArrayList<Segment>();
-        int childCount = myTree.getChildCount();
-        for (int i = 0; i < childCount; i++)
+        if (mySegments == null)
         {
-            Tree child = myTree.getChild(i);
-            AstSegment segment = generateSegment(child);
-            segments.add(segment);
+            mySegments = new ArrayList<Segment>();
+            int childCount = myTree.getChildCount();
+            for (int i = 0; i < childCount; i++)
+            {
+                Tree child = myTree.getChild(i);
+                AstSegment segment = generateSegment(child, getTokenStream());
+                mySegments.add(segment);
+            }
         }
-        return segments;
+        return mySegments;
     }
 
     /**
@@ -162,17 +169,6 @@ public class AstSegment extends Segment
         myTree = tree;
     }
 
-    /**
-     * This method returns the start and end location in a file that this
-     * segment is in.
-     * 
-     * @return
-     */
-    public Position getLocation()
-    {
-        return null;
-        // TODO implement this
-    }
 
     /**
      * This method gets a particular segment contained within this segment
@@ -183,8 +179,25 @@ public class AstSegment extends Segment
      */
     public AstSegment getContainedSegmentForLocation(Position location)
     {
-        return null;
-        // TODO implement this
+        AstSegment toReturn = null;
+        for (Segment segment : getContainedSegments())
+        {
+            if (segment.getPosition().getOffset() < location.getOffset()
+                    && segment.getLastPosition().getOffset() > location.getOffset())
+            {
+                toReturn = (AstSegment) segment;
+                break;
+            }
+        }
+        if (toReturn != null)
+        {
+            AstSegment closer = toReturn.getContainedSegmentForLocation(location);
+            if (closer != null)
+            {
+                toReturn = closer;
+            }
+        }
+        return toReturn;
     }
 
 
@@ -205,5 +218,53 @@ public class AstSegment extends Segment
         // {
         // sb.append(segment.toString());
         // }
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see plsqleditor.parsers.Segment#getPosition()
+     */
+    @Override
+    public Position getPosition()
+    {
+        return null; // TODO fix this, or deprecate getPosition()
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see plsqleditor.parsers.Segment#getLastPosition()
+     */
+    @Override
+    public Position getLastPosition()
+    {
+        return null; // TODO fix this, or deprecate getLastPosition()
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see plsqleditor.parsers.Segment#getEndLine()
+     */
+    @Override
+    public int getEndLine()
+    {
+        int tokenIndex = myTree.getTokenStopIndex();
+        Token token = getTokenStream().get(tokenIndex);
+        return token.getLine();
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see plsqleditor.parsers.Segment#getStartLine()
+     */
+    @Override
+    public int getStartLine()
+    {
+        int tokenIndex = myTree.getTokenStartIndex();
+        Token token = getTokenStream().get(tokenIndex);
+        return token.getLine();
     }
 }

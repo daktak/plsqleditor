@@ -96,7 +96,7 @@ public class PackageSegment extends Segment implements Cloneable
     }
 
 
-    public List getContainedSegments()
+    public List<Segment> getContainedSegments()
     {
         return myContainedSegments;
     }

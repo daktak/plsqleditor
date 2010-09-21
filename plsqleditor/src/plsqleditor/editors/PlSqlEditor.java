@@ -861,24 +861,25 @@ public class PlSqlEditor extends TextEditor
 			return;
 		}
 
-		try
-		{
-			syncToOutline = true;
+//      try
+//      {
+            syncToOutline = true;
 
-			int caretOffset = mySourceViewer.getSelectedRange().x;
-			int caretLine = mySourceViewer.getDocument().getLineOfOffset(
-					caretOffset);
+            int caretOffset = mySourceViewer.getSelectedRange().x;
+//          int caretLine = mySourceViewer.getDocument().getLineOfOffset(
+//                  caretOffset);
 
-			fOutlinePage.updateSelection(caretLine);
-		}
-		catch (BadLocationException e)
-		{
-			e.printStackTrace();
-		}
-		finally
-		{
-			syncToOutline = false;
-		}
+            fOutlinePage.updateSelection(caretOffset);
+            syncToOutline = false;
+//      }
+//      catch (BadLocationException e)
+//      {
+//          e.printStackTrace();
+//      }
+//      finally
+//      {
+//          syncToOutline = false;
+//      }
 	}
 
 	/**
@@ -1181,4 +1182,9 @@ public class PlSqlEditor extends TextEditor
 	{
 		return mySource;
 	}
+
+    public boolean isSyncingToOutline()
+    {
+        return syncToOutline;
+    }
 }

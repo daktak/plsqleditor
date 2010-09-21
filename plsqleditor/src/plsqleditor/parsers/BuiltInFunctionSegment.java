@@ -6,10 +6,10 @@ public class BuiltInFunctionSegment extends Segment
 {
     static final Position DUMMY_POS = new Position(0); 
     
-    static class Parameter extends Segment.Parameter
+    static class BuiltInFunctionParameter extends Parameter
     {
 
-        Parameter(String param, String inout, String type, String extraDetails, int offset)
+        BuiltInFunctionParameter(String param, String inout, String type, String extraDetails, int offset)
         {
             super(param, inout, type, extraDetails, offset);
         }

@@ -6,6 +6,7 @@ package plsqleditor.parsers.antlr;
 import org.antlr.runtime.CommonTokenStream;
 import org.antlr.runtime.tree.Tree;
 
+import plsqleditor.parsers.Parameter;
 import plsqleditor.stores.PlSqlType;
 
 /**

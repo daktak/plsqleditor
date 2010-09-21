@@ -36,4 +36,5 @@ public class AstPackageDeclarationSegment extends AstDeclarationSegment
         return PackageNameSegmentName;
     }
 
+    
 }
