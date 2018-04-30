@@ -3,6 +3,7 @@ package plsqleditor.parsers.antlr;
 import org.antlr.runtime.ANTLRStringStream;
 import org.antlr.runtime.CharStream;
 
+
 /**
  * Implements a case-insensitive ANTLR Lexer input stream from and IDocument
  * 

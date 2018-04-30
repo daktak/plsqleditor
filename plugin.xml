@@ -4,7 +4,7 @@
      <extension
          point="org.eclipse.ui.editors">
       <editor
-            name="PL-SQL Editor"
+            name="%editor.name"
             extensions="pkb,sql,pks,prc,pkh,pkdb,pkg,ora,pck"
             icon="icons/at_no_alpha.png"
             contributorClass="plsqleditor.editors.MultiPagePlsqlEditorContributor"
@@ -25,14 +25,14 @@
       <page
             class="plsqleditor.preferences.PlSqlPreferencePage"
             id="plsqleditor.preferences.PlSqlPreferencePage"
-            name="PL/SQL Preferences"/>
+            name="%page.name"/>
       <page
             category="plsqleditor.preferences.PlSqlPreferencePage"
             class="plsqleditor.preferences.DbSetupPreferencePage"
             id="plsqleditor.preferences.DbSetupPreferencePage"
-            name="Database Connectivity Setup"/>
+            name="%page.name.0"/>
       <page
-            name="Editor"
+            name="%page.name.1"
             category="plsqleditor.preferences.PlSqlPreferencePage"
             class="plsqleditor.preferences.PlsqlEditorPreferencePage"
             id="plsqleditor.preferences.PlsqlEditorPreferencePage">
@@ -41,27 +41,27 @@
             category="plsqleditor.preferences.PlsqlEditorPreferencePage"
             class="plsqleditor.preferences.FormattingPreferencePage"
             id="plsqleditor.preferences.PlSqlPreferencePage"
-            name="Formatting Preferences"/>
+            name="%page.name.2"/>
       <page
             category="plsqleditor.preferences.PlsqlEditorPreferencePage"
             class="plsqleditor.preferences.MarkOccurrencesPreferencePage"
             id="plsqleditor.editor.preferences.MarkOccurrencesPreferencePage"
-            name="Mark Occurrences" />
+            name="%page.name.3" />
       <page
             category="plsqleditor.preferences.PlsqlEditorPreferencePage"
             class="plsqleditor.preferences.FoldingPreferencePage"
             id="plsqleditor.editor.preferences.FoldingPreferencePage" 
-            name="Folding" />
+            name="%page.name.4" />
       <page
             category="plsqleditor.preferences.PlSqlPreferencePage"
             class="plsqleditor.preferences.TemplatesPreferencePage"
             id="plsqleditor.preferences.TemplatesPreferencePage"
-            name="Code Templates"/>
+            name="%page.name.5"/>
       <page
             category="plsqleditor.preferences.PlSqlPreferencePage"
             class="plsqleditor.preferences.PlDocPreferencePage"
             id="plsqleditor.preferences.PlDocPreferencePage"
-            name="PlDoc Preferences"/>
+            name="%page.name.6"/>
    </extension>
    <extension
          point="org.eclipse.core.runtime.preferences">
@@ -75,7 +75,7 @@
             objectClass="org.eclipse.core.resources.IFile">
          <menu
                id="plsqleditor.menu3"
-               label="PL/SQL Body"
+               label="%menu.label"
                path="additions">
             <groupMarker name="group3"/>
          </menu>
@@ -85,7 +85,7 @@
                enablesFor="+"
                icon="icons/pencil.gif"
                id="plsqleditor.generateHeader.action"
-               label="Generate Header"
+               label="%action.label"
                menubarPath="plsqleditor.menu3/group3"/>
       </objectContribution>
       <objectContribution
@@ -94,7 +94,7 @@
             objectClass="org.eclipse.core.resources.IFile">
          <menu
                id="plsqleditor.menu"
-               label="PL/SQL"
+               label="%menu.label.0"
                path="additions">
             <separator name="group1"/>
          </menu>
@@ -104,7 +104,7 @@
                enablesFor="1"
                icon="icons/database_down.png"
                id="plsqleditor.loadToDatabase.action"
-               label="Load to Database"
+               label="%action.label.0"
                menubarPath="plsqleditor.menu/group1"/>
          <action
                class="plsqleditor.actions.ResourceMenuOpenFileAction"
@@ -112,7 +112,7 @@
                enablesFor="+"
                icon="icons/togglepresentation.gif"
                id="plsqleditor.refreshErrorStatus.action"
-               label="Refresh Error Status"
+               label="%action.label.1"
                menubarPath="plsqleditor.menu/group1"/>
          <action
                class="plsqleditor.popup.actions.ExecutePlDocAction"
@@ -120,7 +120,7 @@
                enablesFor="+"
                icon="icons/generatePlDoc.gif"
                id="plsqleditor.generatePlDoc.action"
-               label="Generate PlDoc"
+               label="%action.label.2"
                menubarPath="plsqleditor.menu/group1"/>
          <action
                class="plsqleditor.actions.EditorMenuAction"
@@ -128,7 +128,7 @@
                enablesFor="1"
                icon="icons/togglepresentation.gif"
                id="plsqleditor.formatSource.action"
-               label="Format Source"
+               label="%action.label.3"
                menubarPath="plsqleditor.menu/group1"/>
       </objectContribution>
       <viewerContribution
@@ -136,7 +136,7 @@
             targetID="#TextEditorContext">
          <menu
                id="plsqleditor.edit.menu"
-               label="PlSql Edit"
+               label="%menu.label.1"
                path="group.edit">
             <groupMarker name="editgroup"/>
          </menu>
@@ -148,7 +148,7 @@
                id="plsqleditor.lowerCase.action"
                label="%plsqleditor.lowerCase.description"
                menubarPath="plsqleditor.edit.menu/editgroup"
-               tooltip="Converts the selected text to lower case"/>
+               tooltip="%action.tooltip"/>
          <action
                class="plsqleditor.actions.EditorMenuAction"
                definitionId="plsqleditor.upperCase"
@@ -157,7 +157,7 @@
                id="plsqleditor.upperCase.action"
                label="%plsqleditor.upperCase.description"
                menubarPath="plsqleditor.edit.menu/editgroup"
-               tooltip="Converts the selected text to upper case"/>
+               tooltip="%action.tooltip.0"/>
          <action
                class="plsqleditor.actions.EditorMenuAction"
                definitionId="plsqleditor.commentblock"
@@ -166,7 +166,7 @@
                id="plsqleditor.commentblock.action"
                label="%plsqleditor.commentblock.description"
                menubarPath="plsqleditor.edit.menu/editgroup"
-               tooltip="Adds a comment line to a block of selected code"/>
+               tooltip="%action.tooltip.1"/>
          <action
                class="plsqleditor.actions.EditorMenuAction"
                definitionId="plsqleditor.uncommentblock"
@@ -175,122 +175,122 @@
                id="plsqleditor.uncommentblock.action"
                label="%plsqleditor.uncommentblock.description"
                menubarPath="plsqleditor.edit.menu/editgroup"
-               tooltip="Removes a comment line from a block of selected code"/>
+               tooltip="%action.tooltip.2"/>
          <action
                class="plsqleditor.actions.EditorMenuAction"
                definitionId="plsqleditor.generatePlDoc"
                enablesFor="+"
                icon="icons/generatePlDoc.gif"
                id="plsqleditor.generatePlDoc.action"
-               label="Generate PlDoc"/>
+               label="%action.label.4"/>
       </viewerContribution>
    </extension>
    <extension
          point="org.eclipse.ui.commands">
       <command
 	        categoryId="org.eclipse.ui.category.navigate"
-	        description="Matching Bracket"
+	        description="%command.description"
 	        id="plsqleditor.commands.jumpToBracket"
-	        name="Matching Bracket" />
+	        name="%command.name" />
       <command
             categoryId="plsql.editor"
-            description="Causes a PL/SQL File lookup to be executed"
+            description="%command.description.0"
             id="plsql.file.lookup"
-            name="PlSql File Lookup Command"/>
+            name="%command.name.0"/>
       <command
             categoryId="plsql.editor"
-            description="Causes a file to be loaded to the database"
+            description="%command.description.1"
             id="plsqleditor.loadToDatabase"
-            name="Load to Database Command"/>
+            name="%command.name.1"/>
       <command
             categoryId="plsql.editor"
-            description="Generates a PL/SQL Header from a selected package body"
+            description="%command.description.2"
             id="plsqleditor.generateHeader"
-            name="Generate Header"/>
+            name="%command.name.2"/>
       <command
             categoryId="plsql.editor"
-            description="Refreshes the error markers on a file by checking the errors in the database"
+            description="%command.description.3"
             id="plsqleditor.refreshErrorStatus"
-            name="Refresh Error Status"/>
+            name="%command.name.3"/>
       <command
             categoryId="plsql.editor"
-            description="Executes the selected sql statement in the database"
+            description="%command.description.4"
             id="plsql.file.executeSql"
-            name="Execute Sql"/>
+            name="%command.name.4"/>
       <command
             categoryId="plsql.editor"
-            description="Converts the selected text to lower case"
+            description="%command.description.5"
             id="plsqleditor.lowerCase"
-            name="Lower Case"/>
+            name="%command.name.5"/>
       <command
             categoryId="plsql.editor"
-            description="Converts the selected text to upper case"
+            description="%command.description.6"
             id="plsqleditor.upperCase"
-            name="Upper Case"/>
+            name="%command.name.6"/>
       <command
             categoryId="plsql.editor"
-            description="Adds a comment line to a block of selected code"
+            description="%command.description.7"
             id="plsqleditor.commentblock"
-            name="Comment Block"/>
+            name="%command.name.7"/>
       <command
             categoryId="plsql.editor"
-            description="Removes a comment line from a block of selected code"
+            description="%command.description.8"
             id="plsqleditor.uncommentblock"
-            name="Uncomment Block"/>
+            name="%command.name.8"/>
       <category
             id="plsql.editor"
-            name="plsql.editor"/>
+            name="%category.name"/>
       <command
             categoryId="plsql.editor"
-            description="Generates the PL/SQL Documentation from the selected package header(s)"
+            description="%command.description.9"
             id="plsqleditor.generatePlDoc"
-            name="Generate PlDoc"/>
+            name="%command.name.9"/>
       <command
             categoryId="plsql.editor"
-            description="Changes the Schema for this Package so that package loading works"
+            description="%command.description.10"
             id="plsqleditor.changeSchemaForPackage"
-            name="Change Schema for Package"/>
+            name="%command.name.10"/>
       <command
             categoryId="plsql.editor"
             id="plsqleditor.generateHeaderAndLoadBoth"
-            name="GenerateHeaderAndLoadBoth">
+            name="%command.name.11">
       </command>
       	
       <command
             categoryId="plsql.editor"
             id="boomsticks.plsqleditor.loadSchema"
-            name="LoadSchema">
+            name="%command.name.12">
       </command>
       <command
             categoryId="plsql.editor"
             id="boomsticks.plsqleditor.loadSourceFromDb"
-            name="LoadSourceFromDb">
+            name="%command.name.13">
       </command>
       <command
             categoryId="plsql.editor"
             id="boomsticks.plsqleditor.showGrants"
-            name="ShowGrants">
+            name="%command.name.14">
       </command>
       <command
             categoryId="plsql.editor"
             id="boomsticks.plsqleditor.compareToDb"
-            name="CompareToDb">
+            name="%command.name.15">
       </command>
       <command
             categoryId="plsql.editor"
             id="boomsticks.plsqleditor.showDetails"
-            name="ShowDetails">
+            name="%command.name.16">
       </command>
    </extension>
    <extension
          point="org.eclipse.ui.actionSets">
       <actionSet
             id="plsqleditor.actionSet"
-            label="PL/SQL Action Set"
+            label="%actionSet.label"
             visible="false">
          <menu
                id="plSqlMenu"
-               label="&amp;PlSql Menu"
+               label="%menu.label.2"
                path="additions">
             <separator name="plsqlGroup"/>
          </menu>
@@ -299,78 +299,78 @@
                definitionId="plsql.file.lookup"
                icon="icons/srch.gif"
                id="plsqleditor.actions.LookupFileAction"
-               label="&amp;Lookup File"
+               label="%action.label.5"
                menubarPath="plSqlMenu/plsqlGroup"
                style="push"
                toolbarPath="plsqlGroup"
-               tooltip="Looks up a PL/SQL file location"/>
+               tooltip="%action.tooltip.3"/>
          <action
                class="plsqleditor.actions.WorkBenchWindowAction"
                definitionId="plsql.file.executeSql"
                icon="icons/runscript_16.gif"
                id="plsql.file.executeSql.action"
-               label="&amp;Execute Sql"
+               label="%action.label.6"
                menubarPath="plSqlMenu/plsqlGroup"
                style="push"
                toolbarPath="plsqlGroup"
-               tooltip="Executes a selected PL/SQL block"/>
+               tooltip="%action.tooltip.4"/>
          <action
                class="plsqleditor.actions.WorkBenchWindowAction"
                definitionId="plsqleditor.lowerCase"
                icon="icons/Down.gif"
                id="plsqleditor.lowerCase.action"
-               label="Lower Case"
+               label="%action.label.7"
                menubarPath="plSqlMenu/plsqlGroup"
                style="push"
                toolbarPath="plsqlGroup"
-               tooltip="Convert Selected Text to Lower Case"/>
+               tooltip="%action.tooltip.5"/>
          <action
                class="plsqleditor.actions.WorkBenchWindowAction"
                definitionId="plsqleditor.upperCase"
                icon="icons/Up.gif"
                id="plsqleditor.upperCase.action"
-               label="Upper Case"
+               label="%action.label.8"
                menubarPath="plSqlMenu/plsqlGroup"
                style="push"
                toolbarPath="plsqlGroup"
-               tooltip="Convert Selected Text to Upper Case"/>
+               tooltip="%action.tooltip.6"/>
          <action
                class="plsqleditor.actions.WorkBenchWindowAction"
                icon="icons/target.gif"
                id="plsqleditor.showDebugInfo.action"
-               label="Show Debug Info"
+               label="%action.label.9"
                menubarPath="plSqlMenu/plsqlGroup"
                style="push"
                toolbarPath="plsqlGroup"
-               tooltip="Display debug information concerning the current state of the plugin"/>
+               tooltip="%action.tooltip.7"/>
          <action
                class="plsqleditor.actions.WorkBenchWindowAction"
                icon="icons/forward.gif"
                id="plsql.db.commit.action"
-               label="Commit"
+               label="%action.label.10"
                menubarPath="plSqlMenu/plsqlGroup"
                style="push"
                toolbarPath="plsqlGroup"
-               tooltip="Commit the current schema (visible in debug info)"/>
+               tooltip="%action.tooltip.8"/>
          <action
                class="plsqleditor.actions.WorkBenchWindowAction"
                icon="icons/back.gif"
                id="plsql.db.rollback.action"
-               label="Rollback"
+               label="%action.label.11"
                menubarPath="plSqlMenu/plsqlGroup"
                style="push"
                toolbarPath="plsqlGroup"
-               tooltip="Rollback the current schema (visible in the debug info)"/>
+               tooltip="%action.tooltip.9"/>
          <action
                class="plsqleditor.actions.ManageLiveConnectionsAction"
                definitionId="plsql.db.manageLiveConnections"
                icon="icons/manageConnections.gif"
                id="plsqleditor.actions.ManageLiveConnectionsAction"
-               label="&amp;Manage Live Connections"
+               label="%action.label.12"
                menubarPath="plSqlMenu/plsqlGroup"
                style="push"
                toolbarPath="plsqlGroup"
-               tooltip="Allows you to manage the open DB Connections">
+               tooltip="%action.tooltip.10">
          </action>
       </actionSet>
    </extension>
@@ -378,33 +378,33 @@
          point="org.eclipse.ui.contexts">
       <context
             id="plsql.editor"
-            name="Editing PlSql"
-            description="PlSql Editor Context"
+            name="%context.name"
+            description="%context.description"
             parentId="org.eclipse.ui.textEditorScope"/>
    </extension>
    <extension
          point="org.eclipse.ui.views">
       <category
             id="plsql.editor"
-            name="Pl Sql Editor Views"/>
+            name="%category.name.0"/>
       <view
             category="plsql.editor"
             class="plsqleditor.views.ScratchPadView"
             icon="icons/pencil.gif"
             id="plsqleditor.views.ScratchPadView"
-            name="Sql Output"/>
+            name="%view.name"/>
       <view
             category="plsql.editor"
             class="plsqleditor.views.schema.SchemaBrowserView"
             icon="icons/browse.gif"
             id="plsqleditor.views.SchemaBrowserView"
-            name="Schema Browser"/>
+            name="%view.name.0"/>
       <view
             category="plsql.editor"
             class="plsqleditor.views.DbmsOutputView"
             icon="icons/book.gif"
             id="plsqleditor.views.DbmsOutputView"
-            name="Dbms Output"/>
+            name="%view.name.1"/>
    </extension>
    <extension
       point="org.eclipse.compare.contentMergeViewers">
@@ -443,7 +443,7 @@
             fixed="false"
             icon="icons/at.png"
             id="plsqleditor.perspective"
-            name="Toby&apos;s PL/SQL Editor"/> 
+            name="%perspective.name"/> 
    </extension>
    <extension
          point="org.eclipse.ui.bindings">
@@ -459,7 +459,7 @@
             sequence="F3"/>
       <scheme
             id="plsqleditor.keys"
-            name="plsqleditor.keys"/>
+            name="%scheme.name"/>
       <key
             commandId="plsqleditor.generateHeader"
             contextId="plsql.editor"
@@ -529,13 +529,13 @@
       <page
             class="plsqleditor.properties.ProjectDBPropertyPage"
             id="plsqleditor.properties.databaseConnectivity"
-            name="Database Connectivity"
+            name="%page.name.7"
             nameFilter="*"
             objectClass="org.eclipse.core.resources.IProject"/>
       <page
             class="plsqleditor.properties.SchemaMappingPreferencePage"
             id="plsqleditor.properties.schemaMapping"
-            name="Schema Mapping"
+            name="%page.name.8"
             nameFilter="*"
             objectClass="org.eclipse.core.resources.IProject"/>
    </extension>
@@ -545,7 +545,7 @@
             locationURI="popup:org.eclipse.ui.views.ResourceNavigator">
          <command
                commandId="plsqleditor.generateHeaderAndLoadBoth"
-               label="Generate Header and Load both to Database"
+               label="%command.label"
                style="push">
                <visibleWhen checkEnabled="false">
 				    <iterate ifEmpty="false">
@@ -561,7 +561,7 @@
                locationURI="popup:org.eclipse.ui.views.ResourceNavigator">
             <command
                   commandId="boomsticks.plsqleditor.loadSchema"
-                  label="Load Schema"
+                  label="%command.label.0"
                   style="push">
             </command> 
          </menuContribution>
@@ -569,7 +569,7 @@
                locationURI="popup:org.eclipse.ui.views.ResourceNavigator">
             <command
                   commandId="boomsticks.plsqleditor.compareToDb"
-                  label="Compare to Project Default DB"
+                  label="%command.label.1"
                   style="push">
 				<!--visibleWhen checkEnabled="false">
 				      <reference
@@ -582,7 +582,7 @@
                locationURI="popup:plsqleditor.views.SchemaBrowserView">
             <command
                   commandId="boomsticks.plsqleditor.loadSourceFromDb"
-                  label="Load Source from DB"
+                  label="%command.label.2"
                   style="push">
                   <visibleWhen checkEnabled="false">
                       <reference
@@ -599,7 +599,7 @@
                locationURI="popup:plsqleditor.views.SchemaBrowserView">
             <command
                   commandId="boomsticks.plsqleditor.showGrants"
-                  label="Show Grants"
+                  label="%command.label.3"
                   style="push">
 				<visibleWhen checkEnabled="false">
 				      <reference
@@ -612,7 +612,7 @@
                locationURI="popup:plsqleditor.views.SchemaBrowserView">
             <command
                   commandId="boomsticks.plsqleditor.showDetails"
-                  label="Show Details"
+                  label="%command.label.4"
                   style="push">
 				<visibleWhen checkEnabled="false">
 				      <reference
@@ -696,11 +696,11 @@
    <extension
          point="org.eclipse.ui.newWizards">
       <category
-            name="PLSQL Editor Wizards"
+            name="%category.name.1"
             id="plsqleditor.wizards">
       </category>
       <wizard
-            name="New PLSQL File"
+            name="%wizard.name"
             icon="icons/at.png"
             category="plsqleditor.wizards"
             class="plsqleditor.wizards.NewPackageBody"
@@ -773,7 +773,7 @@
    <extension point="org.eclipse.ui.editors.markerAnnotationSpecification">
         <specification
             annotationType="plsqleditor.occurrence"
-            label="Occurrences"
+            label="%specification.label"
             icon="icons/srch.gif"
             textPreferenceKey="occurrenceIndication"
             textPreferenceValue="false"

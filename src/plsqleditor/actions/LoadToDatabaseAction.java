@@ -274,7 +274,7 @@ public class LoadToDatabaseAction extends TextEditorAction
 				int offset = detail.getColumn() + docOffset;
 				line = doc.getLineOfOffset(offset);
 			}
-			Map<String, Integer> attributes = new HashMap<String, Integer>();
+			Map<String, Object> attributes = new HashMap<String, Object>();
 
 			MarkerUtilities.setLineNumber(attributes, line);
 			attributes
