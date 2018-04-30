@@ -191,7 +191,7 @@ public class PlSqlEditor extends TextEditor
 							break;
 						}
 					}
-					Map<String, Integer> attributes = new HashMap<String, Integer>();
+					Map<String, Object> attributes = new HashMap<String, Object>();
 					// MarkerUtilities.setLineNumber(attributes, line + 1);
 					MarkerUtilities.setCharStart(attributes, p.offset);
 					MarkerUtilities.setCharEnd(attributes, p.offset + p.length);

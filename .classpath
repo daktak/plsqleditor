@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
-	<classpathentry kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
-	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="src" path="test"/>
-	<classpathentry kind="lib" path="libs/commons-lang.jar"/>
-	<classpathentry kind="lib" path="libs/ojdbc14.jar"/>
-	<classpathentry kind="lib" path="libs/jdom-1.1.jar"/>
-	<classpathentry kind="lib" path="libs/ant.jar"/>
-	<classpathentry combineaccessrules="false" kind="src" path="/plsql_code_checker"/>
-	<classpathentry kind="lib" path="libs/antlr-runtime-3.0.1.jar"/>
-	<classpathentry kind="output" path="bin"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
+	<classpathentry exported="true" kind="con" path="org.eclipse.pde.core.requiredPlugins"/>
+	<classpathentry including="**/*.java" kind="src" output="target/classes" path="src">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" output="target/test-classes" path="test">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry exported="true" kind="lib" path="libs/commons-lang.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/ojdbc14.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdom-1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/ant.jar"/>
+	<classpathentry kind="output" path="target/classes"/>
 </classpath>
