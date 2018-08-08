@@ -8,8 +8,7 @@ Bundle-ClassPath: plsqleditor.jar,
  libs/ojdbc14.jar,
  libs/jdom-1.1.jar,
  .,
- libs/ant.jar,
- libs/antlr-runtime-3.0.1.jar
+ libs/ant.jar
 Bundle-Activator: plsqleditor.PlsqleditorPlugin
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
@@ -107,7 +106,6 @@ Export-Package: .,
  plsqleditor.editors.model,
  plsqleditor.formatter,
  plsqleditor.parsers,
- plsqleditor.parsers.antlr,
  plsqleditor.popup.actions,
  plsqleditor.preferences,
  plsqleditor.preferences.entities,
@@ -135,3 +133,4 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.console;bundle-version="3.4.0"
 Bundle-ActivationPolicy: lazy
 Bundle-RequiredExecutionEnvironment: JavaSE-1.8
+Automatic-Module-Name: plsqleditor
