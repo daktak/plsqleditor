@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: plsqleditor; singleton:=true
-Bundle-Version: 0.5.5
+Bundle-Version: 0.5.6
 Bundle-ClassPath: plsqleditor.jar,
  libs/commons-lang.jar,
  libs/ojdbc14.jar,
