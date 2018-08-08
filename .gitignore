@@ -3,8 +3,8 @@
 /plugins/
 /@dot
 logs.zip
-build.xml
 javaCompiler...args
 javaCompiler.plsqleditor.jar.args
 plsqleditor.jar
+plsqleditor_*.jar
 
