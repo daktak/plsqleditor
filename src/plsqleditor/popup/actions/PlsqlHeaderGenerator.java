@@ -13,12 +13,12 @@ import java.util.regex.Pattern;
 
 /**
  * This class
- * 
+ *
  * @author Toby Zines
- * 
+ *
  * @version $Id: PlsqlHeaderGenerator.java,v 1.1.2.4 2006/02/02 00:52:06 tobyz
  *          Exp $
- * 
+ *
  * Created on 21/02/2005
  */
 public class PlsqlHeaderGenerator
@@ -119,7 +119,7 @@ public class PlsqlHeaderGenerator
         	else
         	{
         		header.add(line);
-        	}	
+        	}
         }
         return null;
     }
@@ -127,7 +127,7 @@ public class PlsqlHeaderGenerator
     private String parseHeader(BufferedReader file, String[] packageName) throws IOException
     {
         boolean isInHeader = false;
-        // this can be CURRENT_USER or DEFINER 
+        // this can be CURRENT_USER or DEFINER
         // there is no checking, but these are the only two valid values...
         // support for feature 1448560 - header generator needs ability to specify authid
         String authIdString = null;
@@ -142,7 +142,7 @@ public class PlsqlHeaderGenerator
         {
         	if (line.matches(CREATE_PKG_BODY_START + ".*"))
         	{
-	            if (!(tmpLine = line.replaceFirst(CREATE_PKG_BODY_START + "\\W+(\\w+).*",
+	            if (!(tmpLine = line.replaceFirst(CREATE_PKG_BODY_START + "\\W+([\\w+\\.]*(\\w+)).*",
 	                                              "$1")).equals(line))
 	            {
 	            	// we have a standard package name directly after the create or replace statement
@@ -347,7 +347,7 @@ public class PlsqlHeaderGenerator
 
     /**
      * This method parses the body
-     * 
+     *
      * @param br
      * @return The string representation of the whole package header.
      * @throws IOException
@@ -359,6 +359,14 @@ public class PlsqlHeaderGenerator
         sb.append(parseHeader(br, packageName));
         sb.append(parseBody(br));
         br.close();
+        String tmpPackage = null;
+        if (!(tmpPackage = packageName[0].replaceFirst("^(\\w+)\\.(\\w+.*)","$2")).equals(packageName[0]))
+        {
+            if (tmpPackage != "")
+            {
+                packageName[0] = tmpPackage;
+            }
+        }
         sb.append("END " + packageName[0] + ";" + lineSeparator + "/ " + lineSeparator
                 + "SHOW ERRORS PACKAGE " + packageName[0] + ";" + lineSeparator);
         return sb.toString();
