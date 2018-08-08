@@ -1,7 +1,6 @@
 # Toby's PL/SQL Editor
 
-To build
-########
+## To build
 
     Open as project in eclipse.
 
