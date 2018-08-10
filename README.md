@@ -2,6 +2,8 @@
 
 ## To build
 
+    Run "ant ivy-resolve" to pull down required libs/jars
+
     Open as project in eclipse.
 
     Right click on plugin.xml
