@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.4">
+    <info organisation="net.shrimpworks" module="${ant.project.name}"/>
+
+    <configurations>
+        <conf name="default" />
+    </configurations>
+
+    <dependencies>
+        <!-- project dependencies -->
+        <dependency org="org.apache.ant" name="ant" rev="1.8.1" conf="default" />
+        <dependency org="commons-lang" name="commons-lang" rev="1.0" conf="default" />
+        <dependency org="org.jdom" name="jdom" rev="1.1" conf="default" />
+        <dependency org="com.oracle" name="ojbdc14" rev="9.0.2.0.0" conf="default" />
+    </dependencies>
+</ivy-module>
+
+
