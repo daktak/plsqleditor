@@ -2,14 +2,27 @@
 <project name="plsqleditor" default="build.jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<property name="p2.build.repo" value="file:target/buildRepo"/>
+        <property name="version" value= "0.5.6"/>
 	<property name="basews" value="${ws}"/>
 	<property name="baseos" value="${os}"/>
 	<property name="basearch" value="${arch}"/>
 	<property name="basenl" value="${nl}"/>
 	<property name="bundleId" value="plsqleditor"/>
-	<property name="bundleVersion" value="0.5.6"/>
+	<property name="bundleVersion" value="${version}"/>
 	<property name="p2.publishonerror" value="false"/>
-
+        <property name="lib.dir" location="libs"/>
+    <path id="default.classpath">
+        <fileset dir="${lib.dir}" includes="*.jar"/>
+        <pathelement path="${build.src.dir}"/>
+    </path>
+    <path id="dist.classpath">
+        <fileset dir="${dist.dir}" includes="libs/*.jar"/>
+    </path>
+    <!-- Ivy configuration -->
+    <property name="ivy.install.version" value="2.4.0" />
+    <property name="ivy.home" value="${user.home}/.ant" />
+    <property name="ivy.jar.dir" value="${ivy.home}/libs" />
+    <property name="ivy.jar.file" value="${ivy.jar.dir}/ivy.jar" />
 	<!-- Compiler settings. -->
 	<property name="javacFailOnError" value="false"/>
 	<property name="javacDebugInfo" value="on"/>
@@ -36,26 +49,31 @@
 	<property name="bundleJavacTarget" value="${javacTarget}"/>
 	<property name="bundleBootClasspath" value="${bootclasspath}"/>
 
-	<target name="install-ivy" description="Install ivy" unless="ivy.installed">
-	    <mkdir dir="${user.home}/.ant/lib"/>
-	    <get dest="${user.home}/.ant/lib/ivy.jar" src="http://search.maven.org/remotecontent?filepath=org/apache/ivy/ivy/2.3.0/ivy-2.3.0.jar"/>
-	    <fail message="Ivy has been installed. Run the build again"/>
-	</target>
+    <!-- Ivy download -->
+    <target name="ivy-download">
+        <mkdir dir="${ivy.jar.dir}"/>
+        <get src="http://repo2.maven.org/maven2/org/apache/ivy/ivy/${ivy.install.version}/ivy-${ivy.install.version}.jar" 
+             dest="${ivy.jar.file}" usetimestamp="true"/>
+    </target>
 
-        <target name="resolve" depends="install-ivy" description="Use ivy to resolve classpaths">
-            <ivy:cachepath pathid="compile.path">
-              <dependency org="ant" name="ant" rev="1.4.1" conf="default">
-                <exclude org="javax.transaction"/>
-              </dependency>
-            </ivy:cachepath>
-        </target>
+    <!-- Ivy initialisation -->
+    <target name="ivy-init" depends="ivy-download">
+        <path id="ivy.lib.path" path="${ivy.jar.file}"/>
+        <taskdef resource="org/apache/ivy/ant/antlib.xml"
+                 uri="antlib:org.apache.ivy.ant" classpathref="ivy.lib.path"/>
+    </target>
+
+    <!-- Ivy dependency resolution -->
+    <target name="ivy-resolve" depends="ivy-init" description="retrieve dependencies with ivy">
+        <ivy:retrieve pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]" />
+    </target>
 
 	<target name="init" depends="properties">
 		<condition property="pluginTemp" value="${buildTempFolder}/plugins"		>
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="pluginTemp" value="${basedir}"/>
-		<condition property="build.result.folder" value="${pluginTemp}/plsqleditor_0.5.6"		>
+		<condition property="build.result.folder" value="${pluginTemp}/plsqleditor_${version}"		>
 			<isset property="buildTempFolder"/>
 		</condition>
 		<property name="build.result.folder" value="${basedir}"/>
@@ -85,7 +103,7 @@
 		<antcall target="gather.bin.parts">
 			<param name="destination.temp.folder" value="${temp.folder}/"/>
 		</antcall>
-		<jar destfile="target/plsqleditor_0.5.6.jar" basedir="${temp.folder}/plsqleditor_0.5.6" filesetmanifest="merge"/>
+		<jar destfile="target/plsqleditor_${version}.jar" basedir="${temp.folder}/plsqleditor_${version}" filesetmanifest="merge"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
@@ -123,17 +141,17 @@
 			<pathelement path="target/nestedJars/com.ibm.icu_4.4.2.v20110823/icu-data.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332/e4-ide.jar"/>
 			<pathelement path="target/classes"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/target/classes"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/target/classes"/>
 			<pathelement path="${build.result.folder}/plsqleditor.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/plsqleditor.jar"/>
-			<pathelement path="libs/commons-lang.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/libs/commons-lang.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/plsqleditor.jar"/>
+			<pathelement path="libs/commons-lang-1.0.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/commons-lang-1.0.jar"/>
 			<pathelement path="libs/ojdbc14.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/libs/ojdbc14.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/ojdbc14.jar"/>
 			<pathelement path="libs/jdom-1.1.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/libs/jdom-1.1.jar"/>
-			<pathelement path="libs/ant.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/libs/ant.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-1.1.jar"/>
+			<pathelement path="libs/ant-1.8.1.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/ant-1.8.1.jar"/>
 		</path>
 		<!-- compile the source code -->
 		<javac destdir="${build.result.folder}/@dot" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}"		>
@@ -199,7 +217,7 @@
 			<patternset includes="e4-ide.jar"/>
 		</unzip>
 	</target>
-	<target name="plsqleditor.jar" depends="init,plsqleditor.jar.nestedJars" unless="plsqleditor.jar" description="Create jar: plsqleditor plsqleditor.jar.">
+	<target name="plsqleditor.jar" depends="init,ivy-resolve,plsqleditor.jar.nestedJars" unless="plsqleditor.jar" description="Create jar: plsqleditor plsqleditor.jar.">
 		<delete dir="${temp.folder}/plsqleditor.jar.bin"/>
 		<mkdir dir="${temp.folder}/plsqleditor.jar.bin"/>
 		<path id="plsqleditor.jar.classpath">
@@ -210,18 +228,18 @@
 			<pathelement path="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703/compatibility.jar"/>
 			<pathelement path="target/nestedJars/com.ibm.icu_4.4.2.v20110823/icu-data.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332/e4-ide.jar"/>
-			<pathelement path="libs/commons-lang.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/libs/commons-lang.jar"/>
+			<pathelement path="libs/commons-lang-1.0.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/commons-lang-1.0.jar"/>
 			<pathelement path="libs/ojdbc14.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/libs/ojdbc14.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/ojdbc14.jar"/>
 			<pathelement path="libs/jdom-1.1.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/libs/jdom-1.1.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-1.1.jar"/>
 			<pathelement path="bin/"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/bin/"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/bin/"/>
 			<pathelement path="${build.result.folder}/@dot"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/@dot"/>
-			<pathelement path="libs/ant.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_0.5.6/libs/ant.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/@dot"/>
+			<pathelement path="libs/ant-1.8.1.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/ant-1.8.1.jar"/>
 		</path>
 		<!-- compile the source code -->
 		<javac destdir="${temp.folder}/plsqleditor.jar.bin" failonerror="${javacFailOnError}" verbose="${javacVerbose}" debug="${javacDebugInfo}" includeAntRuntime="no" bootclasspath="${bundleBootClasspath}" source="${bundleJavacSource}" target="${bundleJavacTarget}"		>
@@ -263,7 +281,7 @@
 		</copy>
 	</target>
 
-	<target name="build.jars" depends="init" description="Compile classes and build nested jars for the plug-in: plsqleditor.">
+	<target name="build.jars" depends="init,ivy-resolve" description="Compile classes and build nested jars for the plug-in: plsqleditor.">
 		<delete file="${compilation.problem.marker}" quiet="true"/>
 		<available property="@dot" file="${build.result.folder}/@dot"/>
 		<antcall target="@dot"/>
@@ -272,8 +290,8 @@
 	</target>
 
 	<target name="checkCompilationResults" if="compilation.error.occured">
-		<echo file="${compilation.problem.marker}" message="plsqleditor_0.5.6${line.separator}compilation.error.occured=${compilation.error.occured}"/>
-		<eclipse.logCompileError log="${compilation.prereq.log}" bundle="plsqleditor_0.5.6">
+		<echo file="${compilation.problem.marker}" message="plsqleditor_${version}${line.separator}compilation.error.occured=${compilation.error.occured}"/>
+		<eclipse.logCompileError log="${compilation.prereq.log}" bundle="plsqleditor_${version}">
 		</eclipse.logCompileError>
 	</target>
 
@@ -285,7 +303,7 @@
 	</target>
 
 	<target name="publish.bin.parts" depends="init" if="p2.publish.parts" unless="compilation.problem.marker.exists">
-		<mkdir dir="${build.result.folder}/plsqleditor_0.5.6"/>
+		<mkdir dir="${build.result.folder}/plsqleditor_${version}"/>
 		<copy todir="${build.result.folder}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="META-INF/MANIFEST.MF"/>
@@ -295,7 +313,7 @@
 		</copy>
 		<antcall target="apitools.generation">
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="${build.result.folder}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/ojdbc14.jar:/home/user/git/plsqleditor/libs/ant.jar"/>
+			<param name="binary.folders" value="${build.result.folder}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang-1.0.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/ojdbc14.jar:/home/user/git/plsqleditor/libs/ant-1.8.1.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 			<param name="target.folder" value="${build.result.folder}"/>
 		</antcall>
@@ -307,19 +325,19 @@
 		/>
 	</target>
 
-	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/plsqleditor_0.5.6"/>
-		<copy todir="${destination.temp.folder}/plsqleditor_0.5.6" failonerror="true" overwrite="false">
+	<target name="gather.bin.parts" depends="init,ivy-resolve" if="destination.temp.folder">
+		<mkdir dir="${destination.temp.folder}/plsqleditor_${version}"/>
+		<copy todir="${destination.temp.folder}/plsqleditor_${version}" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}">
 				<include name="plsqleditor.jar"/>
 			</fileset>
 		</copy>
-		<copy todir="${destination.temp.folder}/plsqleditor_0.5.6" failonerror="true" overwrite="false">
+		<copy todir="${destination.temp.folder}/plsqleditor_${version}" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}/@dot">
 				<include name="**"/>
 			</fileset>
 		</copy>
-		<copy todir="${destination.temp.folder}/plsqleditor_0.5.6" failonerror="true" overwrite="true">
+		<copy todir="${destination.temp.folder}/plsqleditor_${version}" failonerror="true" overwrite="true">
 			<fileset dir="${basedir}">
 				<include name="plugin.xml"/>
 				<include name="META-INF/"/>
@@ -334,9 +352,9 @@
 		</copy>
 		<antcall target="apitools.generation">
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="${destination.temp.folder}/plsqleditor_0.5.6/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/ojdbc14.jar:/home/user/git/plsqleditor/libs/ant.jar"/>
+			<param name="binary.folders" value="${destination.temp.folder}/plsqleditor_${version}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang-1.0.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/ojdbc14.jar:/home/user/git/plsqleditor/libs/ant-1.8.1.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
-			<param name="target.folder" value="${destination.temp.folder}/plsqleditor_0.5.6"/>
+			<param name="target.folder" value="${destination.temp.folder}/plsqleditor_${version}"/>
 		</antcall>
 	</target>
 
@@ -344,11 +362,11 @@
 	</target>
 
 	<target name="gather.sources" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/plsqleditor_0.5.6"/>
-		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/plsqleditor_0.5.6" failonerror="false" overwrite="false"/>
-		<copy file="${build.result.folder}/plsqleditorsrc.zip" todir="${destination.temp.folder}/plsqleditor_0.5.6" failonerror="false" overwrite="false"/>
+		<mkdir dir="${destination.temp.folder}/plsqleditor_${version}"/>
+		<copy file="${build.result.folder}/src.zip" todir="${destination.temp.folder}/plsqleditor_${version}" failonerror="false" overwrite="false"/>
+		<copy file="${build.result.folder}/plsqleditorsrc.zip" todir="${destination.temp.folder}/plsqleditor_${version}" failonerror="false" overwrite="false"/>
 		<antcall target="copy.src.includes">
-			<param name="source.destination.folder" value="${destination.temp.folder}/plsqleditor_0.5.6"/>
+			<param name="source.destination.folder" value="${destination.temp.folder}/plsqleditor_${version}"/>
 		</antcall>
 	</target>
 
@@ -373,13 +391,13 @@
 	</target>
 
 	<target name="gather.logs" depends="init" if="destination.temp.folder">
-		<mkdir dir="${destination.temp.folder}/plsqleditor_0.5.6"/>
-		<copy todir="${destination.temp.folder}/plsqleditor_0.5.6" failonerror="false" overwrite="false">
+		<mkdir dir="${destination.temp.folder}/plsqleditor_${version}"/>
+		<copy todir="${destination.temp.folder}/plsqleditor_${version}" failonerror="false" overwrite="false">
 			<fileset dir="${build.result.folder}">
 				<include name="@dot${logExtension}"/>
 			</fileset>
 		</copy>
-		<copy todir="${destination.temp.folder}/plsqleditor_0.5.6" failonerror="false" overwrite="false">
+		<copy todir="${destination.temp.folder}/plsqleditor_${version}" failonerror="false" overwrite="false">
 			<fileset dir="${temp.folder}">
 				<include name="plsqleditor.jar.bin${logExtension}"/>
 			</fileset>
@@ -391,8 +409,8 @@
 		<delete file="${build.result.folder}/src.zip"/>
 		<delete file="${build.result.folder}/plsqleditor.jar"/>
 		<delete file="${build.result.folder}/plsqleditorsrc.zip"/>
-		<delete file="target/plsqleditor_0.5.6.jar"/>
-		<delete file="target/plsqleditor_0.5.6.zip"/>
+		<delete file="target/plsqleditor_${version}.jar"/>
+		<delete file="target/plsqleditor_${version}.zip"/>
 		<delete dir="${temp.folder}"/>
 		<delete file="${compilation.problem.marker}" quiet="true"/>
 	</target>
@@ -418,7 +436,7 @@
 				<include name="**/*.bin${logExtension}"/>
 			</fileset>
 		</delete>
-		<zip destfile="target/plsqleditor_0.5.6.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
+		<zip destfile="target/plsqleditor_${version}.zip" basedir="${temp.folder}" filesonly="true" whenempty="skip" update="false"/>
 		<delete dir="${temp.folder}"/>
 	</target>
 
