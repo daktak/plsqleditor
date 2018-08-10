@@ -177,7 +177,7 @@ public class NewPackageBody extends Wizard implements INewWizard
 		if (fileName.endsWith(".pkb"))
 		{
 			contents = "CREATE OR REPLACE PACKAGE BODY "
-					+ packageName
+					+ schemaname + "." + packageName
 					+ " IS\n"
 					+ "/*\n"
 					+ " * File documentation goes here.  This is required for the outline to work correctly.\n"
@@ -198,7 +198,7 @@ public class NewPackageBody extends Wizard implements INewWizard
 					+ " *   ^   ^   ^\n"
 					+ " * The line above allows the package header generator to correctly generate the\n"
 					+ " * command CREATE OR REPLACE PACKAGE "
-					+ packageName
+					+ schemaName + "." + packageName
 					+ "\n"
 					+ " *         AS\n"
 					+ " *         AUTHID CURRENT_USER\n"
@@ -296,7 +296,7 @@ public class NewPackageBody extends Wizard implements INewWizard
 					+ "-- this is a demo file of what a pkg file must look like to work properly\n"
 					+ "-- any issues that you have with the format of this file should be raised\n"
 					+ "-- as bug requests :-)\n" + "CREATE OR REPLACE PACKAGE "
-					+ packageName
+					+ schemaName + "." + packageName
 					+ " IS\n"
 					+ "/*\n"
 					+ " * This comment here is VITAL - without this the parse will not work properly. \n"
@@ -316,7 +316,7 @@ public class NewPackageBody extends Wizard implements INewWizard
 					+ "-- no comments here either\n"
 					+ "-- put them after the create or replace line\n"
 					+ "CREATE OR REPLACE PACKAGE BODY "
-					+ packageName
+					+ schemaName + "." + packageName
 					+ " IS\n"
 					+ "/*\n"
 					+ " * \n"
@@ -340,7 +340,7 @@ public class NewPackageBody extends Wizard implements INewWizard
 		}
 		else if (fileName.endsWith(".pkh"))
 		{
-			contents = "CREATE OR REPLACE PACKAGE " + packageName + "\n AS\n"
+			contents = "CREATE OR REPLACE PACKAGE " + schemaname + "." + packageName + "\n AS\n"
 					+ "/*\n" + " */\n" + "/**\n" + " * @param pis_thing\n"
 					+ " */\n" + "    FUNCTION do_stuff (\n"
 					+ "      pis_thing IN varchar2)\n"

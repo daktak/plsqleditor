@@ -1,20 +1,12 @@
 # Toby's PL/SQL Editor
 
-## To build
+## [WIKI](https://github.com/daktak/plsqleditor/wiki)
 
-    Run "ant ivy-resolve" to pull down required libs/jars
+### To build
 
-    Open as project in eclipse.
+    Ensure eclipse.plugindir is set correctly in build.xml
 
-    Right click on plugin.xml
-
-    Create Ant Script
-
-    run the ant build - should generate a plsqleditor.jar in the root directory
-
-    Double click on plugin.xml
-
-    Under 4 . Exporting click Export Wizard
+    Run "ant build.update.jar"
 
 
 [![Travis CI](https://travis-ci.org/daktak/plsqleditor.svg?branch=master)](https://travis-ci.org/daktak/plsqleditor)

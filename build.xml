@@ -2,7 +2,9 @@
 <project name="plsqleditor" default="build.jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<property name="p2.build.repo" value="file:target/buildRepo"/>
-        <property name="version" value= "0.5.6"/>
+        <property name="version" value= "0.5.7"/>
+        <property name="eclipse.plugindir" value="/usr/lib/eclipse/plugins/"/>
+        <property name="oracle.dir" value="libs"/>
 	<property name="basews" value="${ws}"/>
 	<property name="baseos" value="${os}"/>
 	<property name="basearch" value="${arch}"/>
@@ -11,6 +13,32 @@
 	<property name="bundleVersion" value="${version}"/>
 	<property name="p2.publishonerror" value="false"/>
         <property name="lib.dir" location="libs"/>
+        <mkdir dir="${lib.dir}"/>
+        <first id="ojdbc">
+            <fileset dir="${oracle.dir}" includes="**/ojdbc*.jar"/>
+        </first>
+        <basename property="ojdbc" file="${toString:ojdbc}"/>
+        <copy todir="${lib.dir}" failonerror="true" overwrite="false">
+            <fileset dir="${oracle.dir}">
+                <include name="${ojdbc}" />
+            </fileset>
+        </copy>
+        <first id="equinox.registry">
+            <fileset dir="${eclipse.plugindir}" includes="org.eclipse.equinox.registry_*.jar" />
+        </first>
+        <property name="equinox.registry" value="${toString:equinox.registry}" />
+        <first id="workbench">
+            <fileset dir="${eclipse.plugindir}" includes="org.eclipse.ui.workbench_*.jar" />
+        </first>
+        <property name="workbench" value="${toString:workbench}" />
+        <first id="ibm.icu">
+            <fileset dir="${eclipse.plugindir}" includes="com.ibm.icu_*.jar" />
+        </first>
+        <property name="ibm.icu" value="${toString:ibm.icu}" />
+        <first id="ui.ide">
+            <fileset dir="${eclipse.plugindir}" includes="org.eclipse.ui.ide_*.jar" />
+        </first>
+        <property name="ui.ide" value="${toString:ui.ide}" />
     <path id="default.classpath">
         <fileset dir="${lib.dir}" includes="*.jar"/>
         <pathelement path="${build.src.dir}"/>
@@ -109,23 +137,23 @@
 
 	<target name="@dot.nestedJars">
 		<mkdir dir="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.equinox.registry_3.5.200.dist.jar" dest="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841" overwrite="false">
+                <unzip src="${equinox.registry}" dest="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841" overwrite="false">
 			<patternset includes="runtime_registry_compatibility.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.workbench_3.8.1.dist.jar" dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
+                <unzip src="${workbench}" dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
 			<patternset includes="e4-workbench.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.workbench_3.8.1.dist.jar" dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
+                <unzip src="${workbench}" dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
 			<patternset includes="compatibility.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/com.ibm.icu_4.4.2.v20110823"/>
-                <unzip src="/usr/lib/eclipse/plugins/com.ibm.icu_4.4.2.v20110823.jar" dest="target/nestedJars/com.ibm.icu_4.4.2.v20110823" overwrite="false">
+                <unzip src="${ibm.icu}" dest="target/nestedJars/com.ibm.icu_4.4.2.v20110823" overwrite="false">
 			<patternset includes="icu-data.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.ide_3.8.1.dist.jar" dest="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332" overwrite="false">
+                <unzip src="${ui.ide}" dest="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332" overwrite="false">
 			<patternset includes="e4-ide.jar"/>
 		</unzip>
 	</target>
@@ -133,7 +161,7 @@
 		<delete dir="${build.result.folder}/@dot"/>
 		<mkdir dir="${build.result.folder}/@dot"/>
 		<path id="@dot.classpath">
-                    <fileset dir="/usr/lib/eclipse/plugins/" includes="**/*.jar"/>
+                    <fileset dir="${eclipse.plugindir}/" includes="**/*.jar"/>
                     <fileset dir="/usr/share/eclipse/dropins/jdt/plugins/" includes="**/*.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841/runtime_registry_compatibility.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703/e4-workbench.jar"/>
@@ -146,8 +174,8 @@
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/plsqleditor.jar"/>
 			<pathelement path="libs/commons-lang-1.0.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/commons-lang-1.0.jar"/>
-			<pathelement path="libs/ojdbc14.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/ojdbc14.jar"/>
+                        <pathelement path="${ojdbc}"/>
+                        <pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/${ojdbc}"/>
 			<pathelement path="libs/jdom-1.1.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-1.1.jar"/>
 			<pathelement path="libs/ant-1.8.1.jar"/>
@@ -192,27 +220,27 @@
 
 	<target name="plsqleditor.jar.nestedJars">
 		<mkdir dir="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.equinox.registry_3.5.200.dist.jar"
+                <unzip src="${equinox.registry}"
                     dest="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841" overwrite="false">
 			<patternset includes="runtime_registry_compatibility.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.workbench_3.8.1.dist.jar"
+                <unzip src="${workbench}"
                     dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
 			<patternset includes="e4-workbench.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.workbench_3.8.1.dist.jar"
+                <unzip src="${workbench}"
                     dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
 			<patternset includes="compatibility.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/com.ibm.icu_4.4.2.v20110823"/>
-                <unzip src="/usr/lib/eclipse/plugins/com.ibm.icu_4.4.2.v20110823.jar"
+                <unzip src="${ibm.icu}"
                     dest="target/nestedJars/com.ibm.icu_4.4.2.v20110823" overwrite="false">
 			<patternset includes="icu-data.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.ide_3.8.1.dist.jar"
+                <unzip src="${ui.ide}"
                     dest="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332" overwrite="false">
 			<patternset includes="e4-ide.jar"/>
 		</unzip>
@@ -221,7 +249,7 @@
 		<delete dir="${temp.folder}/plsqleditor.jar.bin"/>
 		<mkdir dir="${temp.folder}/plsqleditor.jar.bin"/>
 		<path id="plsqleditor.jar.classpath">
-                    <fileset dir="/usr/lib/eclipse/plugins/" includes="**/*.jar"/>
+                    <fileset dir="${eclipse.plugindir}/" includes="**/*.jar"/>
                     <!-- <fileset dir="/usr/share/eclipse/dropins/jdt/plugins/" includes="**/*.jar"/> -->
 			<pathelement path="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841/runtime_registry_compatibility.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703/e4-workbench.jar"/>
@@ -230,8 +258,8 @@
 			<pathelement path="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332/e4-ide.jar"/>
 			<pathelement path="libs/commons-lang-1.0.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/commons-lang-1.0.jar"/>
-			<pathelement path="libs/ojdbc14.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/ojdbc14.jar"/>
+                        <pathelement path="${ojdbc14}"/>
+                        <pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/${ojdbc}"/>
 			<pathelement path="libs/jdom-1.1.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-1.1.jar"/>
 			<pathelement path="bin/"/>
@@ -313,7 +341,7 @@
 		</copy>
 		<antcall target="apitools.generation">
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="${build.result.folder}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang-1.0.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/ojdbc14.jar:/home/user/git/plsqleditor/libs/ant-1.8.1.jar"/>
+                        <param name="binary.folders" value="${build.result.folder}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang-1.0.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/${ojdbc}:/home/user/git/plsqleditor/libs/ant-1.8.1.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 			<param name="target.folder" value="${build.result.folder}"/>
 		</antcall>
@@ -352,7 +380,7 @@
 		</copy>
 		<antcall target="apitools.generation">
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="${destination.temp.folder}/plsqleditor_${version}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang-1.0.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/ojdbc14.jar:/home/user/git/plsqleditor/libs/ant-1.8.1.jar"/>
+                        <param name="binary.folders" value="${destination.temp.folder}/plsqleditor_${version}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang-1.0.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/${ojdbc}:/home/user/git/plsqleditor/libs/ant-1.8.1.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 			<param name="target.folder" value="${destination.temp.folder}/plsqleditor_${version}"/>
 		</antcall>
