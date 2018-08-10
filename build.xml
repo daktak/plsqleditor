@@ -2,7 +2,7 @@
 <project name="plsqleditor" default="build.jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<property name="p2.build.repo" value="file:target/buildRepo"/>
-        <property name="version" value= "0.5.6"/>
+        <property name="version" value= "0.5.7"/>
 	<property name="basews" value="${ws}"/>
 	<property name="baseos" value="${os}"/>
 	<property name="basearch" value="${arch}"/>
