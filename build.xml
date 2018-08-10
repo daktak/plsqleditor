@@ -68,7 +68,7 @@
         <ivy:retrieve pattern="${lib.dir}/[artifact]-[revision](-[classifier]).[ext]" />
     </target>
 
-	<target name="init" depends="properties,ivy-resolve">
+	<target name="init" depends="properties">
 		<condition property="pluginTemp" value="${buildTempFolder}/plugins"		>
 			<isset property="buildTempFolder"/>
 		</condition>
@@ -217,7 +217,7 @@
 			<patternset includes="e4-ide.jar"/>
 		</unzip>
 	</target>
-	<target name="plsqleditor.jar" depends="init,plsqleditor.jar.nestedJars" unless="plsqleditor.jar" description="Create jar: plsqleditor plsqleditor.jar.">
+	<target name="plsqleditor.jar" depends="init,ivy-resolve,plsqleditor.jar.nestedJars" unless="plsqleditor.jar" description="Create jar: plsqleditor plsqleditor.jar.">
 		<delete dir="${temp.folder}/plsqleditor.jar.bin"/>
 		<mkdir dir="${temp.folder}/plsqleditor.jar.bin"/>
 		<path id="plsqleditor.jar.classpath">
@@ -281,7 +281,7 @@
 		</copy>
 	</target>
 
-	<target name="build.jars" depends="init" description="Compile classes and build nested jars for the plug-in: plsqleditor.">
+	<target name="build.jars" depends="init,ivy-resolve" description="Compile classes and build nested jars for the plug-in: plsqleditor.">
 		<delete file="${compilation.problem.marker}" quiet="true"/>
 		<available property="@dot" file="${build.result.folder}/@dot"/>
 		<antcall target="@dot"/>
@@ -325,7 +325,7 @@
 		/>
 	</target>
 
-	<target name="gather.bin.parts" depends="init" if="destination.temp.folder">
+	<target name="gather.bin.parts" depends="init,ivy-resolve" if="destination.temp.folder">
 		<mkdir dir="${destination.temp.folder}/plsqleditor_${version}"/>
 		<copy todir="${destination.temp.folder}/plsqleditor_${version}" failonerror="true" overwrite="false">
 			<fileset dir="${build.result.folder}">
