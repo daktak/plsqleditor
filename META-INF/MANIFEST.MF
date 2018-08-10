@@ -4,11 +4,11 @@ Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: plsqleditor; singleton:=true
 Bundle-Version: 0.5.6
 Bundle-ClassPath: plsqleditor.jar,
- libs/commons-lang.jar,
+ libs/commons-lang-1.0.jar,
  libs/ojdbc14.jar,
  libs/jdom-1.1.jar,
  .,
- libs/ant.jar
+ libs/ant-1.8.1.jar
 Bundle-Activator: plsqleditor.PlsqleditorPlugin
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
