@@ -14,4 +14,4 @@
 
     Under 4 . Exporting click Export Wizard
 
-![Travis CI](https://travis-ci.org/daktak/plsqleditor.svg?branch=master)
+[![Travis CI](https://travis-ci.org/daktak/plsqleditor.svg?branch=master)](https://travis-ci.org/daktak/plsqleditor)
