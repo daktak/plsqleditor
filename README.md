@@ -1,6 +1,8 @@
 # Toby's PL/SQL Editor
 
-## To build
+## [WIKI](https://github.com/daktak/plsqleditor/wiki)
+
+### To build
 
     Ensure eclipse.plugindir is set correctly in build.xml
 
