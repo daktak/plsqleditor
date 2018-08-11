@@ -3,6 +3,7 @@
 
 	<property name="p2.build.repo" value="file:target/buildRepo"/>
         <property name="version" value= "0.5.7"/>
+        <property name="eclipse.plugindir" value="/usr/lib/eclipse/plugins/"/>
 	<property name="basews" value="${ws}"/>
 	<property name="baseos" value="${os}"/>
 	<property name="basearch" value="${arch}"/>
@@ -11,6 +12,22 @@
 	<property name="bundleVersion" value="${version}"/>
 	<property name="p2.publishonerror" value="false"/>
         <property name="lib.dir" location="libs"/>
+        <first id="equinox.registry">
+            <fileset dir="${eclipse.plugindir}" includes="org.eclipse.equinox.registry_*.jar" />
+        </first>
+        <property name="equinox.registry" value="${toString:equinox.registry}" />
+        <first id="workbench">
+            <fileset dir="${eclipse.plugindir}" includes="org.eclipse.ui.workbench_*.jar" />
+        </first>
+        <property name="workbench" value="${toString:workbench}" />
+        <first id="ibm.icu">
+            <fileset dir="${eclipse.plugindir}" includes="com.ibm.icu_*.jar" />
+        </first>
+        <property name="ibm.icu" value="${toString:ibm.icu}" />
+        <first id="ui.ide">
+            <fileset dir="${eclipse.plugindir}" includes="org.eclipse.ui.ide_*.jar" />
+        </first>
+        <property name="ui.ide" value="${toString:ui.ide}" />
     <path id="default.classpath">
         <fileset dir="${lib.dir}" includes="*.jar"/>
         <pathelement path="${build.src.dir}"/>
@@ -109,23 +126,23 @@
 
 	<target name="@dot.nestedJars">
 		<mkdir dir="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.equinox.registry_3.5.200.dist.jar" dest="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841" overwrite="false">
+                <unzip src="${equinox.registry}" dest="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841" overwrite="false">
 			<patternset includes="runtime_registry_compatibility.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.workbench_3.8.1.dist.jar" dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
+                <unzip src="${workbench}" dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
 			<patternset includes="e4-workbench.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.workbench_3.8.1.dist.jar" dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
+                <unzip src="${workbench}" dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
 			<patternset includes="compatibility.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/com.ibm.icu_4.4.2.v20110823"/>
-                <unzip src="/usr/lib/eclipse/plugins/com.ibm.icu_4.4.2.v20110823.jar" dest="target/nestedJars/com.ibm.icu_4.4.2.v20110823" overwrite="false">
+                <unzip src="${ibm.icu}" dest="target/nestedJars/com.ibm.icu_4.4.2.v20110823" overwrite="false">
 			<patternset includes="icu-data.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.ide_3.8.1.dist.jar" dest="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332" overwrite="false">
+                <unzip src="${ui.ide}" dest="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332" overwrite="false">
 			<patternset includes="e4-ide.jar"/>
 		</unzip>
 	</target>
@@ -133,7 +150,7 @@
 		<delete dir="${build.result.folder}/@dot"/>
 		<mkdir dir="${build.result.folder}/@dot"/>
 		<path id="@dot.classpath">
-                    <fileset dir="/usr/lib/eclipse/plugins/" includes="**/*.jar"/>
+                    <fileset dir="${eclipse.plugindir}/" includes="**/*.jar"/>
                     <fileset dir="/usr/share/eclipse/dropins/jdt/plugins/" includes="**/*.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841/runtime_registry_compatibility.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703/e4-workbench.jar"/>
@@ -192,27 +209,27 @@
 
 	<target name="plsqleditor.jar.nestedJars">
 		<mkdir dir="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.equinox.registry_3.5.200.dist.jar"
+                <unzip src="${equinox.registry}"
                     dest="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841" overwrite="false">
 			<patternset includes="runtime_registry_compatibility.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.workbench_3.8.1.dist.jar"
+                <unzip src="${workbench}"
                     dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
 			<patternset includes="e4-workbench.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.workbench_3.8.1.dist.jar"
+                <unzip src="${workbench}"
                     dest="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703" overwrite="false">
 			<patternset includes="compatibility.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/com.ibm.icu_4.4.2.v20110823"/>
-                <unzip src="/usr/lib/eclipse/plugins/com.ibm.icu_4.4.2.v20110823.jar"
+                <unzip src="${ibm.icu}"
                     dest="target/nestedJars/com.ibm.icu_4.4.2.v20110823" overwrite="false">
 			<patternset includes="icu-data.jar"/>
 		</unzip>
 		<mkdir dir="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332"/>
-                <unzip src="/usr/lib/eclipse/plugins/org.eclipse.ui.ide_3.8.1.dist.jar"
+                <unzip src="${ui.ide}"
                     dest="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332" overwrite="false">
 			<patternset includes="e4-ide.jar"/>
 		</unzip>
@@ -221,7 +238,7 @@
 		<delete dir="${temp.folder}/plsqleditor.jar.bin"/>
 		<mkdir dir="${temp.folder}/plsqleditor.jar.bin"/>
 		<path id="plsqleditor.jar.classpath">
-                    <fileset dir="/usr/lib/eclipse/plugins/" includes="**/*.jar"/>
+                    <fileset dir="${eclipse.plugindir}/" includes="**/*.jar"/>
                     <!-- <fileset dir="/usr/share/eclipse/dropins/jdt/plugins/" includes="**/*.jar"/> -->
 			<pathelement path="target/nestedJars/org.eclipse.equinox.registry_3.5.200.v20120522-1841/runtime_registry_compatibility.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.ui.workbench_3.8.1.v20120816-082703/e4-workbench.jar"/>
