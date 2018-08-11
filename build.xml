@@ -12,6 +12,10 @@
 	<property name="bundleVersion" value="${version}"/>
 	<property name="p2.publishonerror" value="false"/>
         <property name="lib.dir" location="libs"/>
+        <first id="ojdbc">
+            <fileset dir="/lib/oracle" includes="**/ojdbc*.jar"/>
+        </first>
+        <echo message="${toString:ojdbc}"/>
         <first id="equinox.registry">
             <fileset dir="${eclipse.plugindir}" includes="org.eclipse.equinox.registry_*.jar" />
         </first>
