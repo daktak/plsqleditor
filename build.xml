@@ -4,6 +4,8 @@
 	<property name="p2.build.repo" value="file:target/buildRepo"/>
         <property name="version" value= "0.5.7"/>
         <property name="eclipse.plugindir" value="/usr/lib/eclipse/plugins/"/>
+        <property name="oracle.dir" value="/usr/lib/oracle/"/>
+        <!-- <property name="oracle.dir" value="/lib/oracle/12.1/client64/lib/"/> -->
 	<property name="basews" value="${ws}"/>
 	<property name="baseos" value="${os}"/>
 	<property name="basearch" value="${arch}"/>
@@ -12,10 +14,16 @@
 	<property name="bundleVersion" value="${version}"/>
 	<property name="p2.publishonerror" value="false"/>
         <property name="lib.dir" location="libs"/>
+        <mkdir dir="${lib.dir}"/>
         <first id="ojdbc">
-            <fileset dir="/lib/oracle" includes="**/ojdbc*.jar"/>
+            <fileset dir="${oracle.dir}" includes="**/ojdbc*.jar"/>
         </first>
-        <echo message="${toString:ojdbc}"/>
+        <basename property="ojdbc" file="${toString:ojdbc}"/>
+        <copy todir="${lib.dir}" failonerror="true" overwrite="false">
+            <fileset dir="${oracle.dir}">
+                <include name="${ojdbc}" />
+            </fileset>
+        </copy>
         <first id="equinox.registry">
             <fileset dir="${eclipse.plugindir}" includes="org.eclipse.equinox.registry_*.jar" />
         </first>
@@ -167,8 +175,8 @@
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/plsqleditor.jar"/>
 			<pathelement path="libs/commons-lang-1.0.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/commons-lang-1.0.jar"/>
-			<pathelement path="libs/ojdbc14.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/ojdbc14.jar"/>
+                        <pathelement path="${ojdbc}"/>
+                        <pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/${ojdbc}"/>
 			<pathelement path="libs/jdom-1.1.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-1.1.jar"/>
 			<pathelement path="libs/ant-1.8.1.jar"/>
@@ -251,8 +259,8 @@
 			<pathelement path="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332/e4-ide.jar"/>
 			<pathelement path="libs/commons-lang-1.0.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/commons-lang-1.0.jar"/>
-			<pathelement path="libs/ojdbc14.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/ojdbc14.jar"/>
+                        <pathelement path="${ojdbc14}"/>
+                        <pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/${ojdbc}"/>
 			<pathelement path="libs/jdom-1.1.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-1.1.jar"/>
 			<pathelement path="bin/"/>
@@ -334,7 +342,7 @@
 		</copy>
 		<antcall target="apitools.generation">
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="${build.result.folder}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang-1.0.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/ojdbc14.jar:/home/user/git/plsqleditor/libs/ant-1.8.1.jar"/>
+                        <param name="binary.folders" value="${build.result.folder}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang-1.0.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/${ojdbc}:/home/user/git/plsqleditor/libs/ant-1.8.1.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 			<param name="target.folder" value="${build.result.folder}"/>
 		</antcall>
@@ -373,7 +381,7 @@
 		</copy>
 		<antcall target="apitools.generation">
 			<param name="projectLocation" value="${basedir}"/>
-			<param name="binary.folders" value="${destination.temp.folder}/plsqleditor_${version}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang-1.0.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/ojdbc14.jar:/home/user/git/plsqleditor/libs/ant-1.8.1.jar"/>
+                        <param name="binary.folders" value="${destination.temp.folder}/plsqleditor_${version}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang-1.0.jar:/home/user/git/plsqleditor/libs/jdom-1.1.jar:/home/user/git/plsqleditor/libs/${ojdbc}:/home/user/git/plsqleditor/libs/ant-1.8.1.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 			<param name="target.folder" value="${destination.temp.folder}/plsqleditor_${version}"/>
 		</antcall>

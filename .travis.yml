@@ -1,7 +1,18 @@
 language: java
+sudo: required
 
 before_install:
     - sudo apt-get install -y eclipse
+    - .travis/oracle/download.sh
+    - sudo apt-get -qq install libaio1 rpm
+    - sudo rpm --install --nodeps .cache/oracle/oracle-instantclient*.rpm
 
 script:
     ant build.update.jar
+
+env:
+  global:
+    - ORACLE_HOME=/usr/lib/oracle/12.1/client64/
+    - ORACLE_DOWNLOAD_DIR=.cache/oracle
+    - ORACLE_COOKIE=ic_linuxx8664
+    - ORACLE_FILE='instantclient/11204/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm'
