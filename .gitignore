@@ -7,4 +7,5 @@ javaCompiler...args
 javaCompiler.plsqleditor.jar.args
 plsqleditor.jar
 plsqleditor_*.jar
-
+libs/
+!libs/ojdbc14.jar
