@@ -4,11 +4,11 @@ Bundle-Name: %Bundle-Name
 Bundle-SymbolicName: plsqleditor; singleton:=true
 Bundle-Version: 0.5.7
 Bundle-ClassPath: plsqleditor.jar,
- libs/commons-lang-1.0.jar,
+ libs/commons-lang3-3.7.jar,
  libs/ojdbc14.jar,
- libs/jdom-1.1.jar,
+ libs/jdom-1.1.3.jar,
  .,
- libs/ant-1.8.1.jar
+ libs/ant-1.10.5.jar
 Bundle-Activator: plsqleditor.PlsqleditorPlugin
 Bundle-Vendor: %Bundle-Vendor
 Bundle-Localization: plugin
@@ -49,10 +49,10 @@ Export-Package: .,
  oracle.sql,
  oracle.sql.converter,
  oracle.sql.converter_xcharset,
- org.apache.commons.lang,
- org.apache.commons.lang.builder,
- org.apache.commons.lang.enum,
- org.apache.commons.lang.exception,
+ org.apache.commons.lang3,
+ org.apache.commons.lang3.builder,
+ org.apache.commons.lang3.enum,
+ org.apache.commons.lang3.exception,
  org.apache.tools.ant,
  org.apache.tools.ant.dispatch,
  org.apache.tools.ant.filters,

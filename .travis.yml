@@ -1,11 +1,16 @@
 language: java
 sudo: required
 
+cache:
+  - directories:
+    - .cache/oracle
+
 before_install:
     - sudo apt-get install -y eclipse
-    - .travis/oracle/download.sh
     - sudo apt-get -qq install libaio1 rpm
-    - sudo rpm --install --nodeps .cache/oracle/oracle-instantclient*.rpm
+    - if [ ! -f .cache/oracle/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm ]; then .travis/oracle/download.sh; fi
+    - if [ `stat -c%s .cache/oracle/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm` -lt 5000 ]; then cat .cache/oracle/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm && rm .cache/oracle/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm; fi
+    - sudo rpm --install --nodeps .cache/oracle/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm
 
 script:
     ant build.update.jar
