@@ -4,7 +4,7 @@
 	<property name="p2.build.repo" value="file:target/buildRepo"/>
         <property name="version" value= "0.5.7"/>
         <property name="eclipse.plugindir" value="/usr/lib/eclipse/plugins"/>
-        <property name="oracle.dir" value="/usr/lib/oracle/10.2.0.5/client65/lib"/>
+        <property name="oracle.dir" value="/usr/lib/oracle/11.2/client64/lib"/>
 	<property name="basews" value="${ws}"/>
 	<property name="baseos" value="${os}"/>
 	<property name="basearch" value="${arch}"/>
