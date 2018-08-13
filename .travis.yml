@@ -20,4 +20,4 @@ env:
     - ORACLE_HOME=/usr/lib/oracle/12.1/client64/
     - ORACLE_DOWNLOAD_DIR=.cache/oracle
     - ORACLE_COOKIE=ic_linuxx8664
-    - ORACLE_FILE='instantclient/18300/oracle-instantclient18.3-basic-18.3.0.0.0-1.x86_64.rpm'
+    - ORACLE_FILE='instantclient/183000/oracle-instantclient18.3-basic-18.3.0.0.0-1.x86_64.rpm'
