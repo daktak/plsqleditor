@@ -177,8 +177,8 @@
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/commons-lang3-3.7.jar"/>
                         <pathelement path="${ojdbc}"/>
                         <pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/${ojdbc}"/>
-			<pathelement path="libs/jdom-2.0.2.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-2.0.2.jar"/>
+			<pathelement path="libs/jdom-1.1.3.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-1.1.3.jar"/>
 			<pathelement path="libs/ant-1.10.5.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/ant-1.10.5.jar"/>
 		</path>
@@ -261,8 +261,8 @@
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/commons-lang3-3.7.jar"/>
                         <pathelement path="${ojdbc14}"/>
                         <pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/${ojdbc}"/>
-			<pathelement path="libs/jdom-2.0.2.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-2.0.2.jar"/>
+			<pathelement path="libs/jdom-1.1.3.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-1.1.3.jar"/>
 			<pathelement path="bin/"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/bin/"/>
 			<pathelement path="${build.result.folder}/@dot"/>
@@ -342,7 +342,7 @@
 		</copy>
 		<antcall target="apitools.generation">
 			<param name="projectLocation" value="${basedir}"/>
-                        <param name="binary.folders" value="${build.result.folder}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang3-3.7.jar:/home/user/git/plsqleditor/libs/jdom-2.0.2.jar:/home/user/git/plsqleditor/libs/${ojdbc}:/home/user/git/plsqleditor/libs/ant-1.10.5.jar"/>
+                        <param name="binary.folders" value="${build.result.folder}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang3-3.7.jar:/home/user/git/plsqleditor/libs/jdom-1.1.3.jar:/home/user/git/plsqleditor/libs/${ojdbc}:/home/user/git/plsqleditor/libs/ant-1.10.5.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 			<param name="target.folder" value="${build.result.folder}"/>
 		</antcall>
@@ -381,7 +381,7 @@
 		</copy>
 		<antcall target="apitools.generation">
 			<param name="projectLocation" value="${basedir}"/>
-                        <param name="binary.folders" value="${destination.temp.folder}/plsqleditor_${version}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang3-3.7.jar:/home/user/git/plsqleditor/libs/jdom-2.0.2.jar:/home/user/git/plsqleditor/libs/${ojdbc}:/home/user/git/plsqleditor/libs/ant-1.10.5.jar"/>
+                        <param name="binary.folders" value="${destination.temp.folder}/plsqleditor_${version}/plsqleditor.jar:${build.result.folder}/@dot:/home/user/git/plsqleditor/libs/commons-lang3-3.7.jar:/home/user/git/plsqleditor/libs/jdom-1.1.3.jar:/home/user/git/plsqleditor/libs/${ojdbc}:/home/user/git/plsqleditor/libs/ant-1.10.5.jar"/>
 			<param name="projectName" value="${bundleId}_${bundleVersion}"/>
 			<param name="target.folder" value="${destination.temp.folder}/plsqleditor_${version}"/>
 		</antcall>
