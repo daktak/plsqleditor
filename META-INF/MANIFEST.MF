@@ -132,5 +132,5 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.variables;bundle-version="3.2.200",
  org.eclipse.ui.console;bundle-version="3.4.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.5
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Automatic-Module-Name: plsqleditor
