@@ -14,9 +14,9 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="libs/commons-lang.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/commons-lang3-3.7.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/ojdbc14.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/jdom-1.1.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/ant.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/ant-1.10.5.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>
