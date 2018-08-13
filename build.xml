@@ -4,7 +4,7 @@
 	<property name="p2.build.repo" value="file:target/buildRepo"/>
         <property name="version" value= "0.5.7"/>
         <property name="eclipse.plugindir" value="/usr/lib/eclipse/plugins"/>
-        <property name="oracle.dir" value="/usr/lib/oracle"/>
+        <property name="oracle.dir" value="/usr/lib/oracle/10.2.0.5/client65/lib"/>
 	<property name="basews" value="${ws}"/>
 	<property name="baseos" value="${os}"/>
 	<property name="basearch" value="${arch}"/>
@@ -258,7 +258,7 @@
 			<pathelement path="target/nestedJars/org.eclipse.ui.ide_3.8.1.v20120829-085332/e4-ide.jar"/>
 			<pathelement path="libs/commons-lang3-3.7.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/commons-lang3-3.7.jar"/>
-                        <pathelement path="${ojdbc14}"/>
+                        <pathelement path="${ojdbc}"/>
                         <pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/${ojdbc}"/>
 			<pathelement path="libs/jdom-1.1.3.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-1.1.3.jar"/>
@@ -369,8 +369,6 @@
 			<fileset dir="${basedir}">
 				<include name="plugin.xml"/>
 				<include name="META-INF/"/>
-				<include name="html/"/>
-				<include name="*.xml"/>
 				<include name="icons/"/>
 				<include name="plugin.properties"/>
 				<include name="plsqleditor.jar"/>
