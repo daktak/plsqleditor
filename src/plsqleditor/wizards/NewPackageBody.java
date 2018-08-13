@@ -177,7 +177,7 @@ public class NewPackageBody extends Wizard implements INewWizard
 		if (fileName.endsWith(".pkb"))
 		{
 			contents = "CREATE OR REPLACE PACKAGE BODY "
-					+ schemaname + "." + packageName
+					+ schemaName + "." + packageName
 					+ " IS\n"
 					+ "/*\n"
 					+ " * File documentation goes here.  This is required for the outline to work correctly.\n"
@@ -340,7 +340,7 @@ public class NewPackageBody extends Wizard implements INewWizard
 		}
 		else if (fileName.endsWith(".pkh"))
 		{
-			contents = "CREATE OR REPLACE PACKAGE " + schemaname + "." + packageName + "\n AS\n"
+			contents = "CREATE OR REPLACE PACKAGE " + schemaName + "." + packageName + "\n AS\n"
 					+ "/*\n" + " */\n" + "/**\n" + " * @param pis_thing\n"
 					+ " */\n" + "    FUNCTION do_stuff (\n"
 					+ "      pis_thing IN varchar2)\n"
