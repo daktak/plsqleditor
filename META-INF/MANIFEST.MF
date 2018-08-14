@@ -1,13 +1,16 @@
 Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
-Bundle-Name: %Bundle-Name
+Bundle-Name: Toby's PL SQL Editor
 Bundle-SymbolicName: plsqleditor; singleton:=true
 Bundle-Version: 0.5.7
 Bundle-ClassPath: plsqleditor.jar,
- libs,
- .
+ .,
+ libs/ant-1.10.5.jar,
+ libs/commons-lang3-3.7.jar,
+ libs/jdom-1.1.3.jar,
+ libs/ojdbc8.jar
 Bundle-Activator: plsqleditor.PlsqleditorPlugin
-Bundle-Vendor: %Bundle-Vendor
+Bundle-Vendor: daktak@domo.ddns.net
 Bundle-Localization: plugin
 Export-Package: .,
  au.com.gts.data,
@@ -16,29 +19,20 @@ Export-Package: .,
  images,
  oracle.core.lmx,
  oracle.core.lvf,
- oracle.gss.util,
- oracle.gss.util.CharConvBuilder,
- oracle.gss.util.data,
- oracle.gss.util.message,
  oracle.jdbc,
- oracle.jdbc.dbaccess,
  oracle.jdbc.driver,
  oracle.jdbc.internal;x-internal:=true,
  oracle.jdbc.oci,
- oracle.jdbc.oci8,
  oracle.jdbc.oracore,
  oracle.jdbc.pool,
- oracle.jdbc.ttc7,
  oracle.jdbc.util,
  oracle.jdbc.xa,
  oracle.jdbc.xa.client,
  oracle.jpub.runtime,
- oracle.net.TNSAddress,
  oracle.net.ano,
  oracle.net.aso,
  oracle.net.jndi,
  oracle.net.mesg,
- oracle.net.nl,
  oracle.net.ns,
  oracle.net.nt,
  oracle.net.resolver,
@@ -128,5 +122,5 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.variables;bundle-version="3.2.200",
  org.eclipse.ui.console;bundle-version="3.4.0"
 Bundle-ActivationPolicy: lazy
-Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-RequiredExecutionEnvironment: JavaSE-1.8
 Automatic-Module-Name: plsqleditor
