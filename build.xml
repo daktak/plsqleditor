@@ -217,7 +217,6 @@
 			</fileset>
 		</copy>
 	</target>
-
 	<target name="plsqleditor.jar.nestedJars">
 		<mkdir dir="target/nestedJars/org.eclipse.equinox.registry"/>
                 <unzip src="${equinox.registry}"
