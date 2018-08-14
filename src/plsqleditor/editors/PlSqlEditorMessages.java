@@ -26,11 +26,6 @@ public class PlSqlEditorMessages
         RESOURCE_BUNDLE  = PlSqlEditorMessages.class.getName();
         fgResourceBundle = ResourceBundle.getBundle(RESOURCE_BUNDLE);
     }
-    
-    private PlSqlEditorMessages()
-    {
-        //
-    }
 
     public static String getString(String key)
     {

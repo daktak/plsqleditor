@@ -100,7 +100,7 @@ public class MultiPagePlsqlEditorContributor extends
 		super();
 
 		fContentAssistProposal = new RetargetTextEditorAction(
-				PlSqlEditorMessages.getResourceBundle(),
+				(java.util.ResourceBundle) PlSqlEditorMessages.getResourceBundle(),
 				"ContentAssistProposal.");
 		fContentAssistProposal
 				.setActionDefinitionId("org.eclipse.ui.edit.text.contentAssist.proposals");
