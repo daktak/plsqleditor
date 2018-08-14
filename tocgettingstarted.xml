@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<?NLS TYPE="org.eclipse.help.toc"?>
-
-<toc label="Getting Started" link_to="toc.xml#gettingstarted"> 
-	<topic label="File Basics"  href="html/gettingstarted/new_file.html"> 
-		<topic label="PL/SQL Basics" href="html/gettingstarted/plsql_basics.html" /> 
-		<topic label="Schema Structure" href="html/gettingstarted/schema_structure.html" /> 
-	</topic>
-</toc>
