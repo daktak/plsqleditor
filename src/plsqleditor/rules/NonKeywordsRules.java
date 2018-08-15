@@ -20,11 +20,11 @@ public class NonKeywordsRules implements IRule
 {
 
     private IToken    myToken;
-    private ArrayList myKeywords;
+    private ArrayList<String> myKeywords;
 
     public NonKeywordsRules(IToken token)
     {
-        myKeywords = new ArrayList();
+        myKeywords = new ArrayList<String>();
         this.myToken = token;
     }
 

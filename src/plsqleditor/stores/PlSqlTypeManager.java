@@ -18,14 +18,14 @@ import plsqleditor.parsers.SegmentType;
 
 public class PlSqlTypeManager
 {
-    private static final Map theBaseTypes;
-    private static Map       theTypeManagers = new HashMap();
+    private static final Map<String, PlSqlType> theBaseTypes;
+    private static Map<IProject, PlSqlTypeManager>       theTypeManagers = new HashMap<IProject, PlSqlTypeManager>();
 
-    private Map              mySchemaAndPackageQualifiedTypes;
+    private Map<String, Map>              mySchemaAndPackageQualifiedTypes;
 
     static
     {
-        theBaseTypes = new HashMap(PlSqlCodeScanner.DATATYPES.length);
+        theBaseTypes = new HashMap<String, PlSqlType>(PlSqlCodeScanner.DATATYPES.length);
         for (int i = 0; i < PlSqlCodeScanner.DATATYPES.length; i++)
         {
             PlSqlType type = new PlSqlType(null, null, PlSqlCodeScanner.DATATYPES[i]);
@@ -36,12 +36,12 @@ public class PlSqlTypeManager
 
     private PlSqlTypeManager()
     {
-        mySchemaAndPackageQualifiedTypes = new HashMap();
+        mySchemaAndPackageQualifiedTypes = new HashMap<String, Map>();
     }
 
     public static PlSqlType getBaseType(String typeName)
     {
-        return (PlSqlType) theBaseTypes.get(typeName);
+        return theBaseTypes.get(typeName);
     }
 
     /**
@@ -80,7 +80,7 @@ public class PlSqlTypeManager
         {
             forProject = PlsqleditorPlugin.getDefault().getProject();
         }
-        PlSqlTypeManager manager = (PlSqlTypeManager) theTypeManagers.get(forProject);
+        PlSqlTypeManager manager = theTypeManagers.get(forProject);
         if (manager == null)
         {
             manager = new PlSqlTypeManager();
@@ -109,8 +109,8 @@ public class PlSqlTypeManager
             else if (segmentType == SegmentType.Type)
             {
                 String returnType = segment.getReturnType();
-                List fieldNamesList = new ArrayList();
-                List typeNamesList = new ArrayList();
+                List<String> fieldNamesList = new ArrayList<String>();
+                List<Object> typeNamesList = new ArrayList<Object>();
                 String typeType = null;
                 PlSqlType indexType = null;
                 // TODO get details
@@ -142,9 +142,9 @@ public class PlSqlTypeManager
                 {
                     System.out.println("The type is not determinable : " + returnType);
                 }
-                String[] fieldNames = (String[]) fieldNamesList.toArray(new String[fieldNamesList
+                String[] fieldNames = fieldNamesList.toArray(new String[fieldNamesList
                         .size()]);
-                String[] containedTypes = (String[]) typeNamesList.toArray(new String[typeNamesList
+                String[] containedTypes = typeNamesList.toArray(new String[typeNamesList
                         .size()]);
                 type = storeType(schemaName,
                                  packageName,
@@ -173,7 +173,7 @@ public class PlSqlTypeManager
      *            the first field name, group(2) contains the first field type
      *            name.
      */
-    private PlSqlType processTable(List typeNamesList, Matcher paramsMatcher)
+    private PlSqlType processTable(List<Object> typeNamesList, Matcher paramsMatcher)
     {
         String grp2 = paramsMatcher.group(2);
         typeNamesList.add(paramsMatcher.group(1) + grp2 == null ? "" : grp2);
@@ -207,7 +207,7 @@ public class PlSqlTypeManager
      *            the first field name, group(2) contains the first field type
      *            name.
      */
-    private void processRecord(List fieldNamesList, List typeNamesList, Matcher paramsMatcher)
+    private void processRecord(List<String> fieldNamesList, List<Object> typeNamesList, Matcher paramsMatcher)
     {
         fieldNamesList.add(paramsMatcher.group(1));
         typeNamesList.add(paramsMatcher.group(2));
@@ -304,16 +304,16 @@ public class PlSqlTypeManager
         {
             packageName = "default";
         }
-        Map schemaMap = (Map) mySchemaAndPackageQualifiedTypes.get(schemaName);
+        Map<String, Map> schemaMap = mySchemaAndPackageQualifiedTypes.get(schemaName);
         if (schemaMap == null)
         {
-            schemaMap = new HashMap();
+            schemaMap = new HashMap<String, Map>();
             mySchemaAndPackageQualifiedTypes.put(schemaName, schemaMap);
         }
-        Map packageMap = (Map) schemaMap.get(packageName);
+        Map<String, PlSqlType> packageMap = schemaMap.get(packageName);
         if (packageMap == null)
         {
-            packageMap = new HashMap();
+            packageMap = new HashMap<String, PlSqlType>();
             schemaMap.put(packageName, packageMap);
         }
         packageMap.put(name, type);
@@ -358,7 +358,7 @@ public class PlSqlTypeManager
         {
             packageName = "default";
         }
-        Map schemaMap = (Map) mySchemaAndPackageQualifiedTypes.get(schemaName);
+        Map schemaMap = mySchemaAndPackageQualifiedTypes.get(schemaName);
         if (schemaMap == null)
         {
             if (schemaName.equals("default"))

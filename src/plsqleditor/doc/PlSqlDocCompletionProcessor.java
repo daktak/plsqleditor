@@ -102,7 +102,7 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
         PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
         myCurrentDoc = doc;
         myCurrentSegments = plugin.getCurrentSegments(doc);
-        List completions = new ArrayList();
+        List<Segment> completions = new ArrayList<Segment>();
         String currText = null;
         try
         {
@@ -127,9 +127,9 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
                 int atIndex = currText.lastIndexOf("@");
                 currText = currText.substring(atIndex);
 
-                List proposals = new ArrayList();
+                List<String> proposals = new ArrayList<String>();
                 proposals.addAll(Arrays.asList(fgProposals));
-                for (Iterator it = proposals.iterator(); it.hasNext();)
+                for (Iterator<String> it = proposals.iterator(); it.hasNext();)
                 {
                     String str = (String) it.next();
                     if (str != null && str.toUpperCase().startsWith(currText))
@@ -182,7 +182,7 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
         int index = 0;
         int currTextLength = currText.length();
 
-        for (Iterator it = completions.iterator(); it.hasNext();)
+        for (Iterator<Segment> it = completions.iterator(); it.hasNext();)
         {
             Segment proposal = (Segment) it.next();
             String proposalString = proposal.getPresentationName(true, false, true);
@@ -246,7 +246,7 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
      *         <code>false</code> otherwise.
      */
     private boolean addParamCompletions(int documentOffset,
-                                        List completions,
+                                        List<Segment> completions,
                                         String currText,
                                         String lineOfText,
                                         int lastCharacterInPreviousWord)
@@ -261,7 +261,7 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
                         .findNextMethod(myCurrentSegments, documentOffset);
                 if (foundSegment != null)
                 {
-                    for (Iterator it = foundSegment.getParameterList().iterator(); it.hasNext();)
+                    for (Iterator<?> it = foundSegment.getParameterList().iterator(); it.hasNext();)
                     {
                         Segment p = (Segment) it.next();
                         if (p.getName().toUpperCase().startsWith(currText))
@@ -303,7 +303,7 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
      *         <code>false</code> otherwise.
      */
     private boolean addThrowsCompletions(int documentOffset,
-                                         List completions,
+                                         List<Segment> completions,
                                          String currText,
                                          String lineOfText,
                                          int lastCharacterInPreviousWord)
@@ -347,7 +347,7 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
      *         <code>false</code> otherwise.
      */
     private String addLinkCompletions(int documentOffset,
-                                      List completions,
+                                      List<Segment> completions,
                                       String currText,
                                       String lineOfText,
                                       int lastCharacterInPreviousWord)

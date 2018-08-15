@@ -33,7 +33,7 @@ public class MovableItemManager
     /**
      * This is the list of movable items.
      */
-    private List myMovableItems;
+    private List<MovableItem> myMovableItems;
 
     /**
      * This is the item that a user has currently selected for moving and is operating on (with a
@@ -62,7 +62,7 @@ public class MovableItemManager
      */
     public MovableItemManager()
     {
-        myMovableItems = new ArrayList();
+        myMovableItems = new ArrayList<MovableItem>();
     }
 
     /**
@@ -190,7 +190,7 @@ public class MovableItemManager
         GC gc = new GC(canvas);
         gc.setLineWidth(1);
         gc.setForeground(Display.getDefault().getSystemColor(SWT.COLOR_BLACK));
-        for (Iterator it = myMovableItems.iterator(); it.hasNext();)
+        for (Iterator<MovableItem> it = myMovableItems.iterator(); it.hasNext();)
         {
             MovableItem mi = (MovableItem) it.next();
             Point start = mi.getCentre();
@@ -210,7 +210,7 @@ public class MovableItemManager
      */
     public void addMouseListener(MouseListener listener)
     {
-        for (Iterator it = myMovableItems.iterator(); it.hasNext();)
+        for (Iterator<MovableItem> it = myMovableItems.iterator(); it.hasNext();)
         {
             MovableItem mi = (MovableItem) it.next();
             mi.addMouseListener(listener);
@@ -222,7 +222,7 @@ public class MovableItemManager
      */
     public void addMouseMoveListener(MouseMoveListener listener)
     {
-        for (Iterator it = myMovableItems.iterator(); it.hasNext();)
+        for (Iterator<MovableItem> it = myMovableItems.iterator(); it.hasNext();)
         {
             MovableItem mi = (MovableItem) it.next();
             mi.addMouseMoveListener(listener);
@@ -234,7 +234,7 @@ public class MovableItemManager
      */
     public void addMouseTrackListener(MouseTrackListener listener)
     {
-        for (Iterator it = myMovableItems.iterator(); it.hasNext();)
+        for (Iterator<MovableItem> it = myMovableItems.iterator(); it.hasNext();)
         {
             MovableItem mi = (MovableItem) it.next();
             mi.addMouseTrackListener(listener);
@@ -255,7 +255,7 @@ public class MovableItemManager
      */
     public MovableItem getItemForWidget(Widget widget)
     {
-        for (Iterator it = myMovableItems.iterator(); it.hasNext();)
+        for (Iterator<MovableItem> it = myMovableItems.iterator(); it.hasNext();)
         {
             MovableItem mi = (MovableItem) it.next();
             if (mi.getContainedComponent().equals(widget))
@@ -277,7 +277,7 @@ public class MovableItemManager
     {
         if (myCurrentlyLinkingItem != null)
         {
-            for (Iterator it = myMovableItems.iterator(); it.hasNext();)
+            for (Iterator<MovableItem> it = myMovableItems.iterator(); it.hasNext();)
             {
                 MovableItem mi = (MovableItem) it.next();
                 if (mi.equals(myCurrentlyLinkingItem))

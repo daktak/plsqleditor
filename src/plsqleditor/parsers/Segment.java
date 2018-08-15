@@ -16,7 +16,7 @@ import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.editors.model.IMultilineElement;
 import plsqleditor.preferences.PreferenceConstants;
 
-public class Segment implements Comparable, Cloneable, IMultilineElement
+public class Segment implements Comparable<Object>, Cloneable, IMultilineElement
 {
 	public static final String PRIVATE = "Private";
 	public static final String PUBLIC = "Public";
@@ -58,7 +58,7 @@ public class Segment implements Comparable, Cloneable, IMultilineElement
 	 * return declaration, the IS/AS or END statement, but everything in between
 	 * (including the locals declaration).
 	 */
-	protected List myLines = new ArrayList();
+	protected List<Segment> myLines = new ArrayList<Segment>();
 
 	/**
 	 * This is the segment that owns this segment. It may be null if no segment
@@ -174,7 +174,7 @@ public class Segment implements Comparable, Cloneable, IMultilineElement
 			return "";
 		}
 		StringBuffer sb = new StringBuffer("(");
-		for (Iterator it = myParameterList.iterator(); it.hasNext();)
+		for (Iterator<Parameter> it = myParameterList.iterator(); it.hasNext();)
 		{
 			Parameter p = (Parameter) it.next();
 			sb.append(p.toString(overrideParameterSettings));
@@ -534,7 +534,7 @@ public class Segment implements Comparable, Cloneable, IMultilineElement
 	 */
 	public boolean containsParameter(String paramName)
 	{
-		for (Iterator it = myParameterList.iterator(); it.hasNext();)
+		for (Iterator<Parameter> it = myParameterList.iterator(); it.hasNext();)
 		{
 			Parameter p = (Parameter) it.next();
 			if (p.myParameter.equals(paramName))
@@ -592,11 +592,11 @@ public class Segment implements Comparable, Cloneable, IMultilineElement
 		{
 			sb.append("    ").append(type.toString().toUpperCase()).append(" ");
 			sb.append(getName());
-			List l = myParameterList;
+			List<Parameter> l = myParameterList;
 			if (l.size() > 0)
 			{
 				sb.append("(");
-				for (Iterator it = l.iterator(); it.hasNext();)
+				for (Iterator<Parameter> it = l.iterator(); it.hasNext();)
 				{
 					Parameter param = (Parameter) it.next();
 					sb.append(param.myParameter).append(" ")
@@ -639,7 +639,7 @@ public class Segment implements Comparable, Cloneable, IMultilineElement
 	 */
 	private void parseLines(StringBuffer sb, String string)
 	{
-		for (Iterator it = myLines.iterator(); it.hasNext();)
+		for (Iterator<Segment> it = myLines.iterator(); it.hasNext();)
 		{
 			Segment line = (Segment) it.next();
 			// String line = (String) it.next();

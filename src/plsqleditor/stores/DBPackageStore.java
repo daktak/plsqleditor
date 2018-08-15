@@ -63,7 +63,7 @@ public class DBPackageStore
 	 * This field maps each package to the time we last cached that package's
 	 * segments.
 	 */
-	private HashMap myPackageToLastCacheTimeMap;
+	private HashMap<String, Timestamp> myPackageToLastCacheTimeMap;
 
 	/**
 	 * A dummy position to be used when creating Segments. DBPackageStore
@@ -240,10 +240,10 @@ public class DBPackageStore
 	 *             If the sql is malformed or there is a problem with the
 	 *             database connection.
 	 */
-	protected List getObjectSetsByVariables(String sql, Object[] objects,
+	protected List<Object[]> getObjectSetsByVariables(String sql, Object[] objects,
 			Object[] dummyArrays) throws SQLException
 	{
-		List toReturn = new ArrayList();
+		List<Object[]> toReturn = new ArrayList<Object[]>();
 		ResultSet rs = getResultSetByVariables(sql, objects);
 		while (rs.next())
 		{
@@ -480,7 +480,7 @@ public class DBPackageStore
 	 * @return The list of segments that were just loaded.
 	 * @throws SQLException
 	 */
-	protected List loadSegments(String schemaName, String packageName)
+	protected List<Segment> loadSegments(String schemaName, String packageName)
 			throws SQLException
 	{
 		String sql = "SELECT p.procedure_name " + "      ,p.object_name "
@@ -494,7 +494,7 @@ public class DBPackageStore
 		Timestamp cacheTime = getSysTimestamp();
 		SortedSet segmentNameList = getObjectsByVariables(sql, new Object[] {
 				schemaName, schemaName, schemaName, schemaName, packageName });
-		List segmentList = new ArrayList();
+		List<Segment> segmentList = new ArrayList<Segment>();
 		for (Iterator it = segmentNameList.iterator(); it.hasNext();)
 		{
 			String segmentName = (String) it.next();
@@ -530,7 +530,7 @@ public class DBPackageStore
 	 * @throws SQLException
 	 */
 	protected void addSegmentsToList(String schemaName, String packageName,
-			String segmentName, List theList) throws SQLException
+			String segmentName, List<Segment> theList) throws SQLException
 	{
 		String sql = "SELECT a.argument_name, a.position, a.in_out, a.overload "
 				+ "      ,(CASE WHEN a.type_owner IS NULL THEN a.data_type ELSE a.type_owner || '.'|| a.type_name || '.'|| a.type_subname END) data_type "

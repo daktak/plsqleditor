@@ -117,12 +117,12 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
             mySegments.addAll(sortAndFilterSegments(f.getSegments(), f.getDocument()));
         }
 
-        private List sortAndFilterSegments(List segments, IDocument document)
+        private List<Segment> sortAndFilterSegments(List<?> segments, IDocument document)
         {
-            SortedSet sortedSegments = new TreeSet();
+            SortedSet<Object> sortedSegments = new TreeSet<Object>();
             sortedSegments.addAll(segments);
-            List segmentsToReturn = new ArrayList();
-            for (Iterator it = sortedSegments.iterator(); it.hasNext();)
+            List<Segment> segmentsToReturn = new ArrayList<Segment>();
+            for (Iterator<Object> it = sortedSegments.iterator(); it.hasNext();)
             {
                 Segment segment = (Segment) it.next();
                 try
@@ -134,8 +134,8 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
                         {
                             PackageSegment pkgSegment = (PackageSegment) segment;
                             PackageSegment clone = (PackageSegment) pkgSegment.clone();
-                            List containedSegments = clone.getContainedSegments();
-                            List sortedContainedSegments = sortAndFilterSegments(clone.getContainedSegments(),
+                            List<Segment> containedSegments = clone.getContainedSegments();
+                            List<Segment> sortedContainedSegments = sortAndFilterSegments(clone.getContainedSegments(),
                                                                                  document);
                             containedSegments.clear();
                             containedSegments.addAll(sortedContainedSegments);
@@ -317,16 +317,16 @@ public class PlSqlContentOutlinePage extends ContentOutlinePage
         sortAction = new Action("Sort", IAction.AS_CHECK_BOX)
         {
 
-            public void run()
+			public void run()
             {
                 if (myIsSorting)
                 {
-                    viewer.setSorter(null);
+                    viewer.setComparator(null);
                     myIsSorting = false;
                 }
                 else
                 {
-                    viewer.setSorter(myDefaultSorter);
+                    viewer.setComparator(myDefaultSorter);
                     myIsSorting = true;
                 }
             }

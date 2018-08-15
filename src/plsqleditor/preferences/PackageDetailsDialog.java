@@ -58,7 +58,7 @@ public class PackageDetailsDialog extends TitleAreaDialog implements Listener
 
     protected Button myOkButton;
     Table            myLocationsTable;
-    private List     myLocations = new ArrayList();
+    private List<PackageLocation>     myLocations = new ArrayList<PackageLocation>();
 
     /**
      * Constructs a new file extension dialog.
@@ -319,7 +319,7 @@ public class PackageDetailsDialog extends TitleAreaDialog implements Listener
      */
     private void addLocation(PackageLocation newLocation)
     {
-        for (Iterator it = myLocations.iterator(); it.hasNext();)
+        for (Iterator<PackageLocation> it = myLocations.iterator(); it.hasNext();)
         {
             PackageLocation loc = (PackageLocation) it.next();
             if (loc.getLocation().equals(newLocation.getLocation()))
@@ -404,18 +404,18 @@ public class PackageDetailsDialog extends TitleAreaDialog implements Listener
 
     public void setLocations(PackageLocation[] locations)
     {
-        myLocations = new ArrayList();
+        myLocations = new ArrayList<PackageLocation>();
         for (int i = 0; i < locations.length; i++)
         {
             myLocations.add(locations[i]);
         }
     }
 
-    private void addLocationsToTable(List locations)
+    private void addLocationsToTable(List<PackageLocation> locations)
     {
         TableItem item = null;
         int index = 0;
-        for (Iterator it = locations.iterator(); it.hasNext();)
+        for (Iterator<PackageLocation> it = locations.iterator(); it.hasNext();)
         {
             PackageLocation location = (PackageLocation) it.next();
             item = newPackageLocation(location, index++, false);

@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,8 +31,6 @@ import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-
-import au.com.gts.data.Grant;
 
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.db.DbUtility;
@@ -508,13 +505,13 @@ public class PackageStore implements SchemaRegistry.RegistryUpdateListener,
 								segments = p.getSegments();
 								if (segments == null)
 								{
-									segments = new ArrayList();
+									segments = new ArrayList<Segment>();
 								}
 							}
 						}
 						else
 						{
-							List newSegments = p.getSegments();
+							List<Segment> newSegments = p.getSegments();
 							if (newSegments != null)
 							{
 								segments.addAll(newSegments);
@@ -532,7 +529,7 @@ public class PackageStore implements SchemaRegistry.RegistryUpdateListener,
 		}
 		if (segments == null)
 		{
-			segments = new ArrayList();
+			segments = new ArrayList<Segment>();
 		}
 		if (segments.size() == 0 && myDbPackageStore != null)
 		{
@@ -1077,11 +1074,11 @@ public class PackageStore implements SchemaRegistry.RegistryUpdateListener,
 	 * 
 	 * @return The schema name located in the segements, if one is there.
 	 */
-	private String getSchemaNameFromSegments(List segments)
+	private String getSchemaNameFromSegments(List<Segment> segments)
 	{
-		for (Iterator iter = segments.iterator(); iter.hasNext();)
+		for (Iterator<Segment> iter = segments.iterator(); iter.hasNext();)
 		{
-			Segment segment = (Segment) iter.next();
+			Segment segment = iter.next();
 			if (segment instanceof PackageSegment)
 			{
 				PackageSegment ps = (PackageSegment) segment;

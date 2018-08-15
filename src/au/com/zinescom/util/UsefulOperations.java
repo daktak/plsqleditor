@@ -188,8 +188,8 @@ public class UsefulOperations
 
         int size = ary1.length;
 
-        Vector v1 = new Vector(size);
-        Vector v2 = new Vector(size);
+        Vector<Object> v1 = new Vector<Object>(size);
+        Vector<Object> v2 = new Vector<Object>(size);
 
         for (int i = 0; i < size; i++)
         {
@@ -285,7 +285,7 @@ public class UsefulOperations
      * @param toBeAdded the vector to be added. This may be null.
      * @param toAddTo the vector to add to. This MUST NOT be null.
      */
-    public static final Vector addVectorToVectorE(Vector toBeAdded, Vector toAddTo)
+    public static final Vector<Object> addVectorToVectorE(Vector toBeAdded, Vector toAddTo)
     {
         if (toBeAdded == null)
         {
@@ -361,7 +361,7 @@ public class UsefulOperations
 
         Method m = null;
 
-        List list = new ArrayList();
+        List<String> list = new ArrayList<String>();
         StringBuffer buf = new StringBuffer();
         for (int i = 0; i < array.length; i++)
         {
@@ -373,7 +373,7 @@ public class UsefulOperations
             if (method != null)
             {
                 Class clazz = obj.getClass();
-                Hashtable methodTable = (Hashtable) theClassToMethodTable.get(clazz);
+                Hashtable<String, Method> methodTable = (Hashtable) theClassToMethodTable.get(clazz);
                 if (methodTable != null)
                 {
                     m = (Method) methodTable.get(method);
