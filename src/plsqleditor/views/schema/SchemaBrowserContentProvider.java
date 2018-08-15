@@ -23,7 +23,6 @@ import org.eclipse.swt.widgets.Display;
 
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.db.ConnectionDetails;
-import plsqleditor.db.DbUtility;
 import plsqleditor.parsers.AbstractPlSqlParser;
 import plsqleditor.parsers.PackageSegment;
 import plsqleditor.parsers.Segment;
@@ -525,7 +524,7 @@ public class SchemaBrowserContentProvider implements
 	private void addSegmentsToPackage(PackageStore pstore, String schema,
 			String packageName, TreeParent segmentsTp)
 	{
-		List segments = pstore.getSegments(schema, packageName);
+		List<Segment> segments = pstore.getSegments(schema, packageName);
 		IFile packageFile = pstore.getFile(schema, packageName);
 		PackageSegment pkgSeg = AbstractPlSqlParser.getPackageSegment(segments,
 				packageName);

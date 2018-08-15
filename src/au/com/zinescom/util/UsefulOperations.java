@@ -14,6 +14,7 @@ import java.lang.reflect.Method;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -96,7 +97,7 @@ public class UsefulOperations
      * a hashtable of methods keyed on their names. Key : Class Value :
      * Hashtable Key : method name Value : Method
      */
-    private static Hashtable     theClassToMethodTable        = new Hashtable();
+    private static Hashtable<Class<?>, Hashtable<String, Method>>     theClassToMethodTable        = new Hashtable<Class<?>, Hashtable<String, Method>>();
 
     /**
      * This class represents a filter on a file list.
@@ -259,7 +260,7 @@ public class UsefulOperations
      * @param toBeAdded the vector to be added. This may be null.
      * @param toAddTo the vector to add to. This MUST NOT be null.
      */
-    public static final void addVectorToVector(Vector toBeAdded, Vector toAddTo)
+    public static final void addVectorToVector(Vector<? extends AbstractList<?>> toBeAdded, Vector<Object> toAddTo)
     {
         if (toBeAdded == null)
         {
@@ -285,7 +286,7 @@ public class UsefulOperations
      * @param toBeAdded the vector to be added. This may be null.
      * @param toAddTo the vector to add to. This MUST NOT be null.
      */
-    public static final Vector<Object> addVectorToVectorE(Vector toBeAdded, Vector toAddTo)
+    public static final Vector<Object> addVectorToVectorE(Vector<?> toBeAdded, Vector<Object> toAddTo)
     {
         if (toBeAdded == null)
         {
@@ -372,15 +373,15 @@ public class UsefulOperations
             }
             if (method != null)
             {
-                Class clazz = obj.getClass();
-                Hashtable<String, Method> methodTable = (Hashtable) theClassToMethodTable.get(clazz);
+                Class<?> clazz = obj.getClass();
+                Hashtable<String, Method> methodTable = (Hashtable<String, Method>) theClassToMethodTable.get(clazz);
                 if (methodTable != null)
                 {
                     m = (Method) methodTable.get(method);
                 }
                 else
                 {
-                    methodTable = new Hashtable();
+                    methodTable = new Hashtable<String, Method>();
                     theClassToMethodTable.put(clazz, methodTable);
                 }
                 if (m == null)
@@ -438,7 +439,7 @@ public class UsefulOperations
         {
             Collections.sort(list);
             buf = new StringBuffer();
-            for (Iterator it = list.iterator(); it.hasNext();)
+            for (Iterator<String> it = list.iterator(); it.hasNext();)
             {
                 buf.append(it.next());
                 if (it.hasNext())
@@ -458,7 +459,7 @@ public class UsefulOperations
      * @return The <code>Vector</code> constructed from the array, or
      *         <code>null</code> if <code>array</code> is <code>null</code>.
      */
-    public static Vector arrayToVector(Object[] array)
+    public static Vector<Object> arrayToVector(Object[] array)
     {
         if (array == null)
         {
@@ -466,7 +467,7 @@ public class UsefulOperations
         }
 
         int length = array.length;
-        Vector v = new Vector();
+        Vector<Object> v = new Vector<Object>();
         for (int i = 0; i < length; i++)
         {
             v.addElement(array[i]);
@@ -481,7 +482,7 @@ public class UsefulOperations
      * 
      * @param toAddTo the vector to add to. This MUST NOT be null.
      */
-    public static final void concatVectors(Vector toBeConcatenated, Vector toAddTo)
+    public static final void concatVectors(Vector<? extends AbstractList<?>> toBeConcatenated, Vector<Object> toAddTo)
     {
         if (toBeConcatenated == null)
         {
@@ -534,7 +535,7 @@ public class UsefulOperations
      * 
      * @see #constructClass(Class, String, Object[], String[])
      */
-    public static final Object constructClass(Class requiredInstanceOf,
+    public static final Object constructClass(Class<?> requiredInstanceOf,
                                               String className,
                                               Object[] constructionArgs,
                                               String defaultPackageName) throws CreationException
@@ -583,7 +584,7 @@ public class UsefulOperations
      *             <code>requiredInstanceOf</code>.
      *             </ul>
      */
-    public static final Object constructClass(Class requiredInstanceOf,
+    public static final Object constructClass(Class<?> requiredInstanceOf,
                                               String className,
                                               Object[] constructionArgs,
                                               String[] defaultPackageNames)
@@ -598,9 +599,9 @@ public class UsefulOperations
         }
 
         Object objectToReturn = null;
-        Class[] constructionClasses = null;
+        Class<?>[] constructionClasses = null;
 
-        Class classToBeConstructed = null;
+        Class<?> classToBeConstructed = null;
         try
         {
             classToBeConstructed = Class.forName(className);
@@ -612,7 +613,7 @@ public class UsefulOperations
                 constructionClasses[i] = constructionArgs[i].getClass();
             }
 
-            Constructor ctor = null;
+            Constructor<?> ctor = null;
             try
             {
                 ctor = classToBeConstructed.getConstructor(constructionClasses);
@@ -621,11 +622,11 @@ public class UsefulOperations
             {
                 // try interfaces that match
                 boolean isValidConstructor = false;
-                Constructor[] constructors = classToBeConstructed.getConstructors();
+                Constructor<?>[] constructors = classToBeConstructed.getConstructors();
                 for (int i = 0; i < constructors.length; i++)
                 {
-                    Constructor currentCons = constructors[i];
-                    Class[] parameterTypes = currentCons.getParameterTypes();
+                    Constructor<?> currentCons = constructors[i];
+                    Class<?>[] parameterTypes = currentCons.getParameterTypes();
 
                     if (parameterTypes.length == constructionClasses.length)
                     {
@@ -746,9 +747,9 @@ public class UsefulOperations
      *         <code>subset</code> objects were removed from the
      *         <code>superSet</code> objects.
      */
-    public static final Vector getDifference(Vector subset, Vector superSet)
+    public static final Vector<Object> getDifference(Vector<Object> subset, Vector<Object> superSet)
     {
-        return new Vector(getDifference((List) subset, (List) superSet));
+        return new Vector<Object>(getDifference((List<Object>) subset, (List<Object>) superSet));
     }
 
     /**
@@ -767,7 +768,7 @@ public class UsefulOperations
      *         <code>subset</code> objects were removed from the
      *         <code>superSet</code> objects.
      */
-    public static final List getDifference(List subset, List superSet)
+    public static final List<Object> getDifference(List<Object> subset, List<Object> superSet)
     {
         if (subset == null || superSet == null)
         {
@@ -777,7 +778,7 @@ public class UsefulOperations
             throw new IllegalArgumentException(msg);
         }
 
-        List diff = new ArrayList(superSet);
+        List<Object> diff = new ArrayList<Object>(superSet);
 
         for (int i = 0; i < subset.size(); i++)
         {
@@ -795,9 +796,9 @@ public class UsefulOperations
      */
     public static final Object[] getIntersection(Object[] setOne, Object[] setTwo)
     {
-        List list = new ArrayList();
+        List<Object> list = new ArrayList<Object>();
 
-        Vector v2 = arrayToVector(setTwo);
+        Vector<Object> v2 = arrayToVector(setTwo);
 
         for (int i = 0; i < setOne.length; i++)
         {
@@ -842,8 +843,8 @@ public class UsefulOperations
             throw new IllegalArgumentException(msg);
         }
 
-        Vector vSubSet = arrayToVector(subset);
-        Vector vSuperSet = arrayToVector(superSet);
+        Vector<Object> vSubSet = arrayToVector(subset);
+        Vector<Object> vSuperSet = arrayToVector(superSet);
 
         return UsefulOperations.vectorToArray(getDifference(vSubSet, vSuperSet), superSet
                 .getClass().getComponentType());
@@ -864,7 +865,7 @@ public class UsefulOperations
      * @return A vector of up to <code>size</code> containing up to the first
      *         <code>size</code> elements of <code>set</code>.
      */
-    public static final Vector getFirstNElements(Vector set, int size)
+    public static final Vector getFirstNElements(Vector<?> set, int size)
     {
         if (set == null)
         {
@@ -897,7 +898,7 @@ public class UsefulOperations
      * 
      * @return The size of the largest vector in <code>vectorOfVectors</code>.
      */
-    public static final int getMaxSize(Vector vectorOfVectors)
+    public static final int getMaxSize(Vector<?> vectorOfVectors)
     {
         if (vectorOfVectors == null)
         {
@@ -910,7 +911,7 @@ public class UsefulOperations
 
         for (int i = 0; i < size; i++)
         {
-            Vector v = (Vector) vectorOfVectors.elementAt(i);
+            Vector<?> v = (Vector<?>) vectorOfVectors.elementAt(i);
             int newSize = v.size();
             maxSize = maxSize > newSize ? maxSize : newSize;
         }
@@ -931,13 +932,13 @@ public class UsefulOperations
      * @return <code>true</code> if the object is contained in the Vector of
      *         Vectors, and <code>false</code> otherwise.
      */
-    public static final boolean isContainedIn(Vector containingVector, Object obj)
+    public static final boolean isContainedIn(Vector<?> containingVector, Object obj)
     {
         int size = containingVector.size();
 
         for (int k = 0; k < size; k++)
         {
-            Vector bottomVector = (Vector) containingVector.elementAt(k);
+            Vector<?> bottomVector = (Vector<?>) containingVector.elementAt(k);
             if (bottomVector.contains(obj))
             {
                 return true;
@@ -962,9 +963,9 @@ public class UsefulOperations
      * @return <code>true</code> if all objects in <code>subset</code> are
      *         contained in <code>superSet</code>.
      */
-    public static final boolean isSubsetOf(Vector subset, Vector superSet)
+    public static final boolean isSubsetOf(Vector<?> subset, Vector<?> superSet)
     {
-        for (Enumeration e = subset.elements(); e.hasMoreElements();)
+        for (Enumeration<?> e = subset.elements(); e.hasMoreElements();)
         {
             if (!superSet.contains(e.nextElement()))
             {
@@ -991,7 +992,7 @@ public class UsefulOperations
      * @return <code>true</code> if all objects in <code>sublist</code> are
      *         contained in <code>superList</code>.
      */
-    public static final boolean isUnOrderedSublistOf(Vector sublist, Vector superList)
+    public static final boolean isUnOrderedSublistOf(Vector<?> sublist, Vector<?> superList)
     {
         if (sublist == null || superList == null)
         {
@@ -1001,9 +1002,9 @@ public class UsefulOperations
             throw new IllegalArgumentException(msg);
         }
 
-        Vector subClone = (Vector) sublist.clone();
+        Vector<?> subClone = (Vector<?>) sublist.clone();
 
-        for (Enumeration e = superList.elements(); e.hasMoreElements();)
+        for (Enumeration<?> e = superList.elements(); e.hasMoreElements();)
         {
             subClone.removeElement(e.nextElement());
         }
@@ -1087,7 +1088,7 @@ public class UsefulOperations
      *         objects in <code>v</code> in the same order as they appeared in
      *         <code>v</code>.
      */
-    public static final Object[] vectorToArray(Vector v, Class clazz)
+    public static final Object[] vectorToArray(Vector<Object> v, Class<?> clazz)
     {
         if (v == null || clazz == null)
         {
@@ -1118,7 +1119,7 @@ public class UsefulOperations
      *         objects in <code>l</code> in the same order as they appeared in
      *         <code>l</code>.
      */
-    public static final Object[] listToArray(List l, Class clazz)
+    public static final Object[] listToArray(List<?> l, Class<?> clazz)
     {
         if (l == null || clazz == null)
         {
@@ -1151,7 +1152,7 @@ public class UsefulOperations
      *         objects in <code>v</code> in the same order as they appeared in
      *         <code>array</code>.
      */
-    public static final Object[] arrayToArray(Object[] array, Class clazz)
+    public static final Object[] arrayToArray(Object[] array, Class<?> clazz)
     {
         if (array == null || clazz == null)
         {
@@ -1186,13 +1187,13 @@ public class UsefulOperations
      *         containing all the objects in <code>v</code> in the same order
      *         as they appeared in <code>v</code>.
      */
-    public static Object[] vectorToArray(Vector v)
+    public static Object[] vectorToArray(Vector<Object> v)
     {
         if (v == null || v.size() == 0)
         {
             throw new IllegalArgumentException("v [" + v + "] is null or empty");
         }
-        Class clazz = v.firstElement().getClass();
+        Class<?> clazz = v.firstElement().getClass();
         return vectorToArray(v, clazz);
     }
 
@@ -1449,7 +1450,7 @@ public class UsefulOperations
      * @return the final part of the class name (hence the name as declared in
      *         the source file).
      */
-    public static String getShortClassName(Class c)
+    public static String getShortClassName(Class<?> c)
     {
         String className = c.getName();
 
@@ -1499,8 +1500,8 @@ public class UsefulOperations
         {
             if (includeSuperFields)
             {
-                Class superClass = withPublicFields.getClass();
-                Vector fieldArrays = new Vector();
+                Class<?> superClass = withPublicFields.getClass();
+                Vector<Field[]> fieldArrays = new Vector<Field[]>();
                 int fullCount = 0;
 
                 while (superClass != null)
@@ -1649,15 +1650,15 @@ public class UsefulOperations
             }
             if (method != null)
             {
-                Class clazz = obj.getClass();
-                Hashtable methodTable = (Hashtable) theClassToMethodTable.get(clazz);
+                Class<?> clazz = obj.getClass();
+                Hashtable<String, Method> methodTable = (Hashtable<String, Method>) theClassToMethodTable.get(clazz);
                 if (methodTable != null)
                 {
                     m = (Method) methodTable.get(method);
                 }
                 else
                 {
-                    methodTable = new Hashtable();
+                    methodTable = new Hashtable<String, Method>();
                     theClassToMethodTable.put(clazz, methodTable);
                 }
                 if (m == null)
@@ -1722,8 +1723,8 @@ public class UsefulOperations
      *         on the class, null will be returned.
      */
     public static Object getInstanceBasedObject(Object caller,
-                                                Class clazz,
-                                                Hashtable instanceMethodTable)
+                                                Class<?> clazz,
+                                                Hashtable<?, ?> instanceMethodTable)
     {
         String className = clazz.getName();
         Object toCallOn = null;
@@ -1768,7 +1769,7 @@ public class UsefulOperations
      * @return The instance name to be used on the class with the supplied fully
      *         qualified <code>className</code>.
      */
-    private static String getInstanceMethodName(String className, Hashtable instanceMethodTable)
+    private static String getInstanceMethodName(String className, Hashtable<?, ?> instanceMethodTable)
     {
         String methodName = (String) instanceMethodTable.get(className);
         return (methodName == null) ? DEFAULT_INSTANCE_METHOD_NAME : methodName;
@@ -1786,7 +1787,7 @@ public class UsefulOperations
      * 
      * @return the hashtable of names to values.
      */
-    public static Hashtable produceNameValueMap(Object caller, String nameValueMap)
+    public static Hashtable<String, String> produceNameValueMap(Object caller, String nameValueMap)
             throws CreationException
     {
         return produceNameValueMap(caller, nameValueMap, SEPARATORS, CARET);
@@ -1808,12 +1809,12 @@ public class UsefulOperations
      * 
      * @return the hashtable of names to values.
      */
-    public static Hashtable produceNameValueMap(Object caller,
+    public static Hashtable<String, String> produceNameValueMap(Object caller,
                                                 String nameValueMap,
                                                 String interNvpSeparators,
                                                 String intraNvpSeparators) throws CreationException
     {
-        Hashtable map = new Hashtable();
+        Hashtable<String, String> map = new Hashtable<String, String>();
         if (nameValueMap == null)
         {
             return map;
@@ -1848,7 +1849,7 @@ public class UsefulOperations
      * @return The first Class in a stack trace not matching the supplied
      *         strings.
      */
-    public static final Class getCallerClass(String[] exclusions)
+    public static final Class<?> getCallerClass(String[] exclusions)
     {
         StackTraceElement stack[] = (new Throwable()).getStackTrace();
 
@@ -1901,7 +1902,7 @@ public class UsefulOperations
      * 
      * @return The common ancestor.
      */
-    public static Class getCommonAncestor(Class first, Class second)
+    public static Class<?> getCommonAncestor(Class<?> first, Class<?> second)
     {
         if (first.isAssignableFrom(second))
         {
@@ -1914,7 +1915,7 @@ public class UsefulOperations
         else
         {
             // find common ancestor
-            Class firstSuper = first.getSuperclass();
+            Class<?> firstSuper = first.getSuperclass();
             return getCommonAncestor(firstSuper, second);
         }
     }
@@ -1962,10 +1963,10 @@ public class UsefulOperations
         Object[] first = new String[]{"first", "second", "third", "fourth", "fifth"};
         Object[] second = new String[]{"first", "second", "fifth", "sixth"};
 
-        Vector firstList = arrayToVector(first);
-        Vector secndList = arrayToVector(second);
+        Vector<Object> firstList = arrayToVector(first);
+        Vector<Object> secndList = arrayToVector(second);
 
-        Vector diff = getDifference(secndList, firstList);
+        Vector<Object> diff = getDifference(secndList, firstList);
         System.out.println("Difference between [" + firstList + "] and [" + secndList + "] is "
                 + diff);
 

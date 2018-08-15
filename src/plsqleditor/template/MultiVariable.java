@@ -13,7 +13,7 @@ import org.eclipse.jface.text.templates.TemplateVariable;
  */
 public class MultiVariable extends TemplateVariable
 {
-    private final Map myValueMap   = new HashMap();
+    private final Map<Object, String[]> myValueMap   = new HashMap<Object, String[]>();
     private Object    mySet;
     private Object    myDefaultKey = null;
 

@@ -21,7 +21,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.resource.ImageRegistry;
-
+import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import org.eclipse.debug.ui.DebugUITools;
@@ -33,19 +33,20 @@ import org.eclipse.debug.ui.IDebugModelPresentation;
  * To change the template for this generated type comment go to
  * Window>Preferences>Java>Code Generation>Code and Comments
  */
-public class PlsqlMarkerAnnotation extends MarkerAnnotation {
+public class PlsqlMarkerAnnotation extends MarkerAnnotation {//implements IAnnotationPresentation {
 
 
 	private static final int NO_IMAGE= 0;
+	/*
 	private static final int ORIGINAL_MARKER_IMAGE= 1;
 	private static final int QUICKFIX_IMAGE= 2;
 	private static final int QUICKFIX_ERROR_IMAGE= 3;
 	private static final int OVERLAY_IMAGE= 4;
-	private static final int GRAY_IMAGE= 5;
+	private static final int GRAY_IMAGE= 5;*/
 	private static final int BREAKPOINT_IMAGE= 6;
 
 	
-	private static Image fgQuickFixErrorImage;
+	//private static Image fgQuickFixErrorImage;
 	private static ImageRegistry fgGrayMarkersImageRegistry;
 
 	private IDebugModelPresentation fPresentation;
@@ -126,9 +127,6 @@ public class PlsqlMarkerAnnotation extends MarkerAnnotation {
 	public boolean isTemporary() {
 		return false;
 	}
-
-	
-	
 
 	/*
 	 * @see MarkerAnnotation#getImage(Display)

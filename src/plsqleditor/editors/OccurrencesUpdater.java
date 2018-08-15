@@ -269,7 +269,7 @@ public class OccurrencesUpdater implements ISelectionChangedListener
 
 		if (model != null) // viewer's AnnotationModel may already be disposed
 		{
-			model.replaceAnnotations(array, Collections.EMPTY_MAP);
+			model.replaceAnnotations(array, Collections.emptyMap());
 		}
 
 		annotations.clear();

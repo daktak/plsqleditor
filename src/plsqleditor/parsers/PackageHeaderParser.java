@@ -72,7 +72,7 @@ public class PackageHeaderParser extends AbstractPlSqlParser
     public int parseBody(int currentLineOffset,
                             IDocument document,
                             BufferedReader file,
-                            List segments,
+                            List<Segment> segments,
                             Segment packageSegment) throws IOException, BadLocationException
     {
         StringBuffer comments = new StringBuffer();
@@ -93,7 +93,7 @@ public class PackageHeaderParser extends AbstractPlSqlParser
             packageName = "unknownPackage";
         }
 
-        List segmentsToAddTo = segments;
+        List<Segment> segmentsToAddTo = segments;
         if (packageSegment != null)
         {
             segmentsToAddTo = packageSegment.getContainedSegments();
@@ -205,7 +205,7 @@ public class PackageHeaderParser extends AbstractPlSqlParser
         return currentLineOffset;
     }
 
-    private void resolvePragmas(List segmentsToAddTo)
+    private void resolvePragmas(List<Segment> segmentsToAddTo)
     {
         for (int i = segmentsToAddTo.size() - 1; i >= 0; i--)
         {

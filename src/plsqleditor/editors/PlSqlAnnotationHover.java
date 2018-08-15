@@ -91,7 +91,7 @@ public class PlSqlAnnotationHover implements IAnnotationHover
 
         List<Annotation> exact = new ArrayList<Annotation>();
 
-        Iterator e = model.getAnnotationIterator();
+        Iterator<?> e = model.getAnnotationIterator();
         while (e.hasNext())
         {
             Annotation annotation = (Annotation) e.next();

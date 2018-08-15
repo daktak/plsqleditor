@@ -28,7 +28,7 @@ public class PlSqlParserManager
     private PackageHeaderAndBodyParser myPackageHeaderAndBodyParser = new PackageHeaderAndBodyParser();
     private PlSqlParser                mySqlScriptParser            = myPackageHeaderParser; //new FullGrammarParser();
 
-    private Comparator                 thePositionComparator        = new Comparator()
+    private Comparator<Object>                 thePositionComparator        = new Comparator<Object>()
                                                                     {
                                                                         public int compare(Object o1,
                                                                                            Object o2)
@@ -190,20 +190,20 @@ public class PlSqlParserManager
         }
     }
 
-    public Segment findNextSegment(List segments, int offset)
+    public Segment findNextSegment(List<?> segments, int offset)
     {
         return findNextSegment(segments, offset, true);
     }
 
-    public Segment findNextSegment(List segments, int offset, boolean goDeep)
+    public Segment findNextSegment(List<?> segments, int offset, boolean goDeep)
     {
         Segment foundSegment = null;
-        for (Iterator it = segments.iterator(); it.hasNext();)
+        for (Iterator<?> it = segments.iterator(); it.hasNext();)
         {
             Segment s = (Segment) it.next();
             if (goDeep)
             {
-                List containedSegments = s.getContainedSegments();
+                List<?> containedSegments = s.getContainedSegments();
                 foundSegment = findNextSegment(containedSegments, offset);
                 if (foundSegment != null)
                 {
@@ -219,7 +219,7 @@ public class PlSqlParserManager
         return foundSegment;
     }
 
-    public Segment findPreviousSegment(List segments,
+    public Segment findPreviousSegment(List<?> segments,
                                        int offset,
                                        boolean goDeep,
                                        boolean useInternal)
@@ -246,16 +246,16 @@ public class PlSqlParserManager
      *            within the supplied segments list.
      * @return
      */
-    public Segment findPreviousSegment(List segments, int offset, boolean goDeep, boolean[] success, boolean isParentPackage)
+    public Segment findPreviousSegment(List<?> segments, int offset, boolean goDeep, boolean[] success, boolean isParentPackage)
     {
         if (segments.isEmpty())
         {
             return null;
         }
-        TreeSet positionSortedSet = new TreeSet(thePositionComparator);
+        TreeSet<Object> positionSortedSet = new TreeSet<Object>(thePositionComparator);
         positionSortedSet.addAll(segments);
         Segment previousSegment = null;
-        for (Iterator it = positionSortedSet.iterator(); it.hasNext();)
+        for (Iterator<?> it = positionSortedSet.iterator(); it.hasNext();)
         {
             Segment s = (Segment) it.next();
             if (s.getType() == SegmentType.Code)
@@ -277,7 +277,7 @@ public class PlSqlParserManager
             }
             if (goDeep)
             {
-                List containedSegments = s.getContainedSegments();
+                List<?> containedSegments = s.getContainedSegments();
                 Segment foundSegment = findPreviousSegment(containedSegments,
                                                            offset,
                                                            goDeep,
@@ -317,7 +317,7 @@ public class PlSqlParserManager
      * 
      * @return
      */
-    public Segment findNamedSegment(List segments, String identifier, int documentOffset)
+    public Segment findNamedSegment(List<?> segments, String identifier, int documentOffset)
     {
         Segment foundSegment = null;
         // TODO fix the last false in the next line - it breaks the loading
@@ -325,7 +325,7 @@ public class PlSqlParserManager
         Segment firstFoundSegment = findPreviousSegment(segments, documentOffset, true, false);
         if (firstFoundSegment != null)
         {
-            List containedSegments = firstFoundSegment.getContainedSegments();
+            List<?> containedSegments = firstFoundSegment.getContainedSegments();
             Segment secondFoundSegment = findNamedSegment(containedSegments, identifier, true);
             if (secondFoundSegment != null)
             {
@@ -363,15 +363,15 @@ public class PlSqlParserManager
         return foundSegment;
     }
 
-    public Segment findNamedSegment(List segments, String identifier, boolean goDeep)
+    public Segment findNamedSegment(List<?> segments, String identifier, boolean goDeep)
     {
         Segment foundSegment = null;
-        for (Iterator it = segments.iterator(); it.hasNext();)
+        for (Iterator<?> it = segments.iterator(); it.hasNext();)
         {
             Segment s = (Segment) it.next();
             if (goDeep)
             {
-                List containedSegments = s.getContainedSegments();
+                List<?> containedSegments = s.getContainedSegments();
                 foundSegment = findNamedSegment(containedSegments, identifier, true);
                 if (foundSegment != null)
                 {
@@ -389,7 +389,7 @@ public class PlSqlParserManager
         return foundSegment;
     }
 
-    public Segment findNextMethod(List segments, int offset)
+    public Segment findNextMethod(List<?> segments, int offset)
     {
         Segment foundSegment = findNextSegment(segments, offset);
         if (foundSegment != null)

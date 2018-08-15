@@ -55,7 +55,7 @@ public class GenerateHeaderAction implements IObjectActionDelegate
                     if (selection instanceof IStructuredSelection)
                     {
                         IStructuredSelection structuredSelection = (IStructuredSelection) selection;
-                        for (Iterator it = structuredSelection.iterator();it.hasNext();)
+                        for (Iterator<?> it = structuredSelection.iterator();it.hasNext();)
                         {
                             Object o = it.next();
                             if (o instanceof IFile)

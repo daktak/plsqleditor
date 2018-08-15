@@ -4,9 +4,9 @@ import java.io.IOException;
 
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
@@ -118,5 +118,6 @@ public class TemplateEditorUI
     public void savePluginPreferences()
     {
         PlsqleditorPlugin.getDefault().savePluginPreferences();
+        //InstanceScope.getNode(PlsqleditorPlugin.getDefault().toString()).flush();
     }
 }

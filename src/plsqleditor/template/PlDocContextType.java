@@ -1,16 +1,9 @@
 package plsqleditor.template;
 
-import java.util.List;
-
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
-import org.eclipse.jface.text.templates.TemplateContext;
-import org.eclipse.jface.text.templates.TemplateVariableResolver;
-
-import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.editors.PlSqlEditorMessages;
-import plsqleditor.parsers.Segment;
 
 
 

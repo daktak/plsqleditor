@@ -48,7 +48,7 @@ public class PlSqlTextHover implements ITextHover
                     int documentOffset = hoverRegion.getOffset();
                     String searchString = doc.get(documentOffset, hoverRegion.getLength());
 
-                    List segments = getMatchingSegments(searchString, doc, documentOffset);
+                    List<Segment> segments = getMatchingSegments(searchString, doc, documentOffset);
                     
                     if (segments.size() > 0)
                     {
@@ -63,16 +63,16 @@ public class PlSqlTextHover implements ITextHover
                             if (t != null)
                             {
                                 sb.append("Table ").append(t.getName());
-                                List cols = t.getColumns();
+                                List<?> cols = t.getColumns();
                                 int maxLength = 0;
-                                for (Iterator it = cols.iterator(); it.hasNext();)
+                                for (Iterator<?> it = cols.iterator(); it.hasNext();)
                                 {
                                     Column col = (Column) it.next();
                                     int length = col.getName().length();
                                     maxLength = maxLength > length ? maxLength : length;
                                 }
 
-                                for (Iterator it = cols.iterator(); it.hasNext();)
+                                for (Iterator<?> it = cols.iterator(); it.hasNext();)
                                 {
                                     StringBuffer tmpSb = new StringBuffer(PRE_SPACES);
                                     Column col = (Column) it.next();
@@ -221,9 +221,9 @@ public class PlSqlTextHover implements ITextHover
         return toReturn;
     }
 
-    private List getMatchingSegments(String fullyQualifiedSegmentName, IDocument doc, int offset)
+    private List<Segment> getMatchingSegments(String fullyQualifiedSegmentName, IDocument doc, int offset)
     {
-        List toReturn = new ArrayList();
+        List<Segment> toReturn = new ArrayList<Segment>();
         String lastSegmentName = fullyQualifiedSegmentName.toUpperCase();
         
         // Fix for Support Request 1418289 - "Describe" right-click

@@ -45,7 +45,7 @@ public class XMLUtilities
 
 	public String[] getIncludeEntries(IProject project, boolean replaceVariables)
 	{
-		List includes = new ArrayList();
+		List<String> includes = new ArrayList<String>();
 		try
 		{
 
@@ -68,9 +68,9 @@ public class XMLUtilities
 				// Get root element
 				Element root = doc.getRootElement();
 
-				List entries = root.getChildren("includepathentry");
+				List<?> entries = root.getChildren("includepathentry");
 
-				Iterator iter = entries.iterator();
+				Iterator<?> iter = entries.iterator();
 
 				while (iter.hasNext())
 				{

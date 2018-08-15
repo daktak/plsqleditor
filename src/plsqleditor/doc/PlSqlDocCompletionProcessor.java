@@ -42,7 +42,7 @@ public class PlSqlDocCompletionProcessor implements IContentAssistProcessor
 
     private IDocument                myCurrentDoc;
 
-    private List                     myCurrentSegments;
+    private List<Segment>            myCurrentSegments;
     final String                     paramString      = "@param";
     final String                     throwsString     = "@throws";
     final String[]                   linkStrings      = new String[]{"{@link", "@see", "@refer"};
