@@ -41,7 +41,7 @@ public abstract class ScriptExecutor
      *
      * @return execution results
      */
-    public final ProcessOutput run(List args) throws CoreException
+    public final ProcessOutput run(List<?> args) throws CoreException
     {
         return run("", args);
     }
@@ -66,7 +66,7 @@ public abstract class ScriptExecutor
      *
      * @return execution results
      */
-    public final ProcessOutput run(String text, List additionalArgs) throws CoreException
+    public final ProcessOutput run(String text, List<?> additionalArgs) throws CoreException
     {
         File workingDir = getWorkingDir();
 
@@ -74,7 +74,7 @@ public abstract class ScriptExecutor
             getCharsetName(), ignoresBrokenPipe());
         try
         {
-            List cmdArgs = new ArrayList(1);
+            List<String> cmdArgs = new ArrayList<String>(1);
             cmdArgs.add(getExecutable());
             cmdArgs.addAll(getCommandLineOpts(additionalArgs));
 
@@ -133,9 +133,9 @@ public abstract class ScriptExecutor
      *
      * @return complete list of command line arguments
      */
-    protected List getCommandLineOpts(List additionalOptions)
+    protected List<String> getCommandLineOpts(List<?> additionalOptions)
     {
-        return (additionalOptions != null) ? additionalOptions : Collections.EMPTY_LIST;
+        return (additionalOptions != null) ? (List) additionalOptions : Collections.EMPTY_LIST;
     }
 
     /**
