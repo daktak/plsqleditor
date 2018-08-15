@@ -8,9 +8,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.text.TextUtilities;
 
 import plsqleditor.PlsqleditorPlugin;
@@ -41,7 +41,7 @@ public abstract class ScriptExecutor
      *
      * @return execution results
      */
-    public final ProcessOutput run(List<String> args) throws CoreException
+    public final ProcessOutput run(List args) throws CoreException
     {
         return run("", args);
     }
@@ -66,7 +66,7 @@ public abstract class ScriptExecutor
      *
      * @return execution results
      */
-    public final ProcessOutput run(String text, List<String> additionalArgs) throws CoreException
+    public final ProcessOutput run(String text, List additionalArgs) throws CoreException
     {
         File workingDir = getWorkingDir();
 
@@ -74,7 +74,7 @@ public abstract class ScriptExecutor
             getCharsetName(), ignoresBrokenPipe());
         try
         {
-            List<String> cmdArgs = new ArrayList<String>(1);
+            List cmdArgs = new ArrayList(1);
             cmdArgs.add(getExecutable());
             cmdArgs.addAll(getCommandLineOpts(additionalArgs));
 
@@ -133,9 +133,9 @@ public abstract class ScriptExecutor
      *
      * @return complete list of command line arguments
      */
-    protected List<String> getCommandLineOpts(List<String> additionalOptions)
+    protected List getCommandLineOpts(List additionalOptions)
     {
-        return (additionalOptions != null) ? (List<String>) additionalOptions : Collections.emptyList();
+        return (additionalOptions != null) ? additionalOptions : Collections.EMPTY_LIST;
     }
 
     /**
@@ -214,7 +214,7 @@ public abstract class ScriptExecutor
                 URL url =
                     new URL(PlsqleditorPlugin.getDefault().getBundle().getEntry("/"),
                         getScriptDir());
-                URL workingURL = FileLocator.toFileURL(url);
+                URL workingURL = Platform.resolve(url);
                 return new File(workingURL.getPath());
             }
             return new File(scriptsLocation.getParentFile(), getScriptDir());
