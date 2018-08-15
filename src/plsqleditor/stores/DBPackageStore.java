@@ -165,7 +165,7 @@ public class DBPackageStore
 	protected SortedSet getObjectsByVariables(String sql, Object[] objects,
 			Object[] dummy) throws SQLException
 	{
-		SortedSet toReturn = new TreeSet();
+		SortedSet toReturn = new TreeSet<String>();
 		ResultSet rs = getResultSetByVariables(sql, objects);
 		Class returnClass = dummy.getClass().getComponentType();
 		while (rs.next())
@@ -729,7 +729,7 @@ public class DBPackageStore
 				List resultingList = getObjectSetsByVariables(allPackagesSQL,
 						new Object[] { schemaName, schemaName, schemaName },
 						new Object[] { new String[0], new String[0] });
-				packageList = new TreeSet();
+				packageList = new TreeSet<String>();
 				for (Iterator it = resultingList.iterator(); it.hasNext();)
 				{
 					Object[] data = (Object[]) it.next();
@@ -757,7 +757,7 @@ public class DBPackageStore
 				List resultingList = getObjectSetsByVariables(allPackagesSQL,
 						new Object[] { schemaName, schemaName, schemaName },
 						new Object[] { new String[0], new String[0] });
-				newPackageList = new TreeSet();
+				newPackageList = new TreeSet<String>();
 				for (Iterator it = resultingList.iterator(); it.hasNext();)
 				{
 					Object[] data = (Object[]) it.next();

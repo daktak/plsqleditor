@@ -140,6 +140,7 @@ public class ConnectionRegistry
                         sb.append(line);
                     }
                 }
+                br.close();
                 String buffer = sb.toString();
                 List<ConnectionDetails> details = new ArrayList<ConnectionDetails>();
                 int location = 0;

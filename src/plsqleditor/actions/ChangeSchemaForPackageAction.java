@@ -38,7 +38,7 @@ public class ChangeSchemaForPackageAction extends SelectedTextAction
 
             PlsqleditorPlugin plugin = PlsqleditorPlugin.getDefault();
             PackageStore store = plugin.getPackageStore(plugin.getProject());
-            List segments = plugin.getCurrentSegments(doc);
+            List<Segment> segments = plugin.getCurrentSegments(doc);
             
             String packageName = "";
             if (segments != null && segments.size() > 0)

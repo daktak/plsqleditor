@@ -41,7 +41,8 @@ public class ExecuteScratchSqlAction extends SelectedTextAction
         super(bundle, prefix, editor);
     }
 
-    public void operateOn(IDocument doc, ITextSelection selection)
+    @SuppressWarnings("unused")
+	public void operateOn(IDocument doc, ITextSelection selection)
     {
         Shell shell = new Shell();
 

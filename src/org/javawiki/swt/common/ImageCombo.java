@@ -104,10 +104,7 @@ public final class ImageCombo extends Composite {
  */
 public ImageCombo (Composite parent, int style) {
     super (parent, style = checkStyle (style));
-    
-    int textStyle = SWT.SINGLE;
-    if ((style & SWT.READ_ONLY) != 0) textStyle |= SWT.READ_ONLY;
-    if ((style & SWT.FLAT) != 0) textStyle |= SWT.FLAT;
+
     text = new Text (this, SWT.NONE);
     int arrowStyle = SWT.ARROW | SWT.DOWN;
     if ((style & SWT.FLAT) != 0) arrowStyle |= SWT.FLAT;
@@ -417,7 +414,6 @@ void dropDown (boolean drop) {
     }
 
     if (getShell() != popup.getParent ()) {
-        TableItem[] items = table.getItems ();
         int selectionIndex = table.getSelectionIndex ();
         table.removeListener (SWT.Dispose, listener);
         popup.dispose();
@@ -850,7 +846,6 @@ void listEvent (Event event) {
     switch (event.type) {
         case SWT.Dispose:
             if (getShell () != popup.getParent ()) {
-                TableItem[] items = table.getItems ();
                 int selectionIndex = table.getSelectionIndex ();
                 popup = null;
                 table = null;

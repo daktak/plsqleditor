@@ -21,11 +21,11 @@ import org.eclipse.jface.text.rules.Token;
  */
 public class KeywordsRule implements IRule
 {
-    private HashMap myKeywords;
+    private HashMap<String, IToken> myKeywords;
 
     public KeywordsRule(IToken defaultToken)
     {
-        myKeywords = new HashMap();
+        myKeywords = new HashMap<String, IToken>();
     }
 
     public void addKeyword(IToken token, String word)
