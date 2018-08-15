@@ -30,7 +30,8 @@ public class ArrayPlSqlType extends PlSqlType
      * This field indicates the index type of the array. By default it is a 
      * PlSqlType.NUMBER.
      */
-    private PlSqlType myIndexType = PlSqlTypeManager.getBaseType("BINARY_INTEGER");
+    @SuppressWarnings("unused")
+	private PlSqlType myIndexType = PlSqlTypeManager.getBaseType("BINARY_INTEGER");
 
     /**
      * This creates the ArrayPlSqlType.
