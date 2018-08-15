@@ -60,13 +60,13 @@ public class PackageHeaderAndBodyParser extends AbstractPlSqlParser
     public int parseBody(int currentLineOffset,
                             IDocument document,
                             BufferedReader file,
-                            List segments,
+                            List<Segment> segments,
                             Segment packageSegment) throws IOException, BadLocationException
     {
         myIsInHeaderSection = true;
         currentLineOffset = myHeaderParser.parseBody(currentLineOffset, document, file, segments, packageSegment);
         myIsInHeaderSection = false;
-        List secondSegments = new ArrayList();
+        List<Segment> secondSegments = new ArrayList<Segment>();
         String pkgSegName = "unknown";
         if (packageSegment != null)
         {

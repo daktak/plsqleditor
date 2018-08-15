@@ -12,7 +12,7 @@ package plsqleditor.actions;
  * 
  * @author Toby Zines
  */
-public class OpenLocationType implements Comparable
+public class OpenLocationType implements Comparable<Object>
 {
     private int myId;
     

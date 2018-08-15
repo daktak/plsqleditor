@@ -47,14 +47,14 @@ public class PlSqlReconcilingStrategy
      */
     protected int               cNextPos     = 0;
 
-    Map                         myPositionsTable;
+    Map<String, ArrayList>                         myPositionsTable;
     private int[]               myTodoIndices;
 
     public PlSqlReconcilingStrategy()
     {
-        myPositionsTable = new HashMap();
-        myPositionsTable.put(FOLDING_TAGS, new ArrayList());
-        myPositionsTable.put(TODO_TAGS, new ArrayList());
+        myPositionsTable = new HashMap<String, ArrayList>();
+        myPositionsTable.put(FOLDING_TAGS, new ArrayList<Object>());
+        myPositionsTable.put(TODO_TAGS, new ArrayList<Object>());
 
         myTodoIndices = new int[TaskListIdentityStore.instance().getMarkers().size()];
     }
@@ -134,9 +134,9 @@ public class PlSqlReconcilingStrategy
      */
     protected void calculatePositions()
     {
-        for (Iterator it = myPositionsTable.values().iterator(); it.hasNext();)
+        for (Iterator<ArrayList> it = myPositionsTable.values().iterator(); it.hasNext();)
         {
-            List list = (List) it.next();
+            List list = it.next();
             list.clear();
         }
         cNextPos = fOffset;
@@ -156,9 +156,9 @@ public class PlSqlReconcilingStrategy
             {
             	if (editor != null)
             	{
-	                List positions = (List) myPositionsTable.get(FOLDING_TAGS);
+	                List<Position> positions = myPositionsTable.get(FOLDING_TAGS);
 	                editor.updateFoldingStructure(positions);
-	                positions = (List) myPositionsTable.get(TODO_TAGS);
+	                positions = myPositionsTable.get(TODO_TAGS);
 	                editor.updateTodoTags(positions);
             	}
             }
@@ -288,7 +288,7 @@ public class PlSqlReconcilingStrategy
 
     protected void emitPosition(int startOffset, int length, String type)
     {
-        List positionsList = (List) myPositionsTable.get(type);
+        List<Position> positionsList = myPositionsTable.get(type);
         if (positionsList != null)
         {
             positionsList.add(new Position(startOffset, length));

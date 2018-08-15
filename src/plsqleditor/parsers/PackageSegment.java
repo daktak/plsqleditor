@@ -14,7 +14,7 @@ public class PackageSegment extends Segment implements Cloneable
     /**
      * This is the list of segments contained in this package.
      */
-    private List myContainedSegments = new ArrayList();
+    private List<Segment> myContainedSegments = new ArrayList<Segment>();
 
     /**
      * This is the name of the schema that owns this packageSegment
@@ -38,8 +38,8 @@ public class PackageSegment extends Segment implements Cloneable
         clone.myReturnType = myReturnType;
         clone.myLines = myLines;
         clone.myParent = myParent;
-        clone.myContainedSegments = new ArrayList();
-        for (Iterator it = myContainedSegments.iterator(); it.hasNext();)
+        clone.myContainedSegments = new ArrayList<Segment>();
+        for (Iterator<Segment> it = myContainedSegments.iterator(); it.hasNext();)
         {
             Segment segment = (Segment) it.next();
             Segment segClone = (Segment) segment.clone();

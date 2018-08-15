@@ -138,7 +138,7 @@ public class PackageDetails implements Cloneable
 
             m = locsPattern.matcher(locations);
             int currentLoc = 0;
-            List locationList = new ArrayList();
+            List<PackageLocation> locationList = new ArrayList<PackageLocation>();
             while (m.find(currentLoc))
             {
                 String loc = m.group(1);

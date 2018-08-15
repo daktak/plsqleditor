@@ -4,7 +4,7 @@ import java.util.ArrayList;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
-import org.eclipse.jface.text.Assert;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextPresentationListener;
 import org.eclipse.jface.text.information.IInformationPresenter;
@@ -405,10 +405,9 @@ public class PlSqlSourceViewer extends ProjectionViewer implements IPropertyChan
      */
     public void prependTextPresentationListener(ITextPresentationListener listener)
     {
-
         Assert.isNotNull(listener);
 
-        if (fTextPresentationListeners == null) fTextPresentationListeners = new ArrayList();
+        if (fTextPresentationListeners == null) fTextPresentationListeners = new ArrayList<ITextPresentationListener>();
 
         fTextPresentationListeners.remove(listener);
         fTextPresentationListeners.add(0, listener);

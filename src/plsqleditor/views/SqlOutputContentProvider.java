@@ -23,7 +23,7 @@ public class SqlOutputContentProvider implements IStructuredContentProvider
     private static String[]                 DEFAULT_TITLES   = new String[]{"Message"};
     private static SqlResult                DEFAULT_RESULT;
     private String[]                        myTitles         = DEFAULT_TITLES;
-    private List                            myElementList;
+    private List<SqlResult>                            myElementList;
 
     private Object[]                        myElements       = new Object[]{DEFAULT_RESULT};
     private Viewer                          myViewer;
@@ -73,7 +73,7 @@ public class SqlOutputContentProvider implements IStructuredContentProvider
     {
         setupTitles(rs);
         setQueryString(rs.getElapsedTime() / 1000 + "ms elapsed: " + queryString);
-        myElementList = new ArrayList();
+        myElementList = new ArrayList<SqlResult>();
         next(false, true);
     }
 

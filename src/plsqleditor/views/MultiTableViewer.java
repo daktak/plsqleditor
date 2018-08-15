@@ -11,6 +11,7 @@ import org.eclipse.jface.viewers.ICellModifier;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ILazyContentProvider;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.ITableColorProvider;
 import org.eclipse.jface.viewers.ITableFontProvider;
@@ -458,10 +459,10 @@ public class MultiTableViewer extends StructuredViewer
      * 
      * @see org.eclipse.jface.viewers.StructuredViewer#getSelectionFromWidget()
      */
-    protected List getSelectionFromWidget()
+    protected List<Object> getSelectionFromWidget()
     {
         Widget[] items = getTable().getSelection();
-        ArrayList list = new ArrayList(items.length);
+        ArrayList<Object> list = new ArrayList<Object>(items.length);
         for (int i = 0; i < items.length; i++)
         {
             Widget item = items[i];

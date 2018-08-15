@@ -33,7 +33,7 @@ public class MarkerUtilities
 
     //~ Methods
 
-    public void createMarker(IResource resource, String type, Map attributes)
+    public void createMarker(IResource resource, String type, Map<String, ?> attributes)
     {
         assert attributes != null;
 
@@ -78,7 +78,7 @@ public class MarkerUtilities
 
         if (markers.length == 0) { return EMPTY_ARRAY; }
 
-        ArrayList list = new ArrayList();
+        ArrayList<IMarker> list = new ArrayList<IMarker>();
         for (int i = 0; i < markers.length; i++)
         {
             Integer markerLineNumber = (Integer) getAttribute(markers[i], IMarker.LINE_NUMBER);
@@ -123,12 +123,12 @@ public class MarkerUtilities
         }
     }
 
-    public void setLineNumber(Map attributes, int lineNumber)
+    public void setLineNumber(Map<String, Integer> attributes, int lineNumber)
     {
         attributes.put(IMarker.LINE_NUMBER, new Integer(lineNumber));
     }
 
-    public void setMessage(Map attributes, String message)
+    public void setMessage(Map<String, String> attributes, String message)
     {
         attributes.put(IMarker.MESSAGE, message);
     }
@@ -136,7 +136,7 @@ public class MarkerUtilities
     /**
      * @see MarkerUtilities#setSeverity(Map, Integer)
      */
-    public void setSeverity(Map attributes, int severity)
+    public void setSeverity(Map<String, Integer> attributes, int severity)
     {
         setSeverity(attributes, new Integer(severity));
     }
@@ -150,13 +150,13 @@ public class MarkerUtilities
      *   <li>IMarker.ERROR</li>
      * </ol>
      */
-    public void setSeverity(Map attributes, Integer severity)
+    public void setSeverity(Map<String, Integer> attributes, Integer severity)
     {
         assert ((severity.intValue() >= 0) && (severity.intValue() <= 2));
         attributes.put(IMarker.SEVERITY, severity);
     }
 
-    public void setStartEnd(Map attributes, int start, int end)
+    public void setStartEnd(Map<String, Integer> attributes, int start, int end)
     {
         assert ((start >= 0) && (end >= 0));
         attributes.put(IMarker.CHAR_START, new Integer(start));

@@ -36,7 +36,7 @@ public class MovableItem
 {
     private CLabel             myContainedComponent;
     private Point              myCurrentLocation;
-    private List  myLinkedItems = new ArrayList();
+    private List<MovableItem>  myLinkedItems = new ArrayList<MovableItem>();
     private MouseTrackListener myMouseTrackListener;
     public static final Cursor HAND_CURSOR   = new Cursor(Display.getDefault(), SWT.CURSOR_HAND);
     public static final Cursor NO_CURSOR     = new Cursor(Display.getDefault(), SWT.CURSOR_NO);

@@ -89,7 +89,7 @@ public class PlSqlAnnotationHover implements IAnnotationHover
 
         if (model == null) return null;
 
-        List exact = new ArrayList();
+        List<Annotation> exact = new ArrayList<Annotation>();
 
         Iterator e = model.getAnnotationIterator();
         while (e.hasNext())

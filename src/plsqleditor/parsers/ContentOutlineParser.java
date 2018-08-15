@@ -59,7 +59,7 @@ public class ContentOutlineParser
      * @throws IOException
      * @throws BadLocationException
      */
-    public List parseBodySection(ParseType type,
+    public List<Segment> parseBodySection(ParseType type,
                                  IDocument document,
                                  int offset,
                                  int length,
@@ -69,7 +69,7 @@ public class ContentOutlineParser
         BufferedReader br = new BufferedReader(new InputStreamReader(new ByteArrayInputStream(
                 toParse.getBytes())));
         int currentLineOffset = document.getLineOfOffset(offset);
-        List segments = new ArrayList();
+        List<Segment> segments = new ArrayList<Segment>();
         PlSqlParserManager.instance().getParser(type).parseBody(currentLineOffset, document, br, segments, packageSegment);
         return segments;
     }

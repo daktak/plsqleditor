@@ -32,7 +32,7 @@ public class PlsqlHeaderGenerator
         lineSeparator = System.getProperty("line.separator");
     }
 
-    private void grabHeaderDetails(BufferedReader file, List details) throws IOException
+    private void grabHeaderDetails(BufferedReader file, List<String> details) throws IOException
     {
         String line = null;
         boolean isCommenting = false;
@@ -84,7 +84,7 @@ public class PlsqlHeaderGenerator
         }
     }
 
-    private String processWrappedComment(BufferedReader file, List header) throws IOException
+    private String processWrappedComment(BufferedReader file, List<String> header) throws IOException
     {
         String line = null;
         String tmpLine = null;
@@ -131,8 +131,8 @@ public class PlsqlHeaderGenerator
         // there is no checking, but these are the only two valid values...
         // support for feature 1448560 - header generator needs ability to specify authid
         String authIdString = null;
-        List header = new ArrayList();
-        List details = new ArrayList();
+        List<String> header = new ArrayList<String>();
+        List<String> details = new ArrayList<String>();
         String line = null;
         header.add("/*" + lineSeparator + " * Warning! This file is auto generated. "
                 + lineSeparator + " * Please do not modify this file. Modify the body instead."
@@ -189,13 +189,13 @@ public class PlsqlHeaderGenerator
             sb.append("AUTHID ").append(authIdString).append(lineSeparator);
         }
         sb.append("AS").append(lineSeparator);
-        for (Iterator it = header.iterator(); it.hasNext();)
+        for (Iterator<String> it = header.iterator(); it.hasNext();)
         {
             String hLine = (String) it.next();
             sb.append(hLine).append(lineSeparator);
         }
         sb.append(lineSeparator);
-        for (Iterator it = details.iterator(); it.hasNext();)
+        for (Iterator<String> it = details.iterator(); it.hasNext();)
         {
             String dLine = (String) it.next();
             sb.append(dLine).append(lineSeparator);
@@ -208,8 +208,8 @@ public class PlsqlHeaderGenerator
     {
         StringBuffer sb = new StringBuffer();
         boolean isInHeader = false;
-        List header = new ArrayList();
-        List pragmas = new ArrayList();
+        List<String> header = new ArrayList<String>();
+        List<Object> pragmas = new ArrayList<Object>();
         String line = null;
         boolean isPublic = true;
         boolean isHeaderComment = false; // flag denoting if this is a header
@@ -253,14 +253,14 @@ public class PlsqlHeaderGenerator
                 else if (line.matches(".*\\*/.*") && isHeaderComment)
                 {
                     header.add(line);
-                    for (Iterator it = header.iterator(); it.hasNext();)
+                    for (Iterator<String> it = header.iterator(); it.hasNext();)
                     {
                         String str = (String) it.next();
                         sb.append(str).append(lineSeparator);
                     }
                     isPublic = true;
                     isHeaderComment = false;
-                    header = new ArrayList();
+                    header = new ArrayList<String>();
                     isInHeader = false;
                 }
                 else if (!(tmpLine = line.replaceFirst("(.*)\\@see (.*)\\.(.*)",
@@ -289,7 +289,7 @@ public class PlsqlHeaderGenerator
                 {
                     isPublic = true;
                     isHeaderComment = false;
-                    header = new ArrayList();
+                    header = new ArrayList<String>();
                     isInHeader = true;
                 }
 
@@ -297,12 +297,12 @@ public class PlsqlHeaderGenerator
                 {
                     if (isPublic)
                     {
-                        for (Iterator it = header.iterator(); it.hasNext();)
+                        for (Iterator<String> it = header.iterator(); it.hasNext();)
                         {
                             String str = (String) it.next();
                             sb.append(str).append(lineSeparator);
                         }
-                        for (Iterator it = pragmas.iterator(); it.hasNext();)
+                        for (Iterator<Object> it = pragmas.iterator(); it.hasNext();)
                         {
                             String str = (String) it.next();
                             sb.append(str).append(lineSeparator);
@@ -310,8 +310,8 @@ public class PlsqlHeaderGenerator
                         sb.append(lineSeparator);
                     }
                     isPublic = true;
-                    header = new ArrayList();
-                    pragmas = new ArrayList();
+                    header = new ArrayList<String>();
+                    pragmas = new ArrayList<Object>();
                 }
                 else
                 {
@@ -326,7 +326,7 @@ public class PlsqlHeaderGenerator
             {
                 isHeaderComment = false;
                 isPublic = true;
-                header = new ArrayList();
+                header = new ArrayList<String>();
                 isInHeader = true;
                 header.add(line);
             }

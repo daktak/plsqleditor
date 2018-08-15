@@ -66,9 +66,9 @@ public class SchemaMappingPreferencePage extends PropertyPage implements Listene
 
     protected IWorkbench myWorkbench;
 
-    protected List       myImagesToDispose;
+    protected List<Image>       myImagesToDispose;
 
-    protected Map        myPackagesToImages;
+    protected Map<PackageDetails, Image>        myPackagesToImages;
 
 
     /**
@@ -116,7 +116,7 @@ public class SchemaMappingPreferencePage extends PropertyPage implements Listene
             }
         }
 
-        List locations = getLocationsAsList(newLocation);
+        List<String> locations = getLocationsAsList(newLocation);
         // Create the new type and insert it
         details = new SchemaDetails(newName, locations, newPassword);
         TableItem item = newSchemaDetails(details, i, true);
@@ -125,10 +125,10 @@ public class SchemaMappingPreferencePage extends PropertyPage implements Listene
         fillPackageDetailsTable();
     }
 
-    private List getLocationsAsList(String newLocation)
+    private List<String> getLocationsAsList(String newLocation)
     {
         StringTokenizer scanner = new StringTokenizer(newLocation, ",");
-        List locations = new ArrayList();
+        List<String> locations = new ArrayList<String>();
         while (scanner.hasMoreElements())
         {
             locations.add(scanner.nextToken());
@@ -141,8 +141,8 @@ public class SchemaMappingPreferencePage extends PropertyPage implements Listene
      */
     protected Control createContents(Composite parent)
     {
-        myImagesToDispose = new ArrayList();
-        myPackagesToImages = new HashMap(50);
+        myImagesToDispose = new ArrayList<Image>();
+        myPackagesToImages = new HashMap<PackageDetails, Image>(50);
         Font font = parent.getFont();
 
         // define container & its gridding
@@ -427,8 +427,8 @@ public class SchemaMappingPreferencePage extends PropertyPage implements Listene
         dialog.setNameEnabled(false);
         if (dialog.open() == Window.OK)
         {
-            List locations = getLocationsAsList(dialog.getLocations());
-            for (Iterator it = locations.iterator(); it.hasNext();)
+            List<String> locations = getLocationsAsList(dialog.getLocations());
+            for (Iterator<String> it = locations.iterator(); it.hasNext();)
             {
                 String loc = (String) it.next();
                 sd.addLocation(loc);
@@ -465,7 +465,7 @@ public class SchemaMappingPreferencePage extends PropertyPage implements Listene
         super.dispose();
         if (myImagesToDispose != null)
         {
-            for (Iterator e = myImagesToDispose.iterator(); e.hasNext();)
+            for (Iterator<Image> e = myImagesToDispose.iterator(); e.hasNext();)
             {
                 ((Image) e.next()).dispose();
             }
@@ -473,7 +473,7 @@ public class SchemaMappingPreferencePage extends PropertyPage implements Listene
         }
         if (myPackagesToImages != null)
         {
-            for (Iterator e = myPackagesToImages.values().iterator(); e.hasNext();)
+            for (Iterator<Image> e = myPackagesToImages.values().iterator(); e.hasNext();)
             {
                 ((Image) e.next()).dispose();
             }
@@ -568,7 +568,7 @@ public class SchemaMappingPreferencePage extends PropertyPage implements Listene
         }
         if (myPackageTable.getItemCount() > 0)
         {
-            ArrayList packageList = new ArrayList();
+            ArrayList<Object> packageList = new ArrayList<Object>();
             for (int i = 0; i < myPackageTable.getItemCount(); i++)
             {
                 packageList.add(myPackageTable.getItem(i).getData());

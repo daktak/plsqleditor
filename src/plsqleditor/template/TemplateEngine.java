@@ -30,7 +30,7 @@ public class TemplateEngine
     private static final String LINE_SELECTION = "${line_selection}";
     private static final String WORD_SELECTION = "${word_selection}";
     private TemplateContextType myContextType;
-    private ArrayList           myProposals;
+    private ArrayList<TemplateProposal>           myProposals;
 
     /**
      * This constructor creates the template engine with the supplied context type.
@@ -39,7 +39,7 @@ public class TemplateEngine
      */
     public TemplateEngine(TemplateContextType contextType)
     {
-        myProposals = new ArrayList();
+        myProposals = new ArrayList<TemplateProposal>();
         Assert.isNotNull(contextType);
         myContextType = contextType;
     }

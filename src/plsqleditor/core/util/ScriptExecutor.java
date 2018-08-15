@@ -8,9 +8,9 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ILog;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.jface.text.TextUtilities;
 
 import plsqleditor.PlsqleditorPlugin;
@@ -74,7 +74,7 @@ public abstract class ScriptExecutor
             getCharsetName(), ignoresBrokenPipe());
         try
         {
-            List cmdArgs = new ArrayList(1);
+            List<String> cmdArgs = new ArrayList<String>(1);
             cmdArgs.add(getExecutable());
             cmdArgs.addAll(getCommandLineOpts(additionalArgs));
 
@@ -133,9 +133,9 @@ public abstract class ScriptExecutor
      *
      * @return complete list of command line arguments
      */
-    protected List getCommandLineOpts(List additionalOptions)
+    protected List<String> getCommandLineOpts(List additionalOptions)
     {
-        return (additionalOptions != null) ? additionalOptions : Collections.EMPTY_LIST;
+        return (additionalOptions != null) ? additionalOptions : Collections.emptyList();
     }
 
     /**
@@ -214,7 +214,7 @@ public abstract class ScriptExecutor
                 URL url =
                     new URL(PlsqleditorPlugin.getDefault().getBundle().getEntry("/"),
                         getScriptDir());
-                URL workingURL = Platform.resolve(url);
+                URL workingURL = FileLocator.toFileURL(url);
                 return new File(workingURL.getPath());
             }
             return new File(scriptsLocation.getParentFile(), getScriptDir());
