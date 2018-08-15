@@ -27,19 +27,9 @@ public class MarkOccurrencesPreferencePage extends FieldEditorPreferencePage
 	private BooleanFieldEditor markOcc;
 
 	/*
-	 * Boolean field to determine if occurrences of variables will be marked
-	 */
-	private BooleanFieldEditor variable;
-
-	/*
 	 * Boolean field to determine if occurrences of comments will be marked
 	 */
 	private BooleanFieldEditor comment;
-
-	/*
-	 * Boolean field to determine if occurrences of numbers will be marked
-	 */
-	private BooleanFieldEditor number;
 
 	/*
 	 * Boolean field to determine if occurrences of literals will be marked
@@ -50,16 +40,6 @@ public class MarkOccurrencesPreferencePage extends FieldEditorPreferencePage
 	 * Boolean field to determine if occurrences of documentation will be marked
 	 */
 	private BooleanFieldEditor documentation;
-
-	/*
-	 * Boolean field to determine if occurrences of operators will be marked
-	 */
-	private BooleanFieldEditor operator;
-
-	/*
-	 * Boolean field to determine if occurrences of keywords will be marked
-	 */
-	private BooleanFieldEditor keyword;
 
 	/*
 	 * Boolean field to determine if occurrences should be kept when selection

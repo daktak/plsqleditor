@@ -125,7 +125,7 @@ public class MarkerUtilities
 
     public void setLineNumber(Map<String, Integer> attributes, int lineNumber)
     {
-        attributes.put(IMarker.LINE_NUMBER, new Integer(lineNumber));
+        attributes.put(IMarker.LINE_NUMBER, Integer.valueOf(lineNumber));
     }
 
     public void setMessage(Map<String, String> attributes, String message)
@@ -138,7 +138,7 @@ public class MarkerUtilities
      */
     public void setSeverity(Map<String, Integer> attributes, int severity)
     {
-        setSeverity(attributes, new Integer(severity));
+        setSeverity(attributes, Integer.valueOf(severity));
     }
 
     /**
@@ -159,14 +159,14 @@ public class MarkerUtilities
     public void setStartEnd(Map<String, Integer> attributes, int start, int end)
     {
         assert ((start >= 0) && (end >= 0));
-        attributes.put(IMarker.CHAR_START, new Integer(start));
+        attributes.put(IMarker.CHAR_START, Integer.valueOf(start));
 
         if (end == 0)
         {
             end = start;
         }
 
-        attributes.put(IMarker.CHAR_END, new Integer(end));
+        attributes.put(IMarker.CHAR_END, Integer.valueOf(end));
     }
 
     private IMarker[] findMarkers(IResource resource, String type)

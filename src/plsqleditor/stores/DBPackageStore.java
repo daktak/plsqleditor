@@ -210,7 +210,7 @@ public class DBPackageStore
 			}
 			else if (returnClass == Integer.class)
 			{
-				toReturn.add(new Integer(rs.getInt(1)));
+				toReturn.add(Integer.valueOf(rs.getInt(1)));
 			}
 		}
 		Statement s = rs.getStatement();
@@ -270,7 +270,7 @@ public class DBPackageStore
 				}
 				else if (returnClass == Integer.class)
 				{
-					retrievedData[i] = new Integer(rs.getInt(i + 1));
+					retrievedData[i] = Integer.valueOf(rs.getInt(i + 1));
 				}
 			}
 			toReturn.add(retrievedData);

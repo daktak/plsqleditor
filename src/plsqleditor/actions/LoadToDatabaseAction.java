@@ -278,14 +278,14 @@ public class LoadToDatabaseAction extends TextEditorAction
 
 			MarkerUtilities.setLineNumber(attributes, line);
 			attributes
-					.put(IMarker.PRIORITY, new Integer(IMarker.PRIORITY_HIGH));
+					.put(IMarker.PRIORITY, Integer.valueOf(IMarker.PRIORITY_HIGH));
 			MarkerUtilities.setMessage(attributes, detail.getText());
 			int severity = IMarker.SEVERITY_ERROR;
 			if (detail.getText().indexOf("Statement ignored") != -1)
 			{
 				severity = IMarker.SEVERITY_INFO;
 			}
-			attributes.put(IMarker.SEVERITY, new Integer(severity));
+			attributes.put(IMarker.SEVERITY, Integer.valueOf(severity));
 			MarkerUtilities.createMarker(file, attributes, IMarker.PROBLEM);
 		}
 		catch (CoreException e)

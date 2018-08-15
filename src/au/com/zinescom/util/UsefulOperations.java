@@ -1987,7 +1987,7 @@ public class UsefulOperations
     {
         if (number instanceof Integer)
         {
-            return new Integer(((Integer) number).intValue() - 1);
+            return Integer.valueOf(((Integer) number).intValue() - 1);
         }
         else if (number instanceof Float)
         {
@@ -2020,7 +2020,7 @@ public class UsefulOperations
     {
         if (number instanceof Integer)
         {
-            return new Integer(((Integer) number).intValue() + 1);
+            return Integer.valueOf(((Integer) number).intValue() + 1);
         }
         else if (number instanceof Float)
         {
