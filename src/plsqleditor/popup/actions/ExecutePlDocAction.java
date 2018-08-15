@@ -58,7 +58,7 @@ public class ExecutePlDocAction implements IObjectActionDelegate
                     {
                         IStructuredSelection structuredSelection = (IStructuredSelection) selection;
                         List<IFile> filelist = new ArrayList<IFile>();
-                        for (Iterator it = structuredSelection.iterator(); it.hasNext();)
+                        for (Iterator<?> it = structuredSelection.iterator(); it.hasNext();)
                         {
                             Object o = it.next();
                             if (o instanceof IFile)

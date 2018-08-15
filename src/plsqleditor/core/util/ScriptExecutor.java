@@ -41,7 +41,7 @@ public abstract class ScriptExecutor
      *
      * @return execution results
      */
-    public final ProcessOutput run(List args) throws CoreException
+    public final ProcessOutput run(List<String> args) throws CoreException
     {
         return run("", args);
     }
@@ -66,7 +66,7 @@ public abstract class ScriptExecutor
      *
      * @return execution results
      */
-    public final ProcessOutput run(String text, List additionalArgs) throws CoreException
+    public final ProcessOutput run(String text, List<String> additionalArgs) throws CoreException
     {
         File workingDir = getWorkingDir();
 
@@ -133,9 +133,9 @@ public abstract class ScriptExecutor
      *
      * @return complete list of command line arguments
      */
-    protected List<String> getCommandLineOpts(List additionalOptions)
+    protected List<String> getCommandLineOpts(List<String> additionalOptions)
     {
-        return (additionalOptions != null) ? additionalOptions : Collections.emptyList();
+        return (additionalOptions != null) ? (List<String>) additionalOptions : Collections.emptyList();
     }
 
     /**

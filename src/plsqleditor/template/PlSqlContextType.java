@@ -66,7 +66,7 @@ public class PlSqlContextType extends TemplateContextType
          */
         protected String resolve(TemplateContext context)
         {
-            List list = PlsqleditorPlugin.getDefault().getCurrentSegments(null);
+            List<?> list = PlsqleditorPlugin.getDefault().getCurrentSegments(null);
             if (list != null && list.size() > 0)
             {
                 Segment s = (Segment) list.get(0);

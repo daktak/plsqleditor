@@ -49,7 +49,7 @@ public class PackageBodyParser extends AbstractPlSqlParser
     public int parseBody(final int currentLineOffset,
                             IDocument document,
                             BufferedReader file,
-                            List segments,
+                            List<Segment> segments,
                             Segment packageSegment) throws IOException, BadLocationException
     {
         StringBuffer comments = new StringBuffer();
@@ -66,7 +66,7 @@ public class PackageBodyParser extends AbstractPlSqlParser
             packageName = "unknownPackage";
         }
 
-        List segmentsToAddTo = segments;
+        List<Segment> segmentsToAddTo = segments;
         if (packageSegment != null)
         {
             segmentsToAddTo = packageSegment.getContainedSegments();
@@ -314,7 +314,7 @@ public class PackageBodyParser extends AbstractPlSqlParser
                                    int[] currentLineOffsets,
                                    StringBuffer comments,
                                    Segment[] currentSegments,
-                                   List segmentsToAddTo,
+                                   List<Segment> segmentsToAddTo,
                                    Segment containingSegment) throws BadLocationException,
             IOException
     {
@@ -420,7 +420,7 @@ public class PackageBodyParser extends AbstractPlSqlParser
                                int[] currentLineOffsets,
                                StringBuffer comments,
                                Segment[] currentSegments,
-                               List segmentsToAddTo,
+                               List<Segment> segmentsToAddTo,
                                Segment containingSegment) throws BadLocationException, IOException
     {
         boolean isGrabbingTypes = false;
@@ -813,7 +813,7 @@ public class PackageBodyParser extends AbstractPlSqlParser
      *         <code>false</code> otherwise.
      */
     private boolean grabLocal(String line,
-                              List segments,
+                              List<Segment> segments,
                               Segment currentLocal,
                               boolean[] isReadyForNextLocal)
     {

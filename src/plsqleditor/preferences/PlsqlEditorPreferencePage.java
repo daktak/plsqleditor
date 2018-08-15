@@ -638,7 +638,7 @@ public class PlsqlEditorPreferencePage extends PreferencePage implements
 	private void initializeFields()
 	{
 
-		Iterator e = fColorButtons.keySet().iterator();
+		Iterator<?> e = fColorButtons.keySet().iterator();
 		while (e.hasNext())
 		{
 			ColorEditor c = (ColorEditor) e.next();
@@ -671,7 +671,7 @@ public class PlsqlEditorPreferencePage extends PreferencePage implements
 	{
 		fOverlayStore.propagate();
 		PlsqleditorPlugin.getDefault().savePluginPreferences();
-
+		//InstanceScope.getNode(&lt;bundleId&gt;).flush()
 		return true;
 	}
 

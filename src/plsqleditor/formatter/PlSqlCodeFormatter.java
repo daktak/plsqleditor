@@ -32,17 +32,17 @@ public class PlSqlCodeFormatter
     
     private boolean myIsAtBeginningOfLine = true;
 
-    private static final Set beginStrings;
-    private static final Set endStrings;
+    private static final Set<String> beginStrings;
+    private static final Set<String> endStrings;
     private static final String newLine;
 
     static
     {
-        beginStrings = new HashSet();
+        beginStrings = new HashSet<String>();
         beginStrings.add("BEGIN");
         beginStrings.add("PROCEDURE");
         beginStrings.add("FUNCTION");
-        endStrings = new HashSet();
+        endStrings = new HashSet<String>();
         endStrings.add("END");
         
         newLine = System.getProperty("line.separator");

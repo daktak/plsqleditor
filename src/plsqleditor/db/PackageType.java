@@ -8,7 +8,7 @@ package plsqleditor.db;
  * @author Toby Zines
  *
  */
-public class PackageType implements Comparable
+public class PackageType implements Comparable<Object>
 {
     private int myId;
     

@@ -8,7 +8,7 @@ package plsqleditor.parsers;
  * @author Toby Zines
  *
  */
-public class ParseType implements Comparable
+public class ParseType implements Comparable<Object>
 {
     private int myId;
     

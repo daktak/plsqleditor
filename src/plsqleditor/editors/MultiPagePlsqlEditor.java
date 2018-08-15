@@ -113,7 +113,6 @@ public class MultiPagePlsqlEditor extends MultiPageEditorPart implements
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(this);
 	}
 	
-	@SuppressWarnings("rawtypes")
 	public Object getAdapter(Class adapter)
 	{
 		if (IContentOutlinePage.class.equals(adapter))

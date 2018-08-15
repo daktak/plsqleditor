@@ -8,7 +8,7 @@ package plsqleditor.stores;
  * 
  * @author Toby Zines
  */
-public class PersistenceType implements Comparable
+public class PersistenceType implements Comparable<Object>
 {
     private int myId;
     

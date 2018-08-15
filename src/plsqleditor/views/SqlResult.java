@@ -21,7 +21,7 @@ public class SqlResult
     private String[] myColumnNames;
     
     /** The map of column names to values for this row. */
-    private Map      myValues;
+    private Map<Object, Object>      myValues;
 
     /**
      * This constructor creates the result, starting it out as an empty row that knows the columns
@@ -32,7 +32,7 @@ public class SqlResult
     public SqlResult(String[] columnNames)
     {
         myColumnNames = columnNames;
-        myValues = new HashMap();
+        myValues = new HashMap<Object, Object>();
     }
 
     /**

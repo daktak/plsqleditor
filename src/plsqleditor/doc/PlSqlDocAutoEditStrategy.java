@@ -139,7 +139,7 @@ public class PlSqlDocAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                 Segment foundSegment = null;
                 // TODO should figure out whether this is a package body, package header or plain
                 // sql
-                List segments = theParser.parseBodySection(ParseType.Package_Body,
+                List<Segment> segments = theParser.parseBodySection(ParseType.Package_Body,
                                                            document,
                                                            command.offset,
                                                            foundIndex == -1
@@ -154,7 +154,7 @@ public class PlSqlDocAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
                     if ((foundIndex == -1 || foundSegment.getPosition().getOffset() < foundIndex))
                     {
                         toAppend.append(preSpaces).append("*");
-                        for (Iterator it = foundSegment.getParameterList().iterator(); it.hasNext();)
+                        for (Iterator<?> it = foundSegment.getParameterList().iterator(); it.hasNext();)
                         {
                             Segment parameter = (Segment) it.next();
                             toAppend.append(" @param ");

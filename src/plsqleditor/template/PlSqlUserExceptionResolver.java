@@ -20,7 +20,7 @@ public class PlSqlUserExceptionResolver extends TemplateVariableResolver
         // TODO replace the following line with a preferences lookup
         String[] proposals = new String[]{"NO_DATA_FOUND", "TOO_MANY_ROWS", "OTHERS"};
 
-        Arrays.sort(proposals, new Comparator()
+        Arrays.sort(proposals, new Comparator<Object>()
         {
 
             public int compare(Object o1, Object o2)

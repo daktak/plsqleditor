@@ -577,7 +577,7 @@ public class PlSqlEditor extends TextEditor
 		addAction(menu, "PLSQL", PLSQLEDITOR_CHANGE_SCHEMA_ID);
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	public Object getAdapter(Class required)
 	{
 		if (ProjectionAnnotationModel.class.equals(required))
@@ -1096,7 +1096,7 @@ public class PlSqlEditor extends TextEditor
 		 * 
 		 * @param selectionProvider
 		 *            the selection provider
-		 */
+		 *
 		public void uninstall(ISelectionProvider selectionProvider)
 		{
 			if (selectionProvider == null) return;
@@ -1110,7 +1110,7 @@ public class PlSqlEditor extends TextEditor
 			{
 				selectionProvider.removeSelectionChangedListener(this);
 			}
-		}
+		}*/
 	}
 
 	/**

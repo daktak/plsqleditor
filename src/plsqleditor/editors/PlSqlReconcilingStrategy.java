@@ -136,7 +136,7 @@ public class PlSqlReconcilingStrategy
     {
         for (Iterator<ArrayList> it = myPositionsTable.values().iterator(); it.hasNext();)
         {
-            List list = it.next();
+            List<?> list = it.next();
             list.clear();
         }
         cNextPos = fOffset;
@@ -260,7 +260,7 @@ public class PlSqlReconcilingStrategy
     private int setupTodoIndices(String line, int index)
     {
         int maxTodoIndex = -1;
-        for (Iterator it = TaskListIdentityStore.instance().getMarkers().keySet().iterator(); it
+        for (Iterator<String> it = TaskListIdentityStore.instance().getMarkers().keySet().iterator(); it
                 .hasNext();)
         {
             String marker = (String) it.next();

@@ -361,15 +361,15 @@ public class PackageStore implements SchemaRegistry.RegistryUpdateListener,
 	private String findSchemaNameFromFolder(IFile file)
 	{
 		SchemaDetails[] schemaDetails = myRegistry.getSchemaMappings();
-		List schemaLocations = null;
+		List<String> schemaLocations = null;
 		IPath schemaLocation = file.getProjectRelativePath()
 				.removeLastSegments(1);
 		for (int i = 0; i < schemaDetails.length; i++)
 		{
 			schemaLocations = schemaDetails[i].getLocations();
-			for (Iterator it = schemaLocations.iterator(); it.hasNext();)
+			for (Iterator<String> it = schemaLocations.iterator(); it.hasNext();)
 			{
-				String location = (String) it.next();
+				String location = it.next();
 				if (location.equals(schemaLocation.toString()))
 				{
 					return schemaDetails[i].getName();
@@ -797,9 +797,9 @@ public class PackageStore implements SchemaRegistry.RegistryUpdateListener,
 		{
 			try
 			{
-				SortedSet extraPackages = myDbPackageStore.getPackages(
+				SortedSet<?> extraPackages = myDbPackageStore.getPackages(
 						schemaName, isExpectingPublicSchemas);
-				for (Iterator it = extraPackages.iterator(); it.hasNext();)
+				for (Iterator<?> it = extraPackages.iterator(); it.hasNext();)
 				{
 					String pkg = (String) it.next();
 					String lowerPkg = pkg.toLowerCase();

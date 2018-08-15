@@ -10,7 +10,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -149,6 +148,7 @@ public class SchemaRegistry
                         sb.append(line);
                     }
                 }
+                br.close();
                 String buffer = sb.toString();
                 List<SchemaDetails> details = new ArrayList<SchemaDetails>();
                 int location = 0;

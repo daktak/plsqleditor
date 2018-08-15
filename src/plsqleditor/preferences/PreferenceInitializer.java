@@ -5,7 +5,6 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.swt.graphics.RGB;
 
 import plsqleditor.PlsqleditorPlugin;
-import plsqleditor.editors.IPlSqlColorConstants;
 
 /**
  * Class used to initialize default preference values.
@@ -43,10 +42,10 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
         store.setDefault(MarkOccurrencesPreferences.MARK_OCCURRENCES, true);
         PreferenceConstants.initializeDefaultValues(store);
     }
-
+/*
     private String convert(RGB rgb)
     {
         return rgb.red + "," + rgb.green + "," + rgb.blue;
     }
-
+*/
 }
