@@ -182,7 +182,7 @@ public class PlSqlEditor extends TextEditor
 				try
 				{
 					String detail = document.get(p.offset, p.length);
-					Integer priority = new Integer(IMarker.PRIORITY_NORMAL);
+					Integer priority = Integer.valueOf(IMarker.PRIORITY_NORMAL);
 					for (String marker : taskMap.keySet())
 					{
 						if (detail.startsWith(marker))
@@ -199,7 +199,7 @@ public class PlSqlEditor extends TextEditor
 					attributes.put(IMarker.PRIORITY, priority);
 					MarkerUtilities.setMessage(attributes, detail);
 					int severity = IMarker.SEVERITY_INFO;
-					attributes.put(IMarker.SEVERITY, new Integer(severity));
+					attributes.put(IMarker.SEVERITY, Integer.valueOf(severity));
 					MarkerUtilities
 							.createMarker(file, attributes, IMarker.TASK);
 				}

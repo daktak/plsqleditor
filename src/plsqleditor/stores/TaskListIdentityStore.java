@@ -12,8 +12,8 @@ public class TaskListIdentityStore
     private TaskListIdentityStore()
     {
         myTodoMarkers = new HashMap<String,Integer>();
-        myTodoMarkers.put("TODO", new Integer(IMarker.PRIORITY_NORMAL));
-        myTodoMarkers.put("FIXME", new Integer(IMarker.PRIORITY_HIGH));
+        myTodoMarkers.put("TODO", Integer.valueOf(IMarker.PRIORITY_NORMAL));
+        myTodoMarkers.put("FIXME", Integer.valueOf(IMarker.PRIORITY_HIGH));
     }
 
     public static TaskListIdentityStore instance()
