@@ -20,8 +20,7 @@ import org.eclipse.debug.core.model.IBreakpoint;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.jface.resource.ImageRegistry;
-import org.eclipse.jface.text.source.IAnnotationPresentation;
+//import org.eclipse.jface.resource.ImageRegistry;
 import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import org.eclipse.debug.ui.DebugUITools;
@@ -47,7 +46,7 @@ public class PlsqlMarkerAnnotation extends MarkerAnnotation {//implements IAnnot
 
 	
 	//private static Image fgQuickFixErrorImage;
-	private static ImageRegistry fgGrayMarkersImageRegistry;
+	//private static ImageRegistry fgGrayMarkersImageRegistry;
 
 	private IDebugModelPresentation fPresentation;
 	private AnnotationType fType;
@@ -62,6 +61,7 @@ public class PlsqlMarkerAnnotation extends MarkerAnnotation {//implements IAnnot
 	 * Initializes the annotation's icon representation and its drawing layer
 	 * based upon the properties of the underlying marker.
 	 */
+	@SuppressWarnings({ "deprecation" })
 	protected void initialize() {
 		
 		fImageType= NO_IMAGE;
@@ -131,6 +131,7 @@ public class PlsqlMarkerAnnotation extends MarkerAnnotation {//implements IAnnot
 	/*
 	 * @see MarkerAnnotation#getImage(Display)
 	 */
+	@SuppressWarnings("deprecation")
 	public Image getImage(Display display) {
 		if (fImageType == BREAKPOINT_IMAGE) {
 			Image result= super.getImage(display);
@@ -147,14 +148,13 @@ public class PlsqlMarkerAnnotation extends MarkerAnnotation {//implements IAnnot
 		
 		return super.getImage(display);
 	}
-
+/*
 	private ImageRegistry getGrayMarkerImageRegistry(Display display) {
 		if (fgGrayMarkersImageRegistry == null)
 			fgGrayMarkersImageRegistry= new ImageRegistry(display);
 		return fgGrayMarkersImageRegistry;
 	}
-
-	
+*/
 	public AnnotationType getAnnotationType() {
 		return fType;
 	}
