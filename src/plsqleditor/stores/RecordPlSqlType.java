@@ -5,16 +5,16 @@ import java.util.TreeMap;
 
 import au.com.zinescom.util.UsefulOperations;
 
-import plsqleditor.Utils;
-
 
 public class RecordPlSqlType extends PlSqlType
 {
     public static final Object RECORD = "RECORD";
     public static final Object OBJECT = "OBJECT";
-    private Map myContainedData;
+    @SuppressWarnings("rawtypes")
+	private Map myContainedData;
 
-    public RecordPlSqlType(String schemaName,
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public RecordPlSqlType(String schemaName,
                            String packageName,
                            String name,
                            String[] fieldNames,
@@ -77,12 +77,14 @@ public class RecordPlSqlType extends PlSqlType
         return (PlSqlType) myContainedData.get(field);
     }
 
-    public PlSqlType[] getContainedTypes()
+    @SuppressWarnings("unchecked")
+	public PlSqlType[] getContainedTypes()
     {
         return (PlSqlType[]) myContainedData.values().toArray(new String[myContainedData.size()]);
     }
 
-    public String[] getContainedFieldNames()
+    @SuppressWarnings("unchecked")
+	public String[] getContainedFieldNames()
     {
         return (String[]) myContainedData.keySet().toArray(new String[myContainedData.size()]);
     }

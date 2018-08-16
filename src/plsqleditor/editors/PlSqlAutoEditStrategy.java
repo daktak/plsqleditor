@@ -139,7 +139,7 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
 		for (int i = 0; i < PlSqlCompletionProcessor.autoCompleteDelimiters.length; i++)
 		{
 			char c = PlSqlCompletionProcessor.autoCompleteDelimiters[i];
-			myUpperCaseDelimiters.add(new Character(c));
+			myUpperCaseDelimiters.add(Character.valueOf(c));
 		}
 	}
 
@@ -249,7 +249,7 @@ public class PlSqlAutoEditStrategy extends DefaultIndentLineAutoEditStrategy
 					if ((index == 0
 					// the line below indicates that the character before
 					// the string in question is a delimiter
-					|| myUpperCaseDelimiters.contains(new Character(c.text
+					|| myUpperCaseDelimiters.contains(Character.valueOf(c.text
 							.substring(index - 1, index).charAt(0))))
 							&& (numQuotes % 2 == 0))
 					{

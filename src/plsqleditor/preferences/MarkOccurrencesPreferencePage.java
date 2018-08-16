@@ -147,7 +147,7 @@ public class MarkOccurrencesPreferencePage extends FieldEditorPreferencePage
 		{
 			return;
 		}
-		boolean isMarkOcc = new Boolean(event.getNewValue().toString())
+		boolean isMarkOcc = Boolean.valueOf(event.getNewValue().toString())
 				.booleanValue();
 		setButtonsEnabled(isMarkOcc);
 	}

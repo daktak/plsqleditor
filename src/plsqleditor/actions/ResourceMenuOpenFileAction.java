@@ -31,7 +31,7 @@ import plsqleditor.editors.PlSqlEditorMessages;
  */
 public class ResourceMenuOpenFileAction extends AbstractMenuAction implements IObjectActionDelegate
 {
-    protected List             fSelectedFiles;
+    protected List<?>          fSelectedFiles;
     private IWorkbenchPartSite mySite;
 
     public ResourceMenuOpenFileAction()
