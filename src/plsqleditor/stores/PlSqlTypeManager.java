@@ -21,7 +21,8 @@ public class PlSqlTypeManager
     private static final Map<String, PlSqlType> theBaseTypes;
     private static Map<IProject, PlSqlTypeManager>       theTypeManagers = new HashMap<IProject, PlSqlTypeManager>();
 
-    private Map<String, Map>              mySchemaAndPackageQualifiedTypes;
+    @SuppressWarnings("rawtypes")
+	private Map<String, Map>              mySchemaAndPackageQualifiedTypes;
 
     static
     {
@@ -34,7 +35,8 @@ public class PlSqlTypeManager
         theBaseTypes.put("VARCHAR", new PlSqlType(null, null, "VARCHAR"));
     }
 
-    private PlSqlTypeManager()
+    @SuppressWarnings("rawtypes")
+	private PlSqlTypeManager()
     {
         mySchemaAndPackageQualifiedTypes = new HashMap<String, Map>();
     }
@@ -294,7 +296,8 @@ public class PlSqlTypeManager
         return type;
     }
 
-    private void addType(String schemaName, String packageName, String name, PlSqlType type)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	private void addType(String schemaName, String packageName, String name, PlSqlType type)
     {
         if (schemaName == null)
         {

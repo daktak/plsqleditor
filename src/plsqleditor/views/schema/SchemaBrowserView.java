@@ -38,6 +38,7 @@ import au.com.gts.data.ForeignKeyConstraint;
  * SchemaBrowserContentProvider.
  */
 
+@SuppressWarnings({ "deprecation" })
 public class SchemaBrowserView extends ViewPart
 {
 	public static final String theId = "plsqleditor.views.SchemaBrowserView";

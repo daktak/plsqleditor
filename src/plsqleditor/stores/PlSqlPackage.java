@@ -153,7 +153,7 @@ public class PlSqlPackage
 			Long stamp = (Long) myLatestChanges.get(parseType);
 			if (stamp == null || timestamp > stamp.longValue())
 			{
-				stamp = new Long(timestamp);
+				stamp = Long.valueOf(timestamp);
 				myLatestChanges.put(parseType, stamp);
 			}
 		}

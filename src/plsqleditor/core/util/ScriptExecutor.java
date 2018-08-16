@@ -133,7 +133,8 @@ public abstract class ScriptExecutor
      *
      * @return complete list of command line arguments
      */
-    protected List<String> getCommandLineOpts(List<?> additionalOptions)
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+	protected List<String> getCommandLineOpts(List<?> additionalOptions)
     {
         return (additionalOptions != null) ? (List) additionalOptions : Collections.EMPTY_LIST;
     }
@@ -214,7 +215,8 @@ public abstract class ScriptExecutor
                 URL url =
                     new URL(PlsqleditorPlugin.getDefault().getBundle().getEntry("/"),
                         getScriptDir());
-                URL workingURL = Platform.resolve(url);
+                @SuppressWarnings("deprecation")
+				URL workingURL = Platform.resolve(url);
                 return new File(workingURL.getPath());
             }
             return new File(scriptsLocation.getParentFile(), getScriptDir());
