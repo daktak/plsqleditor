@@ -35,11 +35,13 @@ public class DBPackageStore
 	/**
 	 * This field maps a schema name to a list of packages.
 	 */
+	@SuppressWarnings("rawtypes")
 	private HashMap mySchemaToPackageMap;
 
 	/**
 	 * This field maps a package name to a list of segments.
 	 */
+	@SuppressWarnings("rawtypes")
 	private HashMap myPackageToSegmentMap;
 
 	/**
@@ -51,12 +53,14 @@ public class DBPackageStore
 	 * This field maps each schema to the time we last cached that schema's
 	 * objects.
 	 */
+	@SuppressWarnings("rawtypes")
 	private HashMap mySchemaToLastCacheTimeMap;
 
 	/**
 	 * This field maps each schema to the public schema boolean last requested
 	 * of it.
 	 */
+	@SuppressWarnings("rawtypes")
 	private HashMap mySchemaToLastPublicSchemaRequestBoolean;
 
 	/**
@@ -108,6 +112,7 @@ public class DBPackageStore
 	 * 
 	 * @param defaultConnectionPool
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public DBPackageStore(ConnectionPool defaultConnectionPool)
 	{
 		myDefaultConnectionPool = defaultConnectionPool;
@@ -129,7 +134,7 @@ public class DBPackageStore
 	protected Timestamp getSysTimestamp() throws SQLException
 	{
 		String sql = "SELECT sysdate FROM dual";
-		SortedSet lt = getObjectsByVariables(sql, new Object[] {},
+		SortedSet<?> lt = getObjectsByVariables(sql, new Object[] {},
 				new Timestamp[0]);
 		return (Timestamp) lt.first();
 	}
@@ -162,6 +167,7 @@ public class DBPackageStore
 	 *             If the sql is malformed or there is a problem with the
 	 *             database connection.
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected SortedSet getObjectsByVariables(String sql, Object[] objects,
 			Object[] dummy) throws SQLException
 	{
@@ -251,6 +257,7 @@ public class DBPackageStore
 			for (int i = 0; i < dummyArrays.length; i++)
 			{
 				Object[] dummy = (Object[]) dummyArrays[i];
+				@SuppressWarnings("rawtypes")
 				Class returnClass = dummy.getClass().getComponentType();
 				if (returnClass.equals(String.class))
 				{
@@ -287,6 +294,7 @@ public class DBPackageStore
 	 * 
 	 * @see #getObjectsByVariables(String , Object[], Object[])
 	 */
+	@SuppressWarnings("rawtypes")
 	protected SortedSet getObjectsByVariables(String sql, Object[] objects)
 			throws SQLException
 	{
@@ -414,6 +422,7 @@ public class DBPackageStore
 	 * @return The list of currently known schema names.
 	 * @throws SQLException
 	 */
+	@SuppressWarnings("unchecked")
 	public SortedSet<String> getSchemas(boolean forceUpdate,
 			boolean updateList, int refreshSeconds) throws SQLException
 	{
@@ -453,7 +462,8 @@ public class DBPackageStore
 		// else { System.out.println("Using cached schemas(2)"); }
 
 		// Now add all new schemas to our cache
-		for (Iterator it = newSchemaList.iterator(); it.hasNext();)
+		for (@SuppressWarnings("rawtypes")
+		Iterator it = newSchemaList.iterator(); it.hasNext();)
 		{
 			String s = (String) it.next();
 			mySchemaToPackageMap.put(s, null);
@@ -480,6 +490,7 @@ public class DBPackageStore
 	 * @return The list of segments that were just loaded.
 	 * @throws SQLException
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	protected List<Segment> loadSegments(String schemaName, String packageName)
 			throws SQLException
 	{
@@ -600,6 +611,7 @@ public class DBPackageStore
 	 * @return the list of segments for the given schema and package.
 	 * @throws SQLException
 	 */
+	@SuppressWarnings("rawtypes")
 	public List getSegments(String schemaName, String packageName,
 			boolean forceUpdate, int refreshSeconds) throws SQLException
 	{
@@ -660,6 +672,7 @@ public class DBPackageStore
 	/**
 	 * @see #getSegments(String, String, boolean, int)
 	 */
+	@SuppressWarnings("rawtypes")
 	public List getSegments(String schemaName, String packageName)
 			throws SQLException
 	{
@@ -682,6 +695,7 @@ public class DBPackageStore
 	 * @return The list of packages for the given schema.
 	 * @throws SQLException
 	 */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public SortedSet getPackages(String schemaName, boolean forceUpdate,
 			int refreshSeconds, boolean isExpectingPublicSchemas)
 			throws SQLException
@@ -776,7 +790,7 @@ public class DBPackageStore
 				mySchemaToLastCacheTimeMap.put(schemaName, newCacheTime);
 			}
 		}
-		mySchemaToLastPublicSchemaRequestBoolean.put(schemaName, new Boolean(
+		mySchemaToLastPublicSchemaRequestBoolean.put(schemaName, Boolean.valueOf(
 				isExpectingPublicSchemas));
 
 		// else { System.out.println("Using cached packages"); }
@@ -787,6 +801,7 @@ public class DBPackageStore
 	/**
 	 * @see #getPackages(String, boolean, int, boolean)
 	 */
+	@SuppressWarnings("rawtypes")
 	public SortedSet getPackages(String schemaName,
 			boolean isExpectingPublicSchemas) throws SQLException
 	{

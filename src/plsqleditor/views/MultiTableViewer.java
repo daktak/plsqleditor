@@ -3,7 +3,7 @@ package plsqleditor.views;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jface.util.Assert;
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
@@ -60,6 +60,7 @@ import plsqleditor.util.SortableTableTest;
  * @see #internalRefresh(Object, boolean)
  * 
  */
+@SuppressWarnings("deprecation")
 public class MultiTableViewer extends StructuredViewer
 {
     /**
@@ -946,7 +947,7 @@ public class MultiTableViewer extends StructuredViewer
      * 
      * @see org.eclipse.jface.viewers.StructuredViewer#setSelectionToWidget(java.util.List, boolean)
      */
-    protected void setSelectionToWidget(List list, boolean reveal)
+    protected void setSelectionToWidget(@SuppressWarnings("rawtypes") List list, boolean reveal)
     {
         Table table = getTable();
         if (list == null)

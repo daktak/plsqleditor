@@ -47,10 +47,12 @@ public class PlSqlReconcilingStrategy
      */
     protected int               cNextPos     = 0;
 
-    Map<String, ArrayList>                         myPositionsTable;
+    @SuppressWarnings({ "rawtypes" })
+	Map<String, ArrayList>                         myPositionsTable;
     private int[]               myTodoIndices;
 
-    public PlSqlReconcilingStrategy()
+    @SuppressWarnings("rawtypes")
+	public PlSqlReconcilingStrategy()
     {
         myPositionsTable = new HashMap<String, ArrayList>();
         myPositionsTable.put(FOLDING_TAGS, new ArrayList<Object>());
@@ -134,7 +136,8 @@ public class PlSqlReconcilingStrategy
      */
     protected void calculatePositions()
     {
-        for (Iterator<ArrayList> it = myPositionsTable.values().iterator(); it.hasNext();)
+        for (@SuppressWarnings("rawtypes")
+		Iterator<ArrayList> it = myPositionsTable.values().iterator(); it.hasNext();)
         {
             List<?> list = it.next();
             list.clear();
@@ -152,7 +155,8 @@ public class PlSqlReconcilingStrategy
 
         Display.getDefault().asyncExec(new Runnable()
         {
-            public void run()
+            @SuppressWarnings("unchecked")
+			public void run()
             {
             	if (editor != null)
             	{
@@ -288,7 +292,8 @@ public class PlSqlReconcilingStrategy
 
     protected void emitPosition(int startOffset, int length, String type)
     {
-        List<Position> positionsList = myPositionsTable.get(type);
+        @SuppressWarnings("unchecked")
+		List<Position> positionsList = myPositionsTable.get(type);
         if (positionsList != null)
         {
             positionsList.add(new Position(startOffset, length));

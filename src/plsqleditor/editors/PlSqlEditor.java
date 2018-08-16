@@ -578,7 +578,7 @@ public class PlSqlEditor extends TextEditor
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object getAdapter(Class required)
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class required)
 	{
 		if (ProjectionAnnotationModel.class.equals(required))
 		{
