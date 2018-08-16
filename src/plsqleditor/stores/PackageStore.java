@@ -157,10 +157,6 @@ public class PackageStore implements SchemaRegistry.RegistryUpdateListener,
 				e.printStackTrace();
 			}
 		}
-		if (set == null)
-		{
-			set = new TreeSet<String>();
-		}
 		set.addAll(mySchemaNameToSchemaMap.keySet());
 		return set;
 	}
@@ -426,6 +422,7 @@ public class PackageStore implements SchemaRegistry.RegistryUpdateListener,
 	 * @return The list of {@link Segment}s for the particular schema and
 	 *         package.
 	 */
+	@SuppressWarnings("unchecked")
 	public List<Segment> getSegments(String schemaName, String packageName)
 	{
 		schemaName = schemaName == null ? myCurrentSchemaName : schemaName;

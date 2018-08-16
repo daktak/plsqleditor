@@ -259,6 +259,7 @@ public class OccurrencesUpdater implements ISelectionChangedListener
 	/**
 	 * Removes all occurrence annotations.
 	 */
+	@SuppressWarnings("unchecked")
 	private void removeAnnotations()
 	{
 		IAnnotationModel _model = this.sourceViewer.getAnnotationModel();
