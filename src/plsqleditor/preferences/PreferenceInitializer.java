@@ -2,8 +2,6 @@ package plsqleditor.preferences;
 
 import org.eclipse.core.runtime.preferences.AbstractPreferenceInitializer;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.swt.graphics.RGB;
-
 import plsqleditor.PlsqleditorPlugin;
 
 /**

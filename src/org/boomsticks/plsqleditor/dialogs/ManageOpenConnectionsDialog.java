@@ -163,7 +163,7 @@ public class ManageOpenConnectionsDialog extends Dialog
         {
             public void widgetSelected(SelectionEvent e)
             {
-                tableViewer.setSorter(new LiveConnectionSorter(LiveConnectionSorter.URL));
+                tableViewer.setComparator(new LiveConnectionSorter(LiveConnectionSorter.URL));
             }
         });
 
@@ -175,7 +175,7 @@ public class ManageOpenConnectionsDialog extends Dialog
         {
             public void widgetSelected(SelectionEvent e)
             {
-                tableViewer.setSorter(new LiveConnectionSorter(LiveConnectionSorter.LAST_FILE));
+                tableViewer.setComparator(new LiveConnectionSorter(LiveConnectionSorter.LAST_FILE));
             }
         });
 
@@ -187,7 +187,7 @@ public class ManageOpenConnectionsDialog extends Dialog
         {
             public void widgetSelected(SelectionEvent e)
             {
-                tableViewer.setSorter(new LiveConnectionSorter(LiveConnectionSorter.PROJECT));
+                tableViewer.setComparator(new LiveConnectionSorter(LiveConnectionSorter.PROJECT));
             }
         });
 
@@ -199,7 +199,7 @@ public class ManageOpenConnectionsDialog extends Dialog
         {
             public void widgetSelected(SelectionEvent e)
             {
-                tableViewer.setSorter(new LiveConnectionSorter(LiveConnectionSorter.USER));
+                tableViewer.setComparator(new LiveConnectionSorter(LiveConnectionSorter.USER));
             }
         });
     }
@@ -243,7 +243,7 @@ public class ManageOpenConnectionsDialog extends Dialog
         // Set the cell modifier for the viewer
         // tableViewer.setCellModifier(new ExampleCellModifier(this));
         // Set the default sorter for the viewer
-        tableViewer.setSorter(new LiveConnectionSorter(LiveConnectionSorter.LAST_FILE));
+        tableViewer.setComparator(new LiveConnectionSorter(LiveConnectionSorter.LAST_FILE));
     }
 
     protected void createButtonsForButtonBar(Composite parent)
