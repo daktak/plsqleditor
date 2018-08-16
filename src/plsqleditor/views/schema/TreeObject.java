@@ -63,7 +63,7 @@ public class TreeObject implements IAdaptable
 	}
 
 	@SuppressWarnings("unchecked")
-	public Object getAdapter(Class key)
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class key)
 	{
 		if (key.equals(TreeObject.class))
 		{

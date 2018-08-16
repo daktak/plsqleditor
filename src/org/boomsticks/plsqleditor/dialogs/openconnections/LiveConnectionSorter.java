@@ -16,6 +16,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
  * <code>TIME_UP</code>: number of seconds alive (long).
  * </p>
  */
+@SuppressWarnings("deprecation")
 public class LiveConnectionSorter extends ViewerSorter
 {
 

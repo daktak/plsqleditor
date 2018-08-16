@@ -865,7 +865,8 @@ public class UsefulOperations
      * @return A vector of up to <code>size</code> containing up to the first
      *         <code>size</code> elements of <code>set</code>.
      */
-    public static final Vector getFirstNElements(Vector<?> set, int size)
+    @SuppressWarnings({ "rawtypes", "unchecked" })
+	public static final Vector getFirstNElements(Vector<?> set, int size)
     {
         if (set == null)
         {
@@ -1992,15 +1993,15 @@ public class UsefulOperations
         }
         else if (number instanceof Float)
         {
-            return new Float(((Float) number).floatValue() - 0.1);
+            return ((Float) number).floatValue() - 0.1;
         }
         else if (number instanceof Double)
         {
-            return new Double(((Double) number).doubleValue() - 0.1);
+            return Double.valueOf(((Double) number).doubleValue() - 0.1);
         }
         else if (number instanceof Long)
         {
-            return new Long(((Long) number).longValue() - 1);
+            return Long.valueOf(((Long) number).longValue() - 1);
         }
         else
         {
@@ -2025,15 +2026,15 @@ public class UsefulOperations
         }
         else if (number instanceof Float)
         {
-            return new Float(((Float) number).floatValue() + 0.1);
+            return ((Float) number).floatValue() + 0.1;
         }
         else if (number instanceof Double)
         {
-            return new Double(((Double) number).doubleValue() + 0.1);
+            return Double.valueOf(((Double) number).doubleValue() + 0.1);
         }
         else if (number instanceof Long)
         {
-            return new Long(((Long) number).longValue() - 1);
+            return Long.valueOf(((Long) number).longValue() - 1);
         }
         else
         {

@@ -1,7 +1,5 @@
 package plsqleditor.views.schema;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -211,7 +209,7 @@ public class PackageData extends TreeParent implements IPackageData
 	 * @see plsqleditor.views.schema.SchemaBrowserContentProvider.TreeObject#getAdapter(java.lang.Class)
 	 */
 	@Override
-	public Object getAdapter(Class key)
+	public Object getAdapter(@SuppressWarnings("rawtypes") Class key)
 	{
 		if (key.equals(IResource.class))
 		{

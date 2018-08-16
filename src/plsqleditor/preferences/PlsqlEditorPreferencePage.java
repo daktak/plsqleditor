@@ -65,6 +65,7 @@ import plsqleditor.editors.PlSqlPartitionScanner;
 /*
  * The page for setting the editor options.
  */
+@SuppressWarnings("restriction")
 public class PlsqlEditorPreferencePage extends PreferencePage implements
 		IWorkbenchPreferencePage
 {

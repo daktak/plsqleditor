@@ -47,6 +47,7 @@ import plsqleditor.actions.GenerateHeaderAndLoadBothToDatabaseAction;
 import plsqleditor.actions.LoadToDatabaseAction;
 import plsqleditor.actions.GenerateHeaderAndLoadBothToDatabaseAction.GenerateHeaderAndLoadResult;
 
+@SuppressWarnings("deprecation")
 public class LoadSchemaDialog extends Dialog
 {
 	class PackageDetail
@@ -253,7 +254,7 @@ public class LoadSchemaDialog extends Dialog
 			switch (criteria)
 			{
 			case EXECUTE_COLUMN:
-				return new Boolean(task1.isExecute()).compareTo(new Boolean(
+				return Boolean.valueOf(task1.isExecute()).compareTo(Boolean.valueOf(
 						task2.isExecute()));
 			case NAME_COLUMN:
 				return task1.getName().compareTo(task2.getName());
