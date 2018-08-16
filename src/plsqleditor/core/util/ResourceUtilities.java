@@ -112,8 +112,8 @@ public class ResourceUtilities
     {
         try
         {
-            URL url = Platform.resolve(plugin.getEntry("/"));
-            
+            URL url = FileLocator.resolve(plugin.getEntry("/"));
+
             if (url.getProtocol().equalsIgnoreCase("jar"))
             {
                 String path = url.getPath();
@@ -147,7 +147,7 @@ public class ResourceUtilities
     {
         try
         {
-            return Platform.resolve(plugin.getEntry("/"))
+            return FileLocator.resolve(plugin.getEntry("/"))
                 .getProtocol().equalsIgnoreCase("jar");
         }
         catch (IOException e)
