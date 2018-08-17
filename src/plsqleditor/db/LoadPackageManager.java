@@ -1,5 +1,8 @@
 package plsqleditor.db;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -19,6 +22,7 @@ import java.util.regex.Pattern;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -321,14 +325,30 @@ public class LoadPackageManager
 			try
 			{
 				String user = schemaName;
-				/* TODO
-				if (file has create pkg body as schema.pkgname)
-				{
-					//get default connection
-					IPreferenceStore thePrefs = DbUtility.getPrefs();
-					user = thePrefs.getString(PreferenceConstants.P_USER);
-				}
-				*/
+		        String bodyStart = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] +[Bb][Oo][Dd][Yy] \\W*(\\w+)\\.\\W*(\\w+).*";
+		        try
+		        {
+		        	//Determine if schema is in the bodyStart string
+		            BufferedReader br = new BufferedReader(new InputStreamReader(file.getContents()));
+		            String line = null;
+		            while ((line = br.readLine()) != null)
+		            {
+		                if (line.matches(bodyStart))
+		                {
+							IPreferenceStore thePrefs = DbUtility.getPrefs();
+							user = thePrefs.getString(PreferenceConstants.P_USER);
+		                }
+		            }
+		            br.close();
+		        }
+	            catch (CoreException e)
+	            {
+	                e.printStackTrace();
+	            }
+	            catch (IOException e)
+	            {
+	                e.printStackTrace();
+	            }
 				c = DbUtility.getTempConnection(project, user);
 				return loadCode(c, packageName, toLoad, type);
 			}
