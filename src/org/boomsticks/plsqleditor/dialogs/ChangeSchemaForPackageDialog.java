@@ -65,7 +65,7 @@ public class ChangeSchemaForPackageDialog extends Dialog
      * <p>
      * Note that the <code>open</code> method blocks for input dialogs.
      * </p>
-     * 
+     *
      * @param parentShell the parent shell, or <code>null</code> to create a
      *            top-level shell
      * @param dialogTitle the dialog title, or <code>null</code> if none
@@ -106,7 +106,7 @@ public class ChangeSchemaForPackageDialog extends Dialog
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets.Shell)
      */
     protected void configureShell(Shell shell)
@@ -117,7 +117,7 @@ public class ChangeSchemaForPackageDialog extends Dialog
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse.swt.widgets.Composite)
      */
     protected void createButtonsForButtonBar(Composite parent)
@@ -213,7 +213,7 @@ public class ChangeSchemaForPackageDialog extends Dialog
 
     /**
      * Returns the ok button.
-     * 
+     *
      * @return the ok button
      */
     protected Button getOkButton()
@@ -223,7 +223,7 @@ public class ChangeSchemaForPackageDialog extends Dialog
 
     /**
      * Returns the text area.
-     * 
+     *
      * @return the text area
      */
     protected Text getPackageText()
@@ -233,7 +233,7 @@ public class ChangeSchemaForPackageDialog extends Dialog
 
     /**
      * Returns the text area.
-     * 
+     *
      * @return the text area
      */
     protected Text getSchemaText()
@@ -243,7 +243,7 @@ public class ChangeSchemaForPackageDialog extends Dialog
 
     /**
      * Returns the validator.
-     * 
+     *
      * @return the validator
      */
     protected IInputValidator getValidator()
@@ -253,7 +253,7 @@ public class ChangeSchemaForPackageDialog extends Dialog
 
     /**
      * Returns the string typed into this input dialog.
-     * 
+     *
      * @return the input string
      */
     public String getPackageName()
@@ -263,7 +263,7 @@ public class ChangeSchemaForPackageDialog extends Dialog
 
     /**
      * Returns the string typed into this input dialog.
-     * 
+     *
      * @return the input string
      */
     public String getSchemaName()
@@ -293,7 +293,7 @@ public class ChangeSchemaForPackageDialog extends Dialog
     /**
      * Sets or clears the error message. If not <code>null</code>, the OK
      * button is disabled.
-     * 
+     *
      * @param errorMessage the error message, or <code>null</code> to clear
      * @since 3.0
      */

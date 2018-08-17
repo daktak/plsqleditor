@@ -10,15 +10,15 @@ import au.com.zinescom.util.UsefulOperations;
 
 /**
  * This type represents a trigger in a database.
- * 
+ *
  * Created on 18/06/2003
- * 
+ *
  * @author Toby Zines
  */
 public class Trigger extends DatabaseEntity implements Serializable
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 3001099020764871166L;
 
@@ -50,7 +50,7 @@ public class Trigger extends DatabaseEntity implements Serializable
 
 	/**
 	 * This constructor generates a new Table with an empty set of columns.
-	 * @param actionType2 
+	 * @param actionType2
 	 */
 	public Trigger(DBMetaDataGatherer dbmdg, String schemaName, String name,
 			String triggerType, String triggeringEvent, String tableOwner,
@@ -99,7 +99,7 @@ public class Trigger extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method gets the type of the particular table.
-	 * 
+	 *
 	 * @return tableType
 	 */
 	public String getType()
@@ -109,7 +109,7 @@ public class Trigger extends DatabaseEntity implements Serializable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj)
@@ -138,7 +138,7 @@ public class Trigger extends DatabaseEntity implements Serializable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode()
@@ -239,9 +239,9 @@ public class Trigger extends DatabaseEntity implements Serializable
 	{
 		return myActionType;
 	}
-	
+
 	public String getDisplayName()
     {
-    	return getName() + " on " + getTableOwner() + "." + getTableName(); 
+    	return getName() + " on " + getTableOwner() + "." + getTableName();
     }
 }

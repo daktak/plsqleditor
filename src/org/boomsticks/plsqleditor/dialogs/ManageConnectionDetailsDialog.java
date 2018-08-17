@@ -113,7 +113,7 @@ public class ManageConnectionDetailsDialog extends Dialog
      * <p>
      * Note that the <code>open</code> method blocks for input dialogs.
      * </p>
-     * 
+     *
      * @param parentShell the parent shell, or <code>null</code> to create a
      *            top-level shell
      * @param dialogTitle the dialog title, or <code>null</code> if none
@@ -159,7 +159,7 @@ public class ManageConnectionDetailsDialog extends Dialog
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets
      * .Shell)
@@ -175,7 +175,7 @@ public class ManageConnectionDetailsDialog extends Dialog
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.jface.dialogs.Dialog#createButtonsForButtonBar(org.eclipse
      * .swt.widgets.Composite)
@@ -194,7 +194,7 @@ public class ManageConnectionDetailsDialog extends Dialog
      * This method loads new details, either because a new value has been
      * selected in the list, or because the add button has been pushed, and the
      * blank details will be filled in and loaded to the file system.
-     * 
+     *
      * @param cd The connection details to load, or null if this is the result
      *            of an add request.
      */
@@ -563,13 +563,13 @@ public class ManageConnectionDetailsDialog extends Dialog
         myTestButton.setText("Test Displayed Connection");
         myTestButton.addSelectionListener(new SelectionListener()
         {
-            
+
             @Override
             public void widgetSelected(SelectionEvent arg0)
             {
                 testSelectedConnection();
             }
-            
+
             @Override
             public void widgetDefaultSelected(SelectionEvent arg0)
             {
@@ -587,7 +587,7 @@ public class ManageConnectionDetailsDialog extends Dialog
             {
                 saveConnectionDetails();
             }
-            
+
             @Override
             public void widgetDefaultSelected(SelectionEvent arg0)
             {
@@ -647,7 +647,7 @@ public class ManageConnectionDetailsDialog extends Dialog
     /**
      * Returns <code>true</code> if it is ok to update or delete it (i.e. there
      * are no files using it) and <code>false</code> otherwise.
-     * 
+     *
      * @param connectionDetailsName
      * @return
      */
@@ -689,7 +689,7 @@ public class ManageConnectionDetailsDialog extends Dialog
 
     /**
      * Returns the ok button.
-     * 
+     *
      * @return the ok button
      */
     protected Button getOkButton()
@@ -699,7 +699,7 @@ public class ManageConnectionDetailsDialog extends Dialog
 
     /**
      * Returns the text area.
-     * 
+     *
      * @return the text area
      */
     protected Text getSchemaNameText()
@@ -709,7 +709,7 @@ public class ManageConnectionDetailsDialog extends Dialog
 
     /**
      * Returns the validator.
-     * 
+     *
      * @return the validator
      */
     protected IInputValidator getValidator()
@@ -739,7 +739,7 @@ public class ManageConnectionDetailsDialog extends Dialog
     /**
      * Sets or clears the error message. If not <code>null</code>, the OK button
      * is disabled.
-     * 
+     *
      * @param errorMessage the error message, or <code>null</code> to clear
      * @since 3.0
      */

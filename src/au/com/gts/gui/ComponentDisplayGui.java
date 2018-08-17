@@ -190,7 +190,7 @@ public class ComponentDisplayGui extends Canvas
         MouseListener listener = new MouseListener()
         {
             Point myClickPoint;
-            
+
             public void mouseDown(MouseEvent event)
             {
                 System.out.println(event);
@@ -220,7 +220,7 @@ public class ComponentDisplayGui extends Canvas
 
             private boolean isCloseEnough(Point clickPoint, int x, int y)
             {
-                if (Math.abs(clickPoint.x - x) < RIGHT_CLICK_JITTER 
+                if (Math.abs(clickPoint.x - x) < RIGHT_CLICK_JITTER
                  && Math.abs(clickPoint.y - y) < RIGHT_CLICK_JITTER)
                 {
                     return true;
@@ -232,25 +232,25 @@ public class ComponentDisplayGui extends Canvas
             {
                 //
             }
-            
+
         };
 
         MouseMoveListener mml = new MouseMoveListener()
         {
             MovableItem myPreviousTarget = null;
-            
+
             public void mouseMove(MouseEvent event)
             {
                 myMovableItems
                         .moveCapturedItem(ComponentDisplayGui.this, event.x, event.y);
-                
+
                 MovableItem linker = myMovableItems.getLinkingObject();
                 if (linker == null)
                 {
                     return;
                 }
                 MovableItem target = myMovableItems.getItemForLocationFromLinkingObject(event.x, event.y);
-                
+
                 if (myPreviousTarget != null)
                 {
                     if (target == null)
@@ -259,7 +259,7 @@ public class ComponentDisplayGui extends Canvas
                     }
                 }
                 myPreviousTarget = target;
-                
+
                 if (linker != null && target != null)
                 {
                     if (target.canBeLinkedToBy(linker))
@@ -273,7 +273,7 @@ public class ComponentDisplayGui extends Canvas
                 }
             }
         };
-        
+
         MouseTrackListener mtl = new MouseTrackListener()
         {
             public void mouseEnter(MouseEvent event)
@@ -291,7 +291,7 @@ public class ComponentDisplayGui extends Canvas
                 // do nothing
             }
         };
-        
+
         myMovableItems.addMouseTrackListener(mtl);
         myMovableItems.addMouseListener(listener);
         myMovableItems.addMouseMoveListener(mml);
@@ -315,13 +315,13 @@ public class ComponentDisplayGui extends Canvas
 				System.out.println ("Item Selected");
 			}
 		});
-		
+
 		menu.setLocation (mi.toDisplay(event.x, event.y));
 		menu.setVisible (true);
 		while (!menu.isDisposed () && menu.isVisible ()) {
 			if (!getDisplay().readAndDispatch ()) getDisplay().sleep ();
 		}
-		menu.dispose ();    
+		menu.dispose ();
     }
 
     public static void main(String[] args)

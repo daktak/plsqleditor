@@ -1,13 +1,13 @@
 /* ---------------------------------------------------------------------
  * (C) COPYRIGHT 2003 ALCATEL AUSTRALIA LIMITED
- * 
+ *
  * This program contains proprietary information which is a trade secret
  * of  ALCATEL  AUSTRALIA  LIMITED  and  also  is  protected  under  the
  * applicable  copyright law.  Recipient is  to retain  this program  in
  * confidence and is not permitted to use or make any copy thereof other
  * than as permitted  under a written agreement with  ALCATEL  AUSTRALIA
  * LIMITED.
- * 
+ *
  * ---------------------------------------------------------------------
  * PROJECT:         TNZ Fulfil
  * ---------------------------------------------------------------------
@@ -22,15 +22,15 @@ package au.com.gts.data;
 
 /**
  * This type represents
- * 
+ *
  * Created on 18/06/2003
- * 
+ *
  * @author Toby Zines
  */
 public class DataConstraint extends Constraint
 {
 	private String myType;
-	
+
     public DataConstraint(String name, Column primaryColumn, String type, String constraintText)
 	{
 		super(name, primaryColumn);
@@ -62,15 +62,15 @@ public class DataConstraint extends Constraint
 	{
 		return myType;
 	}
-	
+
 	public String getDisplayName()
     {
-    	return getName() + " is " + getConstraintText(); 
+    	return getName() + " is " + getConstraintText();
     }
-	
+
 	public String toString()
 	{
-		return "Data " + super.toString() + 
+		return "Data " + super.toString() +
 		"\nConstraint Text: " + getConstraintText();
 	}
 }

@@ -27,9 +27,9 @@ import org.eclipse.swt.widgets.Widget;
 /**
  * This class represents an item that can be placed on a canvas and moved about. The actual moving is done in the canvas
  * code.
- * 
+ *
  * @author Toby Zines
- * 
+ *
  * Created on 8/06/2004
  */
 public class MovableItem
@@ -45,16 +45,16 @@ public class MovableItem
     /**
      * This constructor creates the contained button and associated layout details, preparing this object to be moved
      * around in the specified <code>parent</code>.
-     * 
+     *
      * @param parent
      *            The composite in which this movable item will be located.
-     * 
+     *
      * @param percentageLocation
      *            The left and top percentage start points of the entire space that this item should take up.
-     * 
+     *
      * @param percentageWidth
      *            The percentage end point of the item.
-     * 
+     *
      * @param height
      *            The actual height of the object.
      */
@@ -92,7 +92,7 @@ public class MovableItem
 
     /**
      * This method is executed when a mouse enters the widget that this item is proxying.
-     * 
+     *
      * @param event
      *            The mouse event.
      */
@@ -108,7 +108,7 @@ public class MovableItem
 
     /**
      * This method is executed when a mouse exits the widget that this item is proxying.
-     * 
+     *
      * @param event
      *            The mouse event.
      */
@@ -124,7 +124,7 @@ public class MovableItem
 
     /**
      * This method is executed when a mouse hovers over the widget that this item is proxying.
-     * 
+     *
      * @param event
      *            The mouse event.
      */
@@ -140,7 +140,7 @@ public class MovableItem
      * This method indicates whether the default mouse track listener should be turned on or not. When the mouse events
      * occur, they are pushed through the {@link #mouseEnteredEvent(MouseEvent)},
      * {@link #mouseExittedEvent(MouseEvent)} and {@link #mouseHoveredEvent(MouseEvent)} methods.
-     * 
+     *
      * @param isOn
      *            If this is true, the listener will be active, otherwise it will not
      */
@@ -270,7 +270,7 @@ public class MovableItem
 
     /**
      * This method gets the centre of the label.
-     * 
+     *
      * @return The centre of this item.
      */
     public Point getCentre()
@@ -300,10 +300,10 @@ public class MovableItem
 
     /**
      * This method indicates whether it is possible for the specified <code>movableItem</code> to link to this object.
-     * 
+     *
      * @param movableItem
      *            The item that is trying to link to this.
-     * 
+     *
      * @return true if the specified item can link to this, false otherwise.
      */
     public boolean canBeLinkedToBy(MovableItem movableItem)

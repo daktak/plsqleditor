@@ -10,7 +10,7 @@ import au.com.zinescom.util.UsefulOperations;
 
 /**
  * This type represents a type in a database.
- * 
+ *
  * @author Toby Zines
  */
 public class DbType extends DatabaseEntity implements Serializable
@@ -30,7 +30,7 @@ public class DbType extends DatabaseEntity implements Serializable
 
 	/**
 	 * This constructor generates a new Table with an empty set of columns.
-	 * 
+	 *
 	 * @param name
 	 */
 	public DbType(DBMetaDataGatherer dbmdg, String name)
@@ -65,7 +65,7 @@ public class DbType extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method sets the type of the particular table.
-	 * 
+	 *
 	 * @param type
 	 */
 	public void setType(String type)
@@ -75,7 +75,7 @@ public class DbType extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method gets the type of the particular table.
-	 * 
+	 *
 	 * @return tableType
 	 */
 	public String getType()
@@ -85,7 +85,7 @@ public class DbType extends DatabaseEntity implements Serializable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj)
@@ -113,7 +113,7 @@ public class DbType extends DatabaseEntity implements Serializable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode()

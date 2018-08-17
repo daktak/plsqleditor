@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package au.com.zinescom.util;
 
@@ -11,12 +11,12 @@ public class CreationException extends Exception
 {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 3618417137756943415L;
 
     /**
-     * 
+     *
      */
     public CreationException()
     {

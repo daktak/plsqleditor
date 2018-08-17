@@ -14,7 +14,7 @@ import plsqleditor.db.LoadPackageManager;
 /**
  * Class that plays the role of the domain model in the TableViewerExample In
  * real life, this class would access a persistent store of some kind.
- * 
+ *
  */
 public class OpenConnectionList
 {

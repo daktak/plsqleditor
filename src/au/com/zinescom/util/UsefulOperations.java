@@ -28,7 +28,7 @@ import java.util.Vector;
  * This class provides useful generic methods that are not supplied by the JDK,
  * but could come in handy in testing, or debugging, or printing diagnostic
  * informatin among other things.
- * 
+ *
  * @author Toby Zines
  * @version
  */
@@ -82,7 +82,7 @@ public class UsefulOperations
     /**
      * This is the value returned when the index of a string/char/int etc is not
      * found inside another string.
-     * 
+     *
      * @see #constructClass(Class, String, Object[], String)
      */
     private static final int     STRING_NOT_FOUND             = -1;
@@ -101,9 +101,9 @@ public class UsefulOperations
 
     /**
      * This class represents a filter on a file list.
-     * 
+     *
      * @author Toby Zines
-     * 
+     *
      * Created on 28/01/2005
      */
     public static class FileListFilter implements FilenameFilter
@@ -114,7 +114,7 @@ public class UsefulOperations
         /**
          * This constructor creates the filter with the supplied list of filters
          * that are allowed.
-         * 
+         *
          * @param filterListAry the list of valid extensions. This must not
          *            contain any nulls, or be null, but it may be empty,
          *            indicating nothing is valid.
@@ -127,7 +127,7 @@ public class UsefulOperations
         /**
          * This constructor creates the filter with the supplied list of filters
          * that are allowed.
-         * 
+         *
          * @param filterList the list of comma separated valid extensions. This
          *            may be empty, indicating nothing is valid.
          */
@@ -146,11 +146,11 @@ public class UsefulOperations
         /**
          * This method returns true for any file that has an extension in
          * {@link #myFilters}.
-         * 
+         *
          * @param dir the directory in which the file was found.
-         * 
+         *
          * @param name the name of the file.
-         * 
+         *
          * @return <code>true</code> if the name should be included in the
          *         file list; <code>false</code> otherwise.
          */
@@ -173,11 +173,11 @@ public class UsefulOperations
      * This method checks if two arrays contain the same data. The data does not
      * have to be in the same order, just the same number of objects, and each
      * one is "equal" according to the equals method.
-     * 
+     *
      * @param ary1 The first array.
-     * 
+     *
      * @param ary2 The second array
-     * 
+     *
      * @return Whether or not the two arrays contain the same data.
      */
     public static boolean arraysAreEqual(Object[] ary1, Object[] ary2)
@@ -218,14 +218,14 @@ public class UsefulOperations
 
     /**
      * This method turns an array of objects into a stringified format
-     * 
+     *
      * @param objs The objects being stringified. If this is null, or zero
      *            length, an empty string will be returned where the list would
      *            have been.
-     * 
+     *
      * @param isInBrackets This indicates whether you want square brackets
      *            around the string ( like this : [a,b,c] )
-     * 
+     *
      * @param isWithNewLines This indicates whether you want a new line for each
      *            entry or not.
      */
@@ -256,7 +256,7 @@ public class UsefulOperations
 
     /**
      * This method adds one vector to another without duplication of elements
-     * 
+     *
      * @param toBeAdded the vector to be added. This may be null.
      * @param toAddTo the vector to add to. This MUST NOT be null.
      */
@@ -282,7 +282,7 @@ public class UsefulOperations
 
     /**
      * This method adds one vector to another without duplication of elements
-     * 
+     *
      * @param toBeAdded the vector to be added. This may be null.
      * @param toAddTo the vector to add to. This MUST NOT be null.
      */
@@ -314,15 +314,15 @@ public class UsefulOperations
      * is not available, then toString() will be used.
      * <P>
      * If the separator is null, no separation is used.
-     * 
+     *
      * @param array the array of object to convert
-     * 
+     *
      * @param method The method to call in order to access the required data
      *            from the object. The accessed data will have toString() called
      *            on it. If this is null, toString will be used.
-     * 
+     *
      * @param separator the string to separate each object with
-     * 
+     *
      * @return a string representation of the array
      */
     public static String arrayToString(Object[] array, String method, String separator)
@@ -337,15 +337,15 @@ public class UsefulOperations
      * is not available, then toString() will be used.
      * <P>
      * If the separator is null, no separation is used.
-     * 
+     *
      * @param array the array of object to convert
-     * 
+     *
      * @param method The method to call in order to access the required data
      *            from the object. The accessed data will have toString() called
      *            on it. If this is null, toString will be used.
-     * 
+     *
      * @param separator the string to separate each object with
-     * 
+     *
      * @return a string representation of the array
      */
     public static String arrayToString(Object[] array, String method, String separator, boolean sort)
@@ -453,9 +453,9 @@ public class UsefulOperations
 
     /**
      * This method constructs a <code>Vector</code> from the specified array.
-     * 
+     *
      * @param array The source array.
-     * 
+     *
      * @return The <code>Vector</code> constructed from the array, or
      *         <code>null</code> if <code>array</code> is <code>null</code>.
      */
@@ -477,9 +477,9 @@ public class UsefulOperations
 
     /**
      * This method adds one vector to another by doing a block append.
-     * 
+     *
      * @param toBeConcatenated the vector to be added. This may be null.
-     * 
+     *
      * @param toAddTo the vector to add to. This MUST NOT be null.
      */
     public static final void concatVectors(Vector<? extends AbstractList<?>> toBeConcatenated, Vector<Object> toAddTo)
@@ -499,28 +499,28 @@ public class UsefulOperations
     /**
      * This method returns a new instance of the desired object, instantiated
      * using the <code>constructionArgs</code> passed to it.
-     * 
+     *
      * @param requiredInstanceOf The type of class that this should be (either
      *            an interface, superinterface or class). Cannot be null,
      *            otherwise an IllegalArgumentException will be thrown.
-     * 
+     *
      * @param className The string name of the class. Cannot be null, otherwise
      *            an IllegalArgumentException will be thrown.
-     * 
+     *
      * @param constructionArgs The arguments to pass to the constructor - They
      *            must be in the correct order, and there must be a constructor
      *            with this signature. Cannot be null, otherwise an
      *            IllegalArgumentException will be thrown. They may be zero
      *            length.
-     * 
+     *
      * @param defaultPackageName This is the name of the package at which the
      *            className should be found if the search for the class name by
      *            itself fails. If this is null, there will be no second search.
-     * 
+     *
      * @return an instance of the object that needed to be constructed. It is
      *         guaranteed to be castable to the specified
      *         <code>requiredInstanceOf</code>.
-     * 
+     *
      * @throws CreationException when <br>
      *             <ul>
      *             <li>The class name cannot be found
@@ -532,7 +532,7 @@ public class UsefulOperations
      *             <li>The constructed class is not of type
      *             <code>requiredInstanceOf</code>.
      *             </ul>
-     * 
+     *
      * @see #constructClass(Class, String, Object[], String[])
      */
     public static final Object constructClass(Class<?> requiredInstanceOf,
@@ -549,29 +549,29 @@ public class UsefulOperations
     /**
      * This method returns a new instance of the desired object, instantiated
      * using the <code>constructionArgs</code> passed to it.
-     * 
+     *
      * @param requiredInstanceOf The type of class that this should be (either
      *            an interface, superinterface or class). Cannot be null,
      *            otherwise an IllegalArgumentException will be thrown.
-     * 
+     *
      * @param className The string name of the class. Cannot be null, otherwise
      *            an IllegalArgumentException will be thrown.
-     * 
+     *
      * @param constructionArgs The arguments to pass to the constructor - They
      *            must be in the correct order, and there must be a constructor
      *            with this signature. Cannot be null, otherwise an
      *            IllegalArgumentException will be thrown. They may be zero
      *            length.
-     * 
+     *
      * @param defaultPackageNames This is a list of the package at which the
      *            className should be found if the search for the class name by
      *            itself fails. If this is null, there will be no extra
      *            searches.
-     * 
+     *
      * @return an instance of the object that needed to be constructed. It is
      *         guaranteed to be castable to the specified
      *         <code>requiredInstanceOf</code>.
-     * 
+     *
      * @throws CreationException when <br>
      *             <ul>
      *             <li>The class name cannot be found
@@ -734,15 +734,15 @@ public class UsefulOperations
     /**
      * This method retrieves the elements from <code>superSet</code> that are
      * not in <code>subSet</code>.
-     * 
+     *
      * @param subset The Vector whose elements will be removed from
      *            <code>superset</code>. If this is null,
      *            IllegalArgumentException will be thrown.
-     * 
+     *
      * @param superSet The Vector whose objects will be removed, leaving those
      *            elements not in <code>subSet</code>. If this is null,
      *            IllegalArgumentException will be thrown.
-     * 
+     *
      * @return the set of objects that would be left over if the
      *         <code>subset</code> objects were removed from the
      *         <code>superSet</code> objects.
@@ -755,15 +755,15 @@ public class UsefulOperations
     /**
      * This method retrieves the elements from <code>superSet</code> that are
      * not in <code>subSet</code>.
-     * 
+     *
      * @param subset The Vector whose elements will be removed from
      *            <code>superset</code>. If this is null,
      *            IllegalArgumentException will be thrown.
-     * 
+     *
      * @param superSet The Vector whose objects will be removed, leaving those
      *            elements not in <code>subSet</code>. If this is null,
      *            IllegalArgumentException will be thrown.
-     * 
+     *
      * @return the set of objects that would be left over if the
      *         <code>subset</code> objects were removed from the
      *         <code>superSet</code> objects.
@@ -789,7 +789,7 @@ public class UsefulOperations
 
     /**
      * This method gets the set intersection of the two supplied sets.
-     * 
+     *
      * @param setOne
      * @param setTwo
      * @return those objects that are in both sets.
@@ -818,15 +818,15 @@ public class UsefulOperations
     /**
      * This method subtracts the elements in <code>subset</code> from the
      * elements in <code>superSet</code> and returns the result.
-     * 
+     *
      * @param subset The array whose elements will be removed from
      *            <code>superset</code>. If this is null,
      *            IllegalArgumentException will be thrown.
-     * 
+     *
      * @param superSet The array whose objects will be removed, leaving those
      *            elements not in <code>subSet</code>. If this is null,
      *            IllegalArgumentException will be thrown.
-     * 
+     *
      * @return the set of objects that would be left over if the
      *         <code>subset</code> objects were removed from the
      *         <code>superSet</code> objects (as an array). The type of array
@@ -854,14 +854,14 @@ public class UsefulOperations
      * This method gets the first <code>size</code> elements out of the vector
      * <code>set</code> supplied. If there are not that many elements, it will
      * return all of them.
-     * 
+     *
      * @param set the vector you wish to extract up to <code>size</code>
      *            elements from. If this is null, an IllegalArgumentException
      *            will be thrown.
-     * 
+     *
      * @param size The number of elements you wish to retrieve from the set. If
      *            this is negative, an IllegalArgumentException will be thrown.
-     * 
+     *
      * @return A vector of up to <code>size</code> containing up to the first
      *         <code>size</code> elements of <code>set</code>.
      */
@@ -893,10 +893,10 @@ public class UsefulOperations
 
     /**
      * This method gets the size of the largest Vector in a set of vectors.
-     * 
+     *
      * @param vectorOfVectors the vector containing a list of vectors. If this
      *            is null, an IllegalArgumentException will be thrown.
-     * 
+     *
      * @return The size of the largest vector in <code>vectorOfVectors</code>.
      */
     public static final int getMaxSize(Vector<?> vectorOfVectors)
@@ -923,13 +923,13 @@ public class UsefulOperations
     /**
      * This method checks whether an object is contained inside any of the
      * Vectors contained in a Vector of Vectors.
-     * 
+     *
      * @param containingVector This is the Vector containing a set of Vectors,
      *            one of which must contain <code>obj</code> in order for this
      *            method to return true.
-     * 
+     *
      * @param obj The object that we are looking for in the Vector of Vectors.
-     * 
+     *
      * @return <code>true</code> if the object is contained in the Vector of
      *         Vectors, and <code>false</code> otherwise.
      */
@@ -954,13 +954,13 @@ public class UsefulOperations
      * the two Vectors does not matter. This method treats equal objects as a
      * single object, so if you had a subset of integers (1,2,3,1,1,4,5), and a
      * superset of integers (1,2,3,4,5), this method would return true.
-     * 
+     *
      * @param subset The Vector whose contained objects must all be in the
      *            <code>superset</code> for this method to return true.
-     * 
+     *
      * @param superSet The Vector whose objects must include all those in the
      *            <code>subset</code> for this method to return true.
-     * 
+     *
      * @return <code>true</code> if all objects in <code>subset</code> are
      *         contained in <code>superSet</code>.
      */
@@ -983,13 +983,13 @@ public class UsefulOperations
      * each object as a different object even if it is "equal", so if you had a
      * subset of integers (1,2,3,1,1,4,5), and a superset of integers
      * (1,2,3,4,5), this method would return <code>false</code>.
-     * 
+     *
      * @param sublist The Vector whose contained objects must all be in the
      *            <code>superList</code> for this method to return true.
-     * 
+     *
      * @param superList The Vector whose objects must include all those in the
      *            <code>sublist</code> for this method to return true.
-     * 
+     *
      * @return <code>true</code> if all objects in <code>sublist</code> are
      *         contained in <code>superList</code>.
      */
@@ -1016,11 +1016,11 @@ public class UsefulOperations
      * This method checks whether two objects are equal. It determines whether
      * one or both of them are null, and if not, then calls "equals" between
      * them.
-     * 
+     *
      * @param first The first object to compare.
-     * 
+     *
      * @param second The second object to compare.
-     * 
+     *
      * @return <code>true</code> if the objects are equal, and false
      *         otherwise.
      */
@@ -1042,11 +1042,11 @@ public class UsefulOperations
      * "equals" all the way down the two arrays determining that the Object at
      * the same index in <code>first</code> and <code>second</code> are
      * "equal".
-     * 
+     *
      * @param first The first array to compare.
-     * 
+     *
      * @param second The second array to compare.
-     * 
+     *
      * @return <code>true</code> if the arrays are equal, and false otherwise.
      */
     public static final boolean orderedArraysAreEqual(Object[] first, Object[] second)
@@ -1079,12 +1079,12 @@ public class UsefulOperations
      * array will be of type <code>clazz</code>, and therefore assumes that
      * every object in <code>v</code> will be of type <code>clazz</code> or
      * some subclass of that.
-     * 
+     *
      * @param v The vector of objects to be converted into an array.
-     * 
+     *
      * @param clazz The desired class of the array. All objects in
      *            <code>v</code> must be implicitly castable to this class.
-     * 
+     *
      * @return An array of type <code>clazz []</code> containing all the
      *         objects in <code>v</code> in the same order as they appeared in
      *         <code>v</code>.
@@ -1110,12 +1110,12 @@ public class UsefulOperations
      * array will be of type <code>clazz</code>, and therefore assumes that
      * every object in <code>l</code> will be of type <code>clazz</code> or
      * some subclass of that.
-     * 
+     *
      * @param l The list of objects to be converted into an array.
-     * 
+     *
      * @param clazz The desired class of the array. All objects in
      *            <code>l</code> must be implicitly castable to this class.
-     * 
+     *
      * @return An array of type <code>clazz []</code> containing all the
      *         objects in <code>l</code> in the same order as they appeared in
      *         <code>l</code>.
@@ -1142,13 +1142,13 @@ public class UsefulOperations
      * <code>clazz</code>, it assumes that every object in <code>v</code>
      * will be of type <code>clazz</code> or some subclass of that. This
      * method can be used on List.toArray() arrays.
-     * 
+     *
      * @param array The array of Object to be converted into an array of class
      *            <code>clazz</code>.
-     * 
+     *
      * @param clazz The desired class of the array. All objects in
      *            <code>v</code> must be implicitly castable to this class.
-     * 
+     *
      * @return An array of type <code>clazz []</code> containing all the
      *         objects in <code>v</code> in the same order as they appeared in
      *         <code>array</code>.
@@ -1177,13 +1177,13 @@ public class UsefulOperations
      * etc, since this would affect the overall array). Also, since the class is
      * obtained from the objects, the Vector may not be empty for this call to
      * work.
-     * 
+     *
      * @param v The vector of objects to be converted into an array. A call to
      *            {@link java.util.Vector#firstElement()}will return the first
      *            element and access the class from it, therefore this object
      *            cannot be empty. If it is null or empty, an
      *            IllegalArgumentException will be thrown.
-     * 
+     *
      * @return An array of type <code>v.firstElement().getClass() []</code>
      *         containing all the objects in <code>v</code> in the same order
      *         as they appeared in <code>v</code>.
@@ -1204,20 +1204,20 @@ public class UsefulOperations
      * line characters, each one of these will end up being preceded by a
      * <code>valueToInsert</code> String. The entire line will have a newline
      * appended to it.
-     * 
+     *
      * @param buf The stringBuffer in which to construct the new string.
-     * 
+     *
      * @param valueToInsert The value to insert just after each new line in
      *            <code>originalString</code>.
-     * 
+     *
      * @param originalString The original string with newlines.
-     * 
+     *
      * @param newline This value indicates whether a newline preceeded the
      *            <code>originalString</code> in <code>buf</code>. If it
      *            did (this value will be true) then the
      *            <code>valueToInsert</code> should be inserted into
      *            <code>buf</code> before anything else.
-     * 
+     *
      * @return the StringBuffer passed in as <code>buf</code>. This allows
      *         for chained calls. The returned buffer will have a newline at the
      *         end of it.
@@ -1236,20 +1236,20 @@ public class UsefulOperations
      * line characters, each one of these will end up being preceded by a
      * <code>valueToInsert</code> String. The entire line will have a newline
      * appended to it.
-     * 
+     *
      * @param buf The stringBuffer in which to construct the new string.
-     * 
+     *
      * @param valueToInsert The value to insert just after each new line in
      *            <code>originalString</code>.
-     * 
+     *
      * @param originalString The original string with newlines.
-     * 
+     *
      * @param newline This value indicates whether a newline preceeded the
      *            <code>originalString</code> in <code>buf</code>. If it
      *            did (this value will be true) then the
      *            <code>valueToInsert</code> should be inserted into
      *            <code>buf</code> before anything else.
-     * 
+     *
      * @return the StringBuffer passed in as <code>buf</code>. This allows
      *         for chained calls. The returned buffer will have a newline at the
      *         end of it.
@@ -1322,21 +1322,21 @@ public class UsefulOperations
 
     /**
      * This method converts a string of data into a list of Name Value Pairs.
-     * 
+     *
      * @param line The line of data to be parsed.
-     * 
+     *
      * @param interNvpSeparators The separators to be used to separate one
      *            name-value pair string from another in the <code>line</code>.
      *            N.B. You cannot specify the same character in this string and
      *            in the <code>intraNvpSeparators</code>.
-     * 
+     *
      * @param intraNvpSeparators The separators to be used to separate the name
      *            and the value in a sinlge name-value pair. N.B. You cannot
      *            specify the same character in this string and in the
      *            <code>interNvpSeparators</code>.
-     * 
+     *
      * @return The array of name value pairs that were specified in the string.
-     * 
+     *
      * @throws IllegalArgumentException when there are no
      *             <code>intraNvpSeparators</code> in a particular name value
      *             pair.
@@ -1373,7 +1373,7 @@ public class UsefulOperations
     /**
      * This method is the same as <code>Thread.sleep()</code>, but does not
      * throw <code>InterruptedException</code>.
-     * 
+     *
      * @param millis the length of time to sleep in milliseconds.
      */
     public static void sleep(long millis)
@@ -1393,14 +1393,14 @@ public class UsefulOperations
      * <code>toPad</code> and adds the string <code>toPadWith</code> until
      * the total length of the new string is <code>totalLength</code>. The
      * string <code>toPadWith</code> may be repeated many times.
-     * 
+     *
      * @param toPad The starting string.
-     * 
+     *
      * @param toPadWith The string to add to the starting string
      *            <code>toPad</code>.
-     * 
+     *
      * @param totalLength The final length of the returned string buffer.
-     * 
+     *
      * @return a stringbuffer of length <code>totalLength</code> containing
      *         toPad, and padded with the string <code>toPadWith</code>.
      */
@@ -1432,9 +1432,9 @@ public class UsefulOperations
 
     /**
      * This method gets the short class name for an object.
-     * 
+     *
      * @param o the object whose short class name is desired.
-     * 
+     *
      * @return the final part of the class name (hence the name as declared in
      *         the source file).
      */
@@ -1445,9 +1445,9 @@ public class UsefulOperations
 
     /**
      * This method gets the short class name for the supplied class.
-     * 
+     *
      * @param c the class whose short name is desired.
-     * 
+     *
      * @return the final part of the class name (hence the name as declared in
      *         the source file).
      */
@@ -1464,9 +1464,9 @@ public class UsefulOperations
      * with a delimiter of DOT, the value <code>toParse</code> of
      * au.com.zinescom.util.UsefulOperations would become UsefulOperations. If
      * the delimiter is not found in the string, the whole string is returned.
-     * 
+     *
      * @param toParse The string whose final token is sought.
-     * 
+     *
      * @param delimiter The value to tokenise the string with.
      */
     public static String getLastToken(String toParse, String delimiter)
@@ -1484,9 +1484,9 @@ public class UsefulOperations
      * This method produces a stringified version of the class printing the
      * shorthand name of the class and a list of the names of the public fields
      * and their values.
-     * 
+     *
      * @param withPublicFields The object to be stringified.
-     * 
+     *
      * @return a stringified version of the class printing the shorthand name of
      *         the class and a list of the names of the public fields and their
      *         values.
@@ -1603,9 +1603,9 @@ public class UsefulOperations
      * shorthand name of the class and a list of the names of the public fields
      * and their specific values. This calls is the same as
      * {@link #produceString(Object, boolean) produceString(object, false)}.
-     * 
+     *
      * @param withPublicFields The object to be stringified.
-     * 
+     *
      * @return a stringified version of the class printing the shorthand name of
      *         the class and a list of the names of the (public) fields of the
      *         specific class and their values.
@@ -1622,13 +1622,13 @@ public class UsefulOperations
      * is not available, then toString() will be used.
      * <P>
      * If the separator is null, no separation is used.
-     * 
+     *
      * @param array the array of object to convert
-     * 
+     *
      * @param method The method to call in order to access the required data
      *            from the object. The accessed data will have toString() called
      *            on it. If this is null, toString will be used.
-     * 
+     *
      * @return a string representation of the array
      */
     public static String[] convertArray(Object[] array, String method)
@@ -1712,12 +1712,12 @@ public class UsefulOperations
      * This method gets a singleton style object of class type
      * <code>clazz</code> using an instance method (either located in
      * <code>instanceMethodTable</code> or named the default "instance")
-     * 
+     *
      * @param clazz The class of the object to access.
-     * 
+     *
      * @param instanceMethodTable The hashtable containing the names of instance
      *            methods mapped to class names.
-     * 
+     *
      * @return The instance of the object of type <code>clazz</code> obtained
      *         by calling the appropriate <b>static </b> instance method on
      *         <code>clazz</code>. If there is no method of the selected name
@@ -1763,10 +1763,10 @@ public class UsefulOperations
     /**
      * This method gets the name of the instance method for the supplied
      * <code>className</code>.
-     * 
+     *
      * @param className The name of the class whose instance method is being
      *            sought.
-     * 
+     *
      * @return The instance name to be used on the class with the supplied fully
      *         qualified <code>className</code>.
      */
@@ -1779,13 +1779,13 @@ public class UsefulOperations
     /**
      * This method creates the instanceMethod name table and then adds any class
      * name to instance method name pairs it finds in <code>instanceMap</code>.
-     * 
+     *
      * @param caller the caller of this method.
-     * 
+     *
      * @param nameValueMap The comma and space separated name value pair list
      *            mapping names to values, with name and value being separated
      *            by a caret.
-     * 
+     *
      * @return the hashtable of names to values.
      */
     public static Hashtable<String, String> produceNameValueMap(Object caller, String nameValueMap)
@@ -1797,17 +1797,17 @@ public class UsefulOperations
     /**
      * This method creates an instance method name table and then adds any class
      * name to instance method name pairs it finds in <code>instanceMap</code>.
-     * 
+     *
      * @param caller the caller of this method.
-     * 
+     *
      * @param nameValueMap The <code>interNvpSeparators</code> separated name
      *            value pair list mapping names to values, with name and value
      *            being separated by a <code>intraNvpSeparators</code>.
-     * 
+     *
      * @param interNvpSeparators The inter name value pair separators.
-     * 
+     *
      * @param intraNvpSeparators The intra name value pair separators.
-     * 
+     *
      * @return the hashtable of names to values.
      */
     public static Hashtable<String, String> produceNameValueMap(Object caller,
@@ -1843,10 +1843,10 @@ public class UsefulOperations
      * not match the provided strings. If no class can be found after rejecting
      * those that match the provided strings, an IllegalStateException is
      * thrown. NOTE: This method will not work on calls from this class.
-     * 
+     *
      * @param exclusions The list of strings to exclude in the calling class
      *            search.
-     * 
+     *
      * @return The first Class in a stack trace not matching the supplied
      *         strings.
      */
@@ -1896,11 +1896,11 @@ public class UsefulOperations
 
     /**
      * This method gets the common ancestor of two classes.
-     * 
+     *
      * @param first The first of two classes to compare for a common ancestor.
-     * 
+     *
      * @param second The second of two classes to compare for a common ancestor.
-     * 
+     *
      * @return The common ancestor.
      */
     public static Class<?> getCommonAncestor(Class<?> first, Class<?> second)
@@ -1923,7 +1923,7 @@ public class UsefulOperations
 
     /**
      * This method prints metadata concerning a resultset.
-     * 
+     *
      * @param caller
      * @param rs
      * @throws SQLException
@@ -1956,7 +1956,7 @@ public class UsefulOperations
 
     /**
      * This method runs a few tests.
-     * 
+     *
      * @param args
      */
     public static void main(String[] args)
@@ -1980,9 +1980,9 @@ public class UsefulOperations
     /**
      * This method gets a number that is one less than the supplied
      * <code>number</code>.
-     * 
+     *
      * @param number The number one greater than the return value.
-     * 
+     *
      * @return A number one less than the supplied <code>number</code>.
      */
     public static Number getValueBelow(Object number)
@@ -2013,9 +2013,9 @@ public class UsefulOperations
     /**
      * This method gets a number that is one more than the supplied
      * <code>number</code>.
-     * 
+     *
      * @param number The number one less than the return value.
-     * 
+     *
      * @return A number one greater than the supplied <code>number</code>.
      */
     public static Number getValueAbove(Object number)
@@ -2046,9 +2046,9 @@ public class UsefulOperations
     /**
      * This method capitalises the first letter of the supplied string and
      * returns the new string,
-     * 
+     *
      * @param toCapitalise The string whose first character will be capitalised.
-     * 
+     *
      * @return a string similar to toCapitalise with a capitalised first
      *         character.
      */
@@ -2061,12 +2061,12 @@ public class UsefulOperations
     /**
      * This method checks that a supplied string <code>toMatch</code> is
      * present as a single word somewhere in the supplied <code>line</code>.
-     * 
+     *
      * @param line The line which we are checking for the presence of the word
      *            <code>toMatch</code>.
-     * 
+     *
      * @param toMatch The word we are searching for.
-     * 
+     *
      * @return <code>true</code> if the word <code>toMatch</code> is in the
      *         <code>line</code>.
      */

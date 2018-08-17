@@ -10,7 +10,7 @@ import plsqleditor.editors.MultiPagePlsqlEditor;
 
 /**
  * Label provider for the TableViewerExample
- * 
+ *
  * @see org.eclipse.jface.viewers.LabelProvider
  */
 public class LiveConnectionLabelProvider extends LabelProvider implements ITableLabelProvider
@@ -66,7 +66,7 @@ public class LiveConnectionLabelProvider extends LabelProvider implements ITable
      */
     public Image getColumnImage(Object element, int columnIndex)
     {
-        return (columnIndex == 0) ? // 
+        return (columnIndex == 0) ? //
                 getImage(!((LiveConnection) element).getType().equals(MultiPagePlsqlEditor.SCHEMA_DEFAULT))
                 : null;
     }

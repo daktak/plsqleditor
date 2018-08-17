@@ -12,9 +12,9 @@ import au.com.zinescom.util.UsefulOperations;
 
 /**
  * This type represents
- * 
+ *
  * Created on 18/06/2003
- * 
+ *
  * @author Toby Zines
  */
 public class Column extends DatabaseEntity implements Serializable
@@ -29,14 +29,14 @@ public class Column extends DatabaseEntity implements Serializable
 	private int myPrecisionRadix;
 	private int myNumDecimalDigits;
 	private boolean myIsNullable;
-	
+
 	/** This field represents the constraints on this table. */
 	private List<Constraint> myConstraints;
 
 	private Table myTable;
 
 	/**
-	 * This field indicates whether this column is a primary key in the table 
+	 * This field indicates whether this column is a primary key in the table
 	 * to which it is associated.
 	 */
 	private boolean myIsPrimaryKey;
@@ -45,7 +45,7 @@ public class Column extends DatabaseEntity implements Serializable
 	{
 		myConstraints = new ArrayList<Constraint>();
 	}
-	
+
 	/**
 	 * @return The type of this column as a java class.
 	 */
@@ -64,7 +64,7 @@ public class Column extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method indicates whether this column is nullable or not.
-	 * 
+	 *
 	 * @return <code>true</code> if the field is nullable.
 	 */
 	public boolean isNullable()
@@ -138,7 +138,7 @@ public class Column extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method sets the size of this column.
-	 * 
+	 *
 	 * @param i The size
 	 */
 	public void setSize(int i)
@@ -148,7 +148,7 @@ public class Column extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method returns the owning table for this column.
-	 * 
+	 *
 	 * @return The owning table.
 	 */
 	public Table getTable()
@@ -158,7 +158,7 @@ public class Column extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method sets the owning table for this column.
-	 * 
+	 *
 	 * @param table The table that owns this column.
 	 */
 	protected void setTable(Table table)
@@ -167,9 +167,9 @@ public class Column extends DatabaseEntity implements Serializable
 	}
 
 	/**
-	 * This method indicates whether this column is a primary key of the 
+	 * This method indicates whether this column is a primary key of the
 	 * table it contains.
-	 * 
+	 *
 	 * @return {@link #myIsPrimaryKey}.
 	 */
 	public boolean isPrimaryKey()
@@ -178,9 +178,9 @@ public class Column extends DatabaseEntity implements Serializable
 	}
 
 	/**
-	 * This method sets the indicator as to whether this column is a primary 
+	 * This method sets the indicator as to whether this column is a primary
 	 * key of the table it contains.
-	 * 
+	 *
 	 * @param isPrimaryKey <code>true</code> if this is a primary key
 	 */
 	public void setIsPrimaryKey(boolean isPrimaryKey)
@@ -190,14 +190,14 @@ public class Column extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method adds a constraint this table.
-	 * 
+	 *
 	 * @param constraint
 	 *            The constraint to add.
 	 */
 	public void addConstraint(Constraint constraint)
 	{
 		myConstraints.add(constraint);
-	}	
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
@@ -213,7 +213,7 @@ public class Column extends DatabaseEntity implements Serializable
         {
             return false;
         }
-        if (!UsefulOperations.objectsAreEqual(column.getTable().getName(), 
+        if (!UsefulOperations.objectsAreEqual(column.getTable().getName(),
                                               getTable().getName()))
         {
             return false;
@@ -245,7 +245,7 @@ public class Column extends DatabaseEntity implements Serializable
 		UsefulOperations.insertDataString(sb, "   ", sb.toString(), true);
 		return sbToReturn.toString();
 	}
-	
+
 	public String getDisplayName()
     {
 		StringBuffer sb = new StringBuffer();
@@ -253,6 +253,6 @@ public class Column extends DatabaseEntity implements Serializable
 		{
 			sb.append(" : ").append(mySQLTypeName).append("(").append(mySize).append(")");
 		}
-    	return getName() + sb.toString(); 
+    	return getName() + sb.toString();
     }
 }

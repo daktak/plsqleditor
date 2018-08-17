@@ -100,7 +100,7 @@ public class ManageOpenConnectionsDialog extends Dialog
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see ITaskListViewer#addTask(ExampleTask)
          */
         public void addConnection(LiveConnection task)
@@ -110,7 +110,7 @@ public class ManageOpenConnectionsDialog extends Dialog
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see ITaskListViewer#removeTask(ExampleTask)
          */
         public void removeConnection(LiveConnection task)
@@ -120,7 +120,7 @@ public class ManageOpenConnectionsDialog extends Dialog
 
         /*
          * (non-Javadoc)
-         * 
+         *
          * @see ITaskListViewer#updateTask(ExampleTask)
          */
         public void updateConnection(LiveConnection task)
@@ -274,7 +274,7 @@ public class ManageOpenConnectionsDialog extends Dialog
 
     /**
      * Return the column names in a collection
-     * 
+     *
      * @return List containing column names
      */
     public java.util.List<String> getColumnNames()
@@ -304,7 +304,7 @@ public class ManageOpenConnectionsDialog extends Dialog
      * <p>
      * Note that the <code>open</code> method blocks for input dialogs.
      * </p>
-     * 
+     *
      * @param parentShell the parent shell, or <code>null</code> to create a
      *            top-level shell
      * @param dialogTitle the dialog title, or <code>null</code> if none
@@ -339,7 +339,7 @@ public class ManageOpenConnectionsDialog extends Dialog
 
     /*
      * (non-Javadoc)
-     * 
+     *
      * @see
      * org.eclipse.jface.window.Window#configureShell(org.eclipse.swt.widgets
      * .Shell)
@@ -411,7 +411,7 @@ public class ManageOpenConnectionsDialog extends Dialog
 
     /**
      * Returns the ok button.
-     * 
+     *
      * @return the ok button
      */
     protected Button getOkButton()
@@ -422,7 +422,7 @@ public class ManageOpenConnectionsDialog extends Dialog
     /**
      * Sets or clears the error message. If not <code>null</code>, the OK button
      * is disabled.
-     * 
+     *
      * @param errorMessage the error message, or <code>null</code> to clear
      */
     public void setErrorMessage(String errorMessage)

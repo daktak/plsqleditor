@@ -36,7 +36,7 @@ public class LiveConnectionSorter extends ViewerSorter
 
     /**
      * Creates a resource sorter that will use the given sort criteria.
-     * 
+     *
      * @param criteria the sort criterion to use: one of <code>NAME</code> or
      *            <code>TYPE</code>
      */
@@ -75,7 +75,7 @@ public class LiveConnectionSorter extends ViewerSorter
     /**
      * Returns a number reflecting the collation order of the given tasks based
      * on the percent completed.
-     * 
+     *
      * @param task1
      * @param task2
      * @return a negative number if the first element is less than the second
@@ -88,9 +88,9 @@ public class LiveConnectionSorter extends ViewerSorter
         int result = task1.getProject().compareTo(task2.getProject());
         return result;
     }
-    
+
     /**
-     * 
+     *
      * @param task1
      * @param task2
      * @return
@@ -104,7 +104,7 @@ public class LiveConnectionSorter extends ViewerSorter
     /**
      * Returns a number reflecting the collation order of the given tasks based
      * on the description.
-     * 
+     *
      * @param task1 the first task element to be ordered
      * @param resource2 the second task element to be ordered
      * @return a negative number if the first element is less than the second
@@ -120,7 +120,7 @@ public class LiveConnectionSorter extends ViewerSorter
     /**
      * Returns a number reflecting the collation order of the given tasks based
      * on the description.
-     * 
+     *
      * @param task1 the first task element to be ordered
      * @param resource2 the second task element to be ordered
      * @return a negative number if the first element is less than the second
@@ -136,7 +136,7 @@ public class LiveConnectionSorter extends ViewerSorter
     /**
      * Returns a number reflecting the collation order of the given tasks based
      * on their owner.
-     * 
+     *
      * @param resource1 the first resource element to be ordered
      * @param resource2 the second resource element to be ordered
      * @return a negative number if the first element is less than the second
@@ -151,7 +151,7 @@ public class LiveConnectionSorter extends ViewerSorter
 
     /**
      * Returns the sort criteria of this this sorter.
-     * 
+     *
      * @return the sort criterion
      */
     public int getCriteria()

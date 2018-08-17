@@ -5,9 +5,9 @@ package au.com.gts.data;
 
 /**
  * This type represents
- * 
+ *
  * Created on 18/06/2003
- * 
+ *
  * @author Toby Zines
  */
 public class ForeignKeyConstraint extends Constraint
@@ -21,13 +21,13 @@ public class ForeignKeyConstraint extends Constraint
 	 * This constructor generates the foreign key constraint passing in the
 	 * primary key, foreign key and constraint name (which is the same as the
 	 * foreign key).
-	 * 
+	 *
 	 * @param name
 	 *            The name of the constraint.
-	 * 
+	 *
 	 * @param pkColumn
 	 *            The primary key column referenced by this constraint.
-	 * 
+	 *
 	 * @param fkColumn
 	 *            The foreign key column referenced by this constraint.
 	 */
@@ -80,7 +80,7 @@ public class ForeignKeyConstraint extends Constraint
 	{
 		Column fkColumn = getForeignKeyColumn();
 		Table fkTable = fkColumn.getTable();
-		return super.toString() + 
+		return super.toString() +
 		"\nForeign Key Column: " + fkTable.getStrippedSchemaName() + "." + fkTable.getName() + "." + fkColumn.getName();
 	}
 }

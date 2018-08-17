@@ -13,9 +13,9 @@ import au.com.zinescom.util.UsefulOperations;
 
 /**
  * This type represents a table in a database.
- * 
+ *
  * Created on 18/06/2003
- * 
+ *
  * @author Toby Zines
  */
 public class Table extends DatabaseEntity implements Serializable
@@ -48,7 +48,7 @@ public class Table extends DatabaseEntity implements Serializable
 
 	/**
 	 * This returns all the available columns as a Collection.
-	 * 
+	 *
 	 * @return {@link #myColumns}.
 	 */
 	public List<Column> getColumns()
@@ -74,10 +74,10 @@ public class Table extends DatabaseEntity implements Serializable
 
 	/**
 	 * This returns the column with the supplied name.
-	 * 
+	 *
 	 * @param columnName
 	 *            The name of the column desired.
-	 * 
+	 *
 	 * @return The named column, or null if there is no column with that name.
 	 */
 	public Column getColumn(String columnName)
@@ -96,7 +96,7 @@ public class Table extends DatabaseEntity implements Serializable
 	 * This method sets a new set of columns onto the Table. In doing so, all
 	 * the old columns are removed, and they will no longer reference this
 	 * table. Better to only use this in the {@link DBMetaDataGatherer}.
-	 * 
+	 *
 	 * @param columns
 	 *            The columns to set on this table.
 	 */
@@ -116,7 +116,7 @@ public class Table extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method adds another column at the end of this table.
-	 * 
+	 *
 	 * @param toAdd
 	 *            The column to add to this table.
 	 */
@@ -152,7 +152,7 @@ public class Table extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method sets the type of the particular table.
-	 * 
+	 *
 	 * @param tableType
 	 */
 	public void setType(String tableType)
@@ -162,7 +162,7 @@ public class Table extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method gets the type of the particular table.
-	 * 
+	 *
 	 * @return tableType
 	 */
 	public String getType()
@@ -172,7 +172,7 @@ public class Table extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method returns the current list of constraints on all of the owned columns.
-	 * 
+	 *
 	 * @return {@link #myConstraints}.
 	 */
 	public List<Constraint> getConstraints()
@@ -182,12 +182,12 @@ public class Table extends DatabaseEntity implements Serializable
 		{
 			constraints.addAll(column.getConstraints());
 		}
-		return constraints; 
+		return constraints;
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj)
@@ -211,7 +211,7 @@ public class Table extends DatabaseEntity implements Serializable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode()
@@ -226,7 +226,7 @@ public class Table extends DatabaseEntity implements Serializable
 	{
 		return mySchemaName.substring(mySchemaName.indexOf(".") + 1);
 	}
-	
+
 	public String toString()
 	{
 		// TODO fix this
@@ -234,7 +234,7 @@ public class Table extends DatabaseEntity implements Serializable
 		// + columns
 		return sb.toString();
 	}
-	
+
 	public String getDisplayName()
 	{
 		return getName();

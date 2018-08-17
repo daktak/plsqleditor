@@ -23,9 +23,9 @@ import org.eclipse.swt.widgets.Widget;
 
 /**
  * This class
- * 
+ *
  * @author Toby Zines
- * 
+ *
  * Created on 8/06/2004
  */
 public class MovableItemManager
@@ -67,7 +67,7 @@ public class MovableItemManager
 
     /**
      * This method adds another movable item to the list.
-     * 
+     *
      * @param mi
      */
     public void add(MovableItem mi)
@@ -78,13 +78,13 @@ public class MovableItemManager
     /**
      * This method captures a mouse click, and identifies the movable item that was captured,
      * setting it up for being moved.
-     * 
+     *
      * @param button
      *            The button in whose coordinate space the mouse event was captured.
-     * 
+     *
      * @param x
      *            The x coordinate of the mouse event.
-     * 
+     *
      * @param y
      *            The y coordinate of the mouse event.
      */
@@ -101,13 +101,13 @@ public class MovableItemManager
     /**
      * This method captures a mouse click, and identifies the movable item that was captured,
      * setting it up for being linked.
-     * 
+     *
      * @param button
      *            The button in whose coordinate space the mouse event was captured.
-     * 
+     *
      * @param x
      *            The x coordinate of the mouse event.
-     * 
+     *
      * @param y
      *            The y coordinate of the mouse event.
      */
@@ -124,7 +124,7 @@ public class MovableItemManager
     /**
      * This method moves the currently captured item to the newly specified location, specified in
      * the coordinates used to capture the item.
-     * 
+     *
      * @param x
      * @param y
      */
@@ -178,7 +178,7 @@ public class MovableItemManager
     }
 
     /**
-     * 
+     *
      */
     public void drawlinks(Canvas canvas)
     {
@@ -267,7 +267,7 @@ public class MovableItemManager
     }
 
     /**
-     * 
+     *
      * @param x
      * @param y
      * @return The item at the specified location (x and y) relative to the movable it that is

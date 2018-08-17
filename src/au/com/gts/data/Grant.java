@@ -10,13 +10,13 @@ import au.com.zinescom.util.UsefulOperations;
 
 /**
  * This type represents a stand along procedure in a database.
- * 
+ *
  * @author Toby Zines
  */
 public class Grant extends DatabaseEntity implements Serializable
 {
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = -3459191925608361423L;
 
@@ -27,18 +27,18 @@ public class Grant extends DatabaseEntity implements Serializable
 	private String mySchemaName;
 
 	private String myGrantor;
-	
+
 	private String myGrantee;
-	
+
 	private String myGrantable;
-	
+
 	private String myTarget;
-	
+
 	private DBMetaDataGatherer myDbMetaDataGatherer;
 
 	/**
 	 * This constructor generates a new Table with an empty set of columns.
-	 * @param name 
+	 * @param name
 	 */
 	public Grant(DBMetaDataGatherer dbmdg, String schemaName, String target, String grantor, String grantee, String privilege, String grantable)
 	{
@@ -49,7 +49,7 @@ public class Grant extends DatabaseEntity implements Serializable
 		myGrantor = grantor;
 		myGrantee = grantee;
 		myGrantable = grantable;
-		setName("Grant " + myPrivilege + " on " + mySchemaName + 
+		setName("Grant " + myPrivilege + " on " + mySchemaName +
 				"." + myTarget + " to " + myGrantee);
 	}
 
@@ -79,7 +79,7 @@ public class Grant extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method gets the privilege of the particular grant.
-	 * 
+	 *
 	 * @return myPrivilege
 	 */
 	public String getPrivilege()
@@ -89,7 +89,7 @@ public class Grant extends DatabaseEntity implements Serializable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	public boolean equals(Object obj)
@@ -118,7 +118,7 @@ public class Grant extends DatabaseEntity implements Serializable
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode()
@@ -133,10 +133,10 @@ public class Grant extends DatabaseEntity implements Serializable
 	{
 		return mySchemaName.substring(mySchemaName.indexOf(".") + 1);
 	}
-	
+
 	public String toString()
 	{
-		return "Grantor [" + myGrantor + "] provides " + getName() + 
+		return "Grantor [" + myGrantor + "] provides " + getName() +
 		".\n  Grantable = " + myGrantable;
 	}
 
@@ -171,9 +171,9 @@ public class Grant extends DatabaseEntity implements Serializable
 	{
 		return myTarget;
 	}
-	
+
 	public String getDisplayName()
     {
-    	return getPrivilege() + " to " + getGrantee(); 
+    	return getPrivilege() + " to " + getGrantee();
     }
 }

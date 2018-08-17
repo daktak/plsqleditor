@@ -14,9 +14,9 @@ import plsqleditor.db.OracleDbMetaDataGatherer;
 
 /**
  * This type represents
- * 
+ *
  * Created on 21/06/2003
- * 
+ *
  * @author Toby Zines
  */
 public class Schema extends DatabaseEntity implements Serializable
@@ -61,7 +61,7 @@ public class Schema extends DatabaseEntity implements Serializable
 
 	/**
 	 * This constructor ...
-	 * 
+	 *
 	 */
 	public Schema(String catalogName, String schemaName, String fullName,
 			DBMetaDataGatherer dbmdg)
@@ -74,7 +74,7 @@ public class Schema extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method returns all the schemas stored in {@link #theSchemas}table.
-	 * 
+	 *
 	 * @return All the stored schemas
 	 */
 	public static Schema[] getSchemas(DBMetaDataGatherer dbmdg)
@@ -93,7 +93,7 @@ public class Schema extends DatabaseEntity implements Serializable
 			for (Schema schema : dbmdg.getSchemas())
 			{
 				schemaMap.put(schema.getSchemaName(), schema);
-			} 
+			}
 		}
 		return schemaMap;
 	}
@@ -102,13 +102,13 @@ public class Schema extends DatabaseEntity implements Serializable
 	 * This method gets the instance of the schema with the supplied name. If
 	 * there is no schema with that name, one will be created and stored in
 	 * {@link #theSchemas}.
-	 * 
+	 *
 	 * @param catalogName
 	 *            The name of the catalog that the schema belong to.
-	 * 
+	 *
 	 * @param schemaName
 	 *            The name of the schema being sought.
-	 * 
+	 *
 	 * @return The schema named by <code>schemaName</code>.
 	 */
 	public static Schema getSchema(DBMetaDataGatherer dbmdg,
@@ -138,7 +138,7 @@ public class Schema extends DatabaseEntity implements Serializable
 	}
 
 	// TODO getProcedures, getFunctions, getTypes (which have type bodies, like Packages have Package bodies)
-	
+
 	public Map<String, Function> getFunctions()
 	{
 		if (myFunctions == null)
@@ -151,7 +151,7 @@ public class Schema extends DatabaseEntity implements Serializable
 				for (Function function : functions)
 				{
 					myFunctions.put(function.getName(), function);
-					function.setSchemaName(myFullName); 
+					function.setSchemaName(myFullName);
 				}
 			}
 			catch (SQLException e)
@@ -174,7 +174,7 @@ public class Schema extends DatabaseEntity implements Serializable
 				for (Procedure procedure : procedures)
 				{
 					myProcedures.put(procedure.getName(), procedure);
-					procedure.setSchemaName(myFullName); 
+					procedure.setSchemaName(myFullName);
 				}
 			}
 			catch (SQLException e)
@@ -209,7 +209,7 @@ public class Schema extends DatabaseEntity implements Serializable
 	}
 	/**
 	 * This method returns the map of table names to tables for this schema.
-	 * 
+	 *
 	 * @return The map of table's names to tables within this schema.
 	 */
 	public Map<String, Trigger> getTriggers()
@@ -224,7 +224,7 @@ public class Schema extends DatabaseEntity implements Serializable
 				for (Trigger trigger : triggers)
 				{
 					myTriggers.put(trigger.getName(), trigger);
-					trigger.setSchemaName(myFullName); 
+					trigger.setSchemaName(myFullName);
 				}
 			}
 			catch (SQLException e)
@@ -237,7 +237,7 @@ public class Schema extends DatabaseEntity implements Serializable
 
 	/**
 	 * This method returns the map of table names to tables for this schema.
-	 * 
+	 *
 	 * @return The map of table's names to tables within this schema.
 	 */
 	public Map<String, Table> getTables()
@@ -285,10 +285,10 @@ public class Schema extends DatabaseEntity implements Serializable
 	/**
 	 * This method returns the table owned by this schema with the supplied
 	 * name.
-	 * 
+	 *
 	 * @param tableName
 	 *            The name of the table to return.
-	 * 
+	 *
 	 * @return The table of the supplied name, or null if there is no table of
 	 *         that name.
 	 */
@@ -324,14 +324,14 @@ public class Schema extends DatabaseEntity implements Serializable
 			map.clear();
 		}
 	}
-	
+
 	public String toString()
 	{
 		return getName();
 	}
-	
+
 	public String getDisplayName()
     {
-    	return getSchemaName(); 
+    	return getSchemaName();
     }
 }

@@ -2,7 +2,7 @@ package org.boomsticks.plsqleditor.dialogs.openconnections;
 
 /**
  * A LiveConnection has the following properties: type, url, filename and timeUp
- * 
+ *
  * @author Toby Zines
  */
 public class LiveConnection
@@ -24,7 +24,7 @@ public class LiveConnection
 
     /**
      * Create a task with an initial description
-     * 
+     *
      * @param url
      */
     public LiveConnection(String url)
@@ -60,7 +60,7 @@ public class LiveConnection
 
     /**
      * @return The project owning the connection.
-     * 
+     *
      */
     public String getProject()
     {
@@ -69,7 +69,7 @@ public class LiveConnection
 
     /**
      * Set the 'type' property
-     * 
+     *
      * @param b
      */
     public void setType(String type)
@@ -79,7 +79,7 @@ public class LiveConnection
 
     /**
      * Set the 'url' property
-     * 
+     *
      * @param string
      */
     public void setUrl(String url)
@@ -89,7 +89,7 @@ public class LiveConnection
 
     /**
      * Set the 'filename' property
-     * 
+     *
      * @param string
      */
     public void setFilename(String filename)
@@ -99,7 +99,7 @@ public class LiveConnection
 
     /**
      * Set the 'project' property
-     * 
+     *
      * @param i
      */
     public void setProject(String i)

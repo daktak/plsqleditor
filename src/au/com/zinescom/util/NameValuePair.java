@@ -15,11 +15,11 @@ public class NameValuePair
 
     /** This is the name in the pair. */
     private String myName;
-    
+
     /** This is the value in the pair. */
     private String myValue;
-    
-    
+
+
 	/**
 	 * Constructor that accepts one string of the format "propertyName=propertyValue", parses it and
 	 * stores the propertyName and property value in this class.
@@ -33,11 +33,11 @@ public class NameValuePair
 	{
 		//String tokens are: "=", " " (whitespace)
 		StringTokenizer st = new StringTokenizer(propertyNameAndValueString, "= ");
-		if (st.countTokens() != 2) 
+		if (st.countTokens() != 2)
 		{
 			System.out.println("<In NameValuePair::NameValuePair(String)>Fatal error. Usage: 'name=value'.");
 		}
-		else 
+		else
 		{
 			//Set the values to this object's instance variables.
 			//Trim all white spaces from both end's of each string.
@@ -45,8 +45,8 @@ public class NameValuePair
 			myValue = (st.nextToken()).trim();
 		}
 	}
-	
-    /** 
+
+    /**
      * This method creates new NameValuePair.  If either value
      * is null, an IllegalArgumentException will be thrown.
      *
@@ -54,23 +54,23 @@ public class NameValuePair
      *
      * @param value The value of the pair. Must not be null.
      */
-    public NameValuePair(String name, String value) 
+    public NameValuePair(String name, String value)
     {
         final String METHOD_NAME = "NameValuePair(name, value) ";
         if (name == null)
         {
-            throw new IllegalArgumentException(METHOD_NAME + 
+            throw new IllegalArgumentException(METHOD_NAME +
                 ": the name is null.");
         }
         if (value == null)
         {
-            throw new IllegalArgumentException(METHOD_NAME + 
+            throw new IllegalArgumentException(METHOD_NAME +
                 ": the value is null.");
         }
         myName = name;
         myValue = value;
     }
-    
+
     /**
      * This method gets the name of the pair.
      *

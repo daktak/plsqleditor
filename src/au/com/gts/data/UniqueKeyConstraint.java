@@ -8,7 +8,7 @@ public class UniqueKeyConstraint extends Constraint
 	}
 
 	/**
-	 * 
+	 *
 	 */
 	private static final long serialVersionUID = 4720250668471261543L;
 
