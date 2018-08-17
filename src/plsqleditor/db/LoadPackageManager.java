@@ -328,7 +328,7 @@ public class LoadPackageManager
 					IPreferenceStore thePrefs = DbUtility.getPrefs();
 					user = thePrefs.getString(PreferenceConstants.P_USER);
 				}
-                                //*/
+				*/
 				c = DbUtility.getTempConnection(project, user);
 				return loadCode(c, packageName, toLoad, type);
 			}
