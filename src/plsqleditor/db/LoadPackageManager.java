@@ -325,30 +325,36 @@ public class LoadPackageManager
 			try
 			{
 				String user = schemaName;
-		        String bodyStart = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] +[Bb][Oo][Dd][Yy] \\W*(\\w+)\\.\\W*(\\w+).*";
-		        try
-		        {
-		        	//Determine if schema is in the bodyStart string
-		            BufferedReader br = new BufferedReader(new InputStreamReader(file.getContents()));
-		            String line = null;
-		            while ((line = br.readLine()) != null)
-		            {
-		                if (line.matches(bodyStart))
-		                {
+				String headerStart = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] \\W*(\\w+).*";
+				String bodyStart = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] +[Bb][Oo][Dd][Yy] \\W*(\\w+).*";
+				String bodyStartWithSchema = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] +[Bb][Oo][Dd][Yy] \\W*(\\w+)\\.\\W*(\\w+).*";
+				try
+				{
+					//Determine if schema is in the bodyStart string
+					BufferedReader br = new BufferedReader(new InputStreamReader(file.getContents()));
+					String line = null;
+					while ((line = br.readLine()) != null)
+					{
+						if (line.matches(bodyStartWithSchema))
+						{
 							IPreferenceStore thePrefs = DbUtility.getPrefs();
 							user = thePrefs.getString(PreferenceConstants.P_USER);
-		                }
-		            }
-		            br.close();
-		        }
-	            catch (CoreException e)
-	            {
-	                e.printStackTrace();
-	            }
-	            catch (IOException e)
-	            {
-	                e.printStackTrace();
-	            }
+							break;
+						}
+						//if other start tags found, lets break thet loop asap
+						else if (line.matches(bodyStart)) { break; }
+						else if (line.matches(headerStart)) { break; }
+					}
+					br.close();
+				}
+				catch (CoreException e)
+				{
+					e.printStackTrace();
+				}
+				catch (IOException e)
+				{
+					e.printStackTrace();
+				}
 				c = DbUtility.getTempConnection(project, user);
 				return loadCode(c, packageName, toLoad, type);
 			}
