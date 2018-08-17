@@ -345,7 +345,14 @@ public class DbUtility
                 }
                 if (passwd == null)
                 {
-                    throw new IllegalStateException("Password for schema " + schema + " is missing");
+                	if (schema == thePrefs.getString(PreferenceConstants.P_USER))
+                	{
+                		passwd = thePrefs.getString(PreferenceConstants.P_PASSWORD);
+                	}
+                	if (passwd == null)
+                	{
+                		throw new IllegalStateException("Password for schema " + schema + " is missing");
+                	}
                 }
 
                 ConnectionPool cp = new ConnectionPool(driver, url, user, passwd, initConns,
@@ -1260,5 +1267,14 @@ public class DbUtility
             toReturn.put(projectDotSchema, cd);
         }
         return toReturn;
+    }
+    
+    /**
+     * 
+     * @return IpreferenceStore
+     */
+    public static IPreferenceStore getPrefs()
+    {
+    	return thePrefs;
     }
 }

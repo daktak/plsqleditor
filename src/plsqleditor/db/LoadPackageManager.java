@@ -320,7 +320,16 @@ public class LoadPackageManager
 		{
 			try
 			{
-				c = DbUtility.getTempConnection(project, schemaName);
+				String user = schemaName;
+				/* TODO
+				if (file has create pkg body as schema.pkgname)
+				{
+					//get default connection
+					IPreferenceStore thePrefs = DbUtility.getPrefs();
+					user = thePrefs.getString(PreferenceConstants.P_USER);
+				}
+                                //*/
+				c = DbUtility.getTempConnection(project, user);
 				return loadCode(c, packageName, toLoad, type);
 			}
 			catch (SQLException e)
