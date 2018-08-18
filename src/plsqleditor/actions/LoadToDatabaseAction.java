@@ -84,26 +84,10 @@ public class LoadToDatabaseAction extends TextEditorAction
 				String schema = PlsqleditorPlugin.getDefault()
 						.getCurrentSchema();
 				IProject project = PlsqleditorPlugin.getDefault().getProject();
-				schema = PlsqleditorPlugin.getSchema(file, project, schema);
 				IPreferenceStore thePrefs = DbUtility.getPrefs();
 				if (thePrefs.getBoolean(PreferenceConstants.P_ALLOW_SCHEMA_LOADING))
 				{
-					try
-					{
-						String usingProjectSpecific = project.getPersistentProperty(new QualifiedName(
-								"", PreferenceConstants.USE_LOCAL_DB_SETTINGS));
-						if (Boolean.valueOf(usingProjectSpecific).booleanValue())
-						{
-							schema = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.P_USER));
-						} else
-						{
-							schema = thePrefs.getString(PreferenceConstants.P_USER);
-						}
-					}
-					catch (CoreException e)
-					{
-						e.printStackTrace();
-					}
+					schema = PlsqleditorPlugin.getSchema(file, project, schema);
 				}
 
 				deleteMarkers(file);
@@ -121,7 +105,6 @@ public class LoadToDatabaseAction extends TextEditorAction
 					}
 					for (int i = 0; i < details.length; i++)
 					{
-						System.out.println(details[i]);
 						SQLErrorDetail detail = details[i];
 						addError(file, doc, docOffset, detail);
 					}
