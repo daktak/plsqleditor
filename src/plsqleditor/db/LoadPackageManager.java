@@ -330,6 +330,7 @@ public class LoadPackageManager
 				String withoutSchema = "\\W*(\\w+).*";
 				String withSchema = "\\W*(\\w+)\\.\\W*(\\w+).*";
 				String declare = "\\W*[Dd][Ee][Cc][Ll][Aa][Rr][Ee].*";
+				String begin = "\\W*[Bb][Ee][Gg][Ii][Nn] ";
 				try
 				{
 					//Determine if schema is in the bodyStart string
@@ -343,10 +344,11 @@ public class LoadPackageManager
 							user = thePrefs.getString(PreferenceConstants.P_USER);
 							break;
 						}
-						//if other start tags found, lets break thet loop asap
+						//if other start tags found, lets break the loop asap
 						else if ((line.matches(header+withoutSchema)) || 
 								(line.matches(header+body+withoutSchema)) || 
-								line.matches(declare))
+								line.matches(declare)||
+								line.matches(begin))
 						{
 							break;
 						}
