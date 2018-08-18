@@ -325,9 +325,11 @@ public class LoadPackageManager
 			try
 			{
 				String user = schemaName;
-				String headerStart = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] \\W*(\\w+).*";
-				String bodyStart = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] +[Bb][Oo][Dd][Yy] \\W*(\\w+).*";
-				String bodyStartWithSchema = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] +[Bb][Oo][Dd][Yy] \\W*(\\w+)\\.\\W*(\\w+).*";
+				String header = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] ";
+				String body = header + "+[Bb][Oo][Dd][Yy] ";
+				String withoutSchema = "\\W*(\\w+).*";
+				String withSchema = "\\W*(\\w+)\\.\\W*(\\w+).*";
+				String declare = "\\W*[Dd][Ee][Cc][Ll][Aa][Rr][Ee].*";
 				try
 				{
 					//Determine if schema is in the bodyStart string
@@ -335,15 +337,19 @@ public class LoadPackageManager
 					String line = null;
 					while ((line = br.readLine()) != null)
 					{
-						if (line.matches(bodyStartWithSchema))
+						if ((line.matches(header+withSchema))||(line.matches(header+body+withSchema)))
 						{
 							IPreferenceStore thePrefs = DbUtility.getPrefs();
 							user = thePrefs.getString(PreferenceConstants.P_USER);
 							break;
 						}
 						//if other start tags found, lets break thet loop asap
-						else if (line.matches(bodyStart)) { break; }
-						else if (line.matches(headerStart)) { break; }
+						else if ((line.matches(header+withoutSchema)) || 
+								(line.matches(header+body+withoutSchema)) || 
+								line.matches(declare))
+						{
+							break;
+						}
 					}
 					br.close();
 				}
