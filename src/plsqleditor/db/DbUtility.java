@@ -29,7 +29,7 @@ import plsqleditor.preferences.PreferenceConstants;
 
 /**
  * @author zinest
- * 
+ *
  */
 public class DbUtility
 {
@@ -64,7 +64,7 @@ public class DbUtility
      * This class maintains information about a Connection, such as whether
      * commits are pending on it or not. Introduced for Feature Request 1415152
      * - Stop database commit messages
-     * 
+     *
      * @author Toby Zines
      */
     static class ConnectionContainer
@@ -77,21 +77,21 @@ public class DbUtility
             connection = conn;
         }
 
-		public void closeConnection()
-		{
-			if (connection != null)
-			{
-				try
-				{
-					connection.close();
-				}
-				catch (SQLException e)
-				{
-					e.printStackTrace();
-				}
-				connection = null;
-			}
-		}
+        public void closeConnection()
+        {
+            if (connection != null)
+            {
+                try
+                {
+                    connection.close();
+                }
+                catch (SQLException e)
+                {
+                    e.printStackTrace();
+                }
+                connection = null;
+            }
+        }
     }
 
     public interface DbPrefsUpdateListener
@@ -127,7 +127,7 @@ public class DbUtility
     private static ConnectionPool initDbaConnectionPool(IProject project)
     {
         ConnectionPool dbaConnPool = theDbaConnectionPools.get(project);
-    	String connType = "DBA connection pool for project [" + project + "]";
+        String connType = "DBA connection pool for project [" + project + "]";
 
         if (dbaConnPool == null)
         {
@@ -270,10 +270,10 @@ public class DbUtility
     /**
      * This method initialises the connection pool being used to talk to the
      * database.
-     * 
+     *
      * @param project The project whose schema connection pool is being
      *            initialised.
-     * 
+     *
      * @param schema The name of the schema.
      */
     private static void initConnectionPool(IProject project, String schema)
@@ -345,14 +345,35 @@ public class DbUtility
                 }
                 if (passwd == null)
                 {
-                	if (schema == thePrefs.getString(PreferenceConstants.P_USER))
-                	{
-                		passwd = thePrefs.getString(PreferenceConstants.P_PASSWORD);
-                	}
-                	if (passwd == null)
-                	{
-                		throw new IllegalStateException("Password for schema " + schema + " is missing");
-                	}
+                    String tmpPass = "";
+                    String tmpUser = "";
+                    String isUsingLocalSettings;
+                    try
+                    {
+                        isUsingLocalSettings = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.USE_LOCAL_DB_SETTINGS));
+                        if (Boolean.valueOf(isUsingLocalSettings).booleanValue())
+                        {
+                            tmpPass = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.P_PASSWORD));
+                            tmpUser = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.P_USER));
+                        }
+                    }
+                    catch (CoreException e)
+                    {
+                        e.printStackTrace();
+                    }
+                    if (schema == tmpUser)
+                    {
+                        if (tmpPass.equals("")||tmpPass == null)
+                        {
+                            passwd = thePrefs.getString(PreferenceConstants.P_PASSWORD);
+                        } else {
+                            passwd = tmpPass;
+                        }
+                    }
+                    if (passwd == null)
+                    {
+                        throw new IllegalStateException("Password for schema " + schema + " is missing");
+                    }
                 }
 
                 ConnectionPool cp = new ConnectionPool(driver, url, user, passwd, initConns,
@@ -487,9 +508,9 @@ public class DbUtility
     /**
      * This method rolls back a particular schema for a particular resource
      * (which leads back to a particular project).
-     * 
+     *
      * @param schema The schema to roll back.
-     * 
+     *
      * @param
      * @throws SQLException
      */
@@ -509,13 +530,13 @@ public class DbUtility
      * column of a resultset returned based on the provided <code>sql</code>
      * query. The first column must be a string. This is ONLY to be used for a
      * given schema.
-     * 
+     *
      * @param sql The query that will yield a resultset.
-     * 
+     *
      * @param isAddingEmptyValue This indicates whether an empty string should
      *            be added to the return value. If so, it will be the first
      *            entry.
-     * 
+     *
      * @return The array of strings obtained from the first column of the data
      *         returned from the database based on the <code>sql</code> query.
      */
@@ -552,13 +573,13 @@ public class DbUtility
      * column of a resultset returned based on the provided <code>sql</code>
      * query. The first column must be a string. This is ONLY to be used for a
      * given schema.
-     * 
+     *
      * @param sql The statement that will yield a resultset.
-     * 
+     *
      * @param isAddingEmptyValue This indicates whether an empty string should
      *            be added to the return value. If so, it will be the first
      *            entry.
-     * 
+     *
      * @return The array of strings obtained from the first column of the data
      *         returned from the database based on the <code>sql</code> query.
      */
@@ -597,11 +618,11 @@ public class DbUtility
      * column of a resultset returned based on the provided <code>sql</code>
      * query. The first column must be a string. This is ONLY to be used for a
      * given schema.
-     * 
+     *
      * @param sql The query that will yield a resultset.
-     * 
+     *
      * @param extraValues The extra values to set on the sql string.
-     * 
+     *
      * @return The array of strings arrays obtained from the columns of the data
      *         returned from the database based on the <code>sql</code> query.
      */
@@ -638,11 +659,11 @@ public class DbUtility
      * column of a resultset returned based on the provided <code>sql</code>
      * query. The first column must be a string. This is ONLY to be used for a
      * given schema.
-     * 
+     *
      * @param sql The query that will yield a resultset.
-     * 
+     *
      * @param extraValues The extra values to set on the sql string.
-     * 
+     *
      * @return The array of strings arrays obtained from the columns of the data
      *         returned from the database based on the <code>sql</code> query.
      */
@@ -688,7 +709,7 @@ public class DbUtility
 
     /**
      * This method closes a statement if it is not null, ignoring any errors.
-     * 
+     *
      * @param s The statement to close.
      */
     public static void close(Statement s)
@@ -708,7 +729,7 @@ public class DbUtility
 
     /**
      * This method closes a result set if it is not null, ignoring any errors.
-     * 
+     *
      * @param rs The result set to close.
      */
     public static void close(ResultSet rs)
@@ -747,7 +768,7 @@ public class DbUtility
     }
 
     /**
-     * 
+     *
      */
     public static void close()
     {
@@ -808,7 +829,7 @@ public class DbUtility
     /**
      * This method checks that the connections related to the supplied
      * <code>project</code> are ok, or they require resetting.
-     * 
+     *
      * @param driver The currently stored driver in the default prefs.
      * @param url The currently stored url in the default prefs.
      * @param user The currently stored user in the default prefs.
@@ -865,7 +886,7 @@ public class DbUtility
     /**
      * This method closes all the dba connections for the list of IProject
      * projects contained by the supplied <code>projectList</code>.
-     * 
+     *
      * @param projectList The list of IProject objects whose dba connection
      *            pools (stored in {@link #theDbaConnectionPools} indexed by
      *            these IProject objects) will be closed.
@@ -885,7 +906,7 @@ public class DbUtility
     /**
      * This method closes all the schemaconnections for the list of IProject
      * projects contained by the supplied <code>projectList</code>.
-     * 
+     *
      * @param projectList The list of IProject objects whose schema connection
      *            pools will be closed. The schema connections are indexed by
      *            IProject.getName() + DOT + schema name.
@@ -974,9 +995,9 @@ public class DbUtility
     /**
      * This method returns the password stored in the registry for a given
      * schema.
-     * 
+     *
      * @param schema The schema whose password is required.
-     * 
+     *
      * @return The password of the given registry or a blank if there is none
      *         stored.
      */
@@ -991,14 +1012,14 @@ public class DbUtility
      * configured for the schema with the supplied <code>schemaName</code>,
      * returning any errors it found. DO NOT use this if you have a specific
      * connection.
-     * 
+     *
      * @param schemaName The name of the schema being loaded, for error
      *            purposes.
-     * 
+     *
      * @param toLoad The myOutputText representation of the entire package.
-     * 
+     *
      * @return The list of errors from the compile, or null if there were none.
-     * 
+     *
      * @throws SQLException when there is a database error
      */
     public static ResultSetWrapper loadCode(IResource resource, String schemaName, String toLoad)
@@ -1041,13 +1062,13 @@ public class DbUtility
      * This method loads a file into the database, using the single connection
      * configured for the schema with the supplied <code>schemaName</code>,
      * returning any errors it found.
-     * 
+     *
      * @param cc The connection container holding a valid connection.
-     * 
+     *
      * @param toLoad The myOutputText representation of the entire package.
-     * 
+     *
      * @return The list of errors from the compile, or null if there were none.
-     * 
+     *
      * @throws SQLException when there is a database error
      */
     public static ResultSetWrapper loadCode(ConnectionContainer cc, String toLoad)
@@ -1086,7 +1107,7 @@ public class DbUtility
     /**
      * This method returns the Oracle SID of the database to which we are
      * currently talking.
-     * 
+     *
      * @return The current Oracle SID.
      */
     public static String getSid(IProject project)
@@ -1135,7 +1156,7 @@ public class DbUtility
 
     /**
      * This method gets the list of existing connection pools.
-     * 
+     *
      * @return
      */
     public static List<String> getCurrentConnectionPoolConnectStrings()
@@ -1170,15 +1191,15 @@ public class DbUtility
     /**
      * This method retrieves the dbms output object for the given
      * <code>schema</code>.
-     * 
+     *
      * @param resource The resource whose project dictates which dbms output
      *            will be selected.
-     * 
+     *
      * @param schema The name of the schema whose dbms output wrapper is
      *            desired.
-     * 
+     *
      * @return the dbms output object for the given <code>schema</code>.
-     * 
+     *
      * @throws SQLException when the connection is dead.
      */
     public static DbmsOutput getDbmsOutput(IResource resource, String schema) throws SQLException
@@ -1268,13 +1289,13 @@ public class DbUtility
         }
         return toReturn;
     }
-    
+
     /**
-     * 
+     *
      * @return IpreferenceStore
      */
     public static IPreferenceStore getPrefs()
     {
-    	return thePrefs;
+        return thePrefs;
     }
 }
