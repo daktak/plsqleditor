@@ -35,6 +35,7 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer
         store.setDefault(PreferenceConstants.P_INIT_CONNS,1);
         store.setDefault(PreferenceConstants.P_MAX_CONNS,1);
         store.setDefault(PreferenceConstants.P_NUM_RESULT_SET_ROWS,200);
+        store.setDefault(PreferenceConstants.P_ALLOW_SCHEMA_LOADING,true);
         store.setDefault(PreferenceConstants.P_AUTO_COMMIT_ON_CLOSE,false);
         store.setDefault(PreferenceConstants.P_SCHEMA_BROWSER_FILTER_LIST,"\\w*SYS,SYSMAN,SYSTEM,XDB,DBSNMP,\\w+PLUGINS");
         store.setDefault(MarkOccurrencesPreferences.MARK_OCCURRENCES, true);

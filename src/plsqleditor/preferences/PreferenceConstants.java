@@ -54,6 +54,7 @@ public class PreferenceConstants
 	public static final String P_INIT_CONNS = "dbInitialConnections";
 	public static final String P_MAX_CONNS = "dbMaxConnections";
 
+	public static final String P_ALLOW_SCHEMA_LOADING = "allowSchemaLoading";
 	public static final String P_AUTO_COMMIT_ON_CLOSE = "isAutoCommittingOnClose";
 	public static final String P_NUM_RESULT_SET_ROWS = "numResultSetRows";
 

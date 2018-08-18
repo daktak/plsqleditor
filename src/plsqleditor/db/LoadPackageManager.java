@@ -336,24 +336,26 @@ public class LoadPackageManager
 					//Determine if schema is in the bodyStart string
 					BufferedReader br = new BufferedReader(new InputStreamReader(file.getContents()));
 					String line = null;
-					while ((line = br.readLine()) != null)
-					{
-						if ((line.matches(header+withSchema))||(line.matches(header+body+withSchema)))
+					IPreferenceStore thePrefs = DbUtility.getPrefs();
+					if (thePrefs.getBoolean(PreferenceConstants.P_ALLOW_SCHEMA_LOADING)) {
+						while ((line = br.readLine()) != null)
 						{
-							IPreferenceStore thePrefs = DbUtility.getPrefs();
-							user = thePrefs.getString(PreferenceConstants.P_USER);
-							break;
+							if ((line.matches(header+withSchema))||(line.matches(body+withSchema)))
+							{
+								user = thePrefs.getString(PreferenceConstants.P_USER);
+								break;
+							}
+							//if other start tags found, lets break the loop asap
+							else if ((line.matches(header+withoutSchema)) ||
+									(line.matches(body+withoutSchema)) ||
+									line.matches(declare)||
+									line.matches(begin))
+							{
+								break;
+							}
 						}
-						//if other start tags found, lets break the loop asap
-						else if ((line.matches(header+withoutSchema)) || 
-								(line.matches(header+body+withoutSchema)) || 
-								line.matches(declare)||
-								line.matches(begin))
-						{
-							break;
-						}
+						br.close();
 					}
-					br.close();
 				}
 				catch (CoreException e)
 				{

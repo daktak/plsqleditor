@@ -55,6 +55,8 @@ public class DbSetupPreferencePage extends FieldEditorPreferencePage
                 getFieldEditorParent()));
         addField(new IntegerFieldEditor(PreferenceConstants.P_NUM_RESULT_SET_ROWS,
                 "&Number of ResultSet Rows per Fetch", getFieldEditorParent()));
+        addField(new BooleanFieldEditor(PreferenceConstants.P_ALLOW_SCHEMA_LOADING,
+        		"Allow loading into schemas from this user", getFieldEditorParent()));
         addField(new BooleanFieldEditor(PreferenceConstants.P_AUTO_COMMIT_ON_CLOSE,
                 "Auto Commit Connections on Close/Shutdown", getFieldEditorParent()));
         addField(new BooleanFieldEditor(PreferenceConstants.P_USE_LOCAL_CLIENT,
