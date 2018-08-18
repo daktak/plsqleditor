@@ -23,6 +23,7 @@ import java.util.regex.Pattern;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -301,6 +302,21 @@ public class LoadPackageManager
 	{
 		Connection c = null;
 		String fullFilename = file.getFullPath().toString();
+		String isUsingLocalSettings =  "false";
+		String user = schemaName;
+		String tmpUser = "";
+		try
+		{
+			isUsingLocalSettings = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.USE_LOCAL_DB_SETTINGS));
+			if (Boolean.valueOf(isUsingLocalSettings).booleanValue())
+			{
+				tmpUser = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.P_USER));
+			}
+		}
+		catch (CoreException e)
+		{
+			e.printStackTrace();
+		}
 		if (myFileToSpecificConnectionMap.containsKey(fullFilename))
 		{
 			ConnectionHolder ch = myFileToSpecificConnectionMap
@@ -324,7 +340,6 @@ public class LoadPackageManager
 		{
 			try
 			{
-				String user = schemaName;
 				String header = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] ";
 				String body = header + "+[Bb][Oo][Dd][Yy] ";
 				String withoutSchema = "\\W*(\\w+).*";
@@ -342,7 +357,12 @@ public class LoadPackageManager
 						{
 							if ((line.matches(header+withSchema))||(line.matches(body+withSchema)))
 							{
-								user = thePrefs.getString(PreferenceConstants.P_USER);
+								if (tmpUser.equals("")||tmpUser == null)
+								{
+									user = thePrefs.getString(PreferenceConstants.P_USER);
+								} else {
+									user = tmpUser;
+								}
 								break;
 							}
 							//if other start tags found, lets break the loop asap
