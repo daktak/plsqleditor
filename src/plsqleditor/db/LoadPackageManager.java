@@ -301,7 +301,6 @@ public class LoadPackageManager
 			IProject project, String schemaName, String packageName,
 			String toLoad, PackageType type)
 	{
-		packageName = PlSqlParserManager.getPackageName(file);
 		Connection c = null;
 		String user = schemaName;
 		String fullFilename = file.getFullPath().toString();

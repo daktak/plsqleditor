@@ -72,8 +72,10 @@ public class LoadToDatabaseAction extends TextEditorAction
 				String packageName;
 				try
 				{
+					packageName = PlSqlParserManager.getPackageName(file);
+					/*
 					packageName = ((Segment) PlsqleditorPlugin.getDefault()
-						.getSegments(file, doc, false).get(0)).getName();
+						.getSegments(file, doc, false).get(0)).getName();*/
 				}
 				catch (IndexOutOfBoundsException ioobe)
 				{
