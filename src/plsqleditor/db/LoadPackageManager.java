@@ -331,13 +331,13 @@ public class LoadPackageManager
 				String withSchema = "\\W*(\\w+)\\.\\W*(\\w+).*";
 				String declare = "\\W*[Dd][Ee][Cc][Ll][Aa][Rr][Ee].*";
 				String begin = "\\W*[Bb][Ee][Gg][Ii][Nn] ";
-				try
-				{
-					//Determine if schema is in the bodyStart string
-					BufferedReader br = new BufferedReader(new InputStreamReader(file.getContents()));
-					String line = null;
-					IPreferenceStore thePrefs = DbUtility.getPrefs();
-					if (thePrefs.getBoolean(PreferenceConstants.P_ALLOW_SCHEMA_LOADING)) {
+				IPreferenceStore thePrefs = DbUtility.getPrefs();
+				if (thePrefs.getBoolean(PreferenceConstants.P_ALLOW_SCHEMA_LOADING)) {
+					try
+					{
+						//Determine if schema is in the bodyStart string
+						BufferedReader br = new BufferedReader(new InputStreamReader(file.getContents()));
+						String line = null;
 						while ((line = br.readLine()) != null)
 						{
 							if ((line.matches(header+withSchema))||(line.matches(body+withSchema)))
@@ -356,14 +356,14 @@ public class LoadPackageManager
 						}
 						br.close();
 					}
-				}
-				catch (CoreException e)
-				{
-					e.printStackTrace();
-				}
-				catch (IOException e)
-				{
-					e.printStackTrace();
+					catch (CoreException e)
+					{
+						e.printStackTrace();
+					}
+					catch (IOException e)
+					{
+						e.printStackTrace();
+					}
 				}
 				c = DbUtility.getTempConnection(project, user);
 				return loadCode(c, packageName, toLoad, type);
