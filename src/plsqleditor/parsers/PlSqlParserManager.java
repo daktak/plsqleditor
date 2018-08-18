@@ -52,21 +52,39 @@ public class PlSqlParserManager
     private static final ParseType getTypeFromContext(IFile file)
     {
         boolean containsHeader = false, containsBody = false;
-        String headerStart = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] \\W*(\\w+).*";
-        String bodyStart = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] +[Bb][Oo][Dd][Yy] \\W*(\\w+).*";
+        String header = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] ";
+        String body = header + "+[Bb][Oo][Dd][Yy] ";
+        String withoutSchema = "\\W*(\\w+).*";
+        String withSchema = "\\W*(\\w+)\\.\\W*(\\w+).*";
+        Pattern headerWithSchema = Pattern.compile(header+withSchema);
+        Pattern bodyWithSchema = Pattern.compile(body+withSchema);
+        Pattern headerWithout = Pattern.compile(header+withoutSchema);
+        Pattern bodyWithout = Pattern.compile(body+withoutSchema);
+        Pattern declare = Pattern.compile("\\W*[Dd][Ee][Cc][Ll][Aa][Rr][Ee].*");
+        Pattern begin = Pattern.compile("\\W*[Bb][Ee][Gg][Ii][Nn] ");
         try
         {
             BufferedReader br = new BufferedReader(new InputStreamReader(file.getContents()));
             String line = null;
             while ((line = br.readLine()) != null)
             {
-                if (line.matches(bodyStart))
+            	Matcher headerM = headerWithout.matcher(line);
+            	Matcher bodyM = bodyWithout.matcher(line);
+            	Matcher headerWithM = headerWithSchema.matcher(line);
+            	Matcher bodyWithM = bodyWithSchema.matcher(line);
+            	Matcher declareM = declare.matcher(line);
+            	Matcher beginM = begin.matcher(line);
+                if (bodyWithM.matches()||bodyM.matches())
                 {
                     containsBody = true;
+                    break;
                 }
-                else if (line.matches(headerStart))
+                else if (headerWithM.matches()||headerM.matches())
                 {
                     containsHeader = true;
+                    break;
+                } else if (beginM.matches() || declareM.matches()) {
+                	break;
                 }
             }
             br.close();
@@ -104,24 +122,35 @@ public class PlSqlParserManager
      */
     public static String getPackageName(IFile file)
     {
-    	Pattern headerStart = Pattern.compile("\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] \\W*(\\w+).*");
-    	Pattern bodyStart = Pattern.compile("\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] +[Bb][Oo][Dd][Yy] \\W*(\\w+).*");
-    	String packageName = null;
+        String header = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] ";
+        String body = header + "+[Bb][Oo][Dd][Yy] ";
+        String withoutSchema = "\\W*(\\w+).*";
+        String withSchema = "\\W*(\\w+)\\.\\W*(\\w+).*";
+        Pattern headerWithSchema = Pattern.compile(header+withSchema);
+        Pattern bodyWithSchema = Pattern.compile(body+withSchema);
+        Pattern headerWithout = Pattern.compile(header+withoutSchema);
+        Pattern bodyWithout = Pattern.compile(body+withoutSchema);
+        String packageName = null;
         try
         {
             BufferedReader br = new BufferedReader(new InputStreamReader(file.getContents()));
             String line = null;
             while ((line = br.readLine()) != null)
             {
-            	Matcher headerM = headerStart.matcher(line);
-            	Matcher bodyM = bodyStart.matcher(line);
-            	if (bodyM.matches())
-            	{
+            	Matcher headerM = headerWithout.matcher(line);
+            	Matcher bodyM = bodyWithout.matcher(line);
+            	Matcher headerWithM = headerWithSchema.matcher(line);
+            	Matcher bodyWithM = bodyWithSchema.matcher(line);
+            	if (bodyWithM.matches()) {
+            		packageName = bodyWithM.group(2);
+            		break;
+            	} else if (headerWithM.matches()) {
+            		packageName = headerWithM.group(2);
+            		break;
+            	} else if (bodyM.matches()) {
             		packageName = bodyM.group(1);
             		break;
-            	}
-            	else if (headerM.matches())
-            	{
+            	} else if (headerM.matches()){
             		packageName = headerM.group(1);
             		break;
             	}
