@@ -31,6 +31,7 @@ import org.eclipse.jface.text.IDocument;
 import plsqleditor.PlsqleditorPlugin;
 import plsqleditor.db.DbUtility.ConnectionContainer;
 import plsqleditor.parsers.PackageSegment;
+import plsqleditor.parsers.PlSqlParserManager;
 import plsqleditor.parsers.Segment;
 import plsqleditor.parsers.SegmentType;
 import plsqleditor.parsers.StringLocationMap;
@@ -300,6 +301,7 @@ public class LoadPackageManager
 			IProject project, String schemaName, String packageName,
 			String toLoad, PackageType type)
 	{
+		packageName = PlSqlParserManager.getPackageName(file);
 		Connection c = null;
 		String user = schemaName;
 		String fullFilename = file.getFullPath().toString();
@@ -378,7 +380,7 @@ public class LoadPackageManager
 			s = c.prepareStatement(toLoad);
 			s.execute();
 
-			String warning = getErrorStatus(c, s, packageName, type);
+			String warning = getErrorStatus(c, s, PlSqlParserManager.getSchemaName(toLoad), packageName, type);
 			if (warning != null)
 			{
 				return mySQLErrors;
@@ -513,7 +515,7 @@ public class LoadPackageManager
 	 *         warnings.
 	 */
 	private String getErrorStatus(Connection c, Statement s,
-			String packageName, PackageType packageType)
+			String schemaName, String packageName, PackageType packageType)
 	{
 		try
 		{
@@ -534,7 +536,7 @@ public class LoadPackageManager
 				else
 				{
 					// DbUtility.printWarnings(warning);
-					SQLErrorDetail[] details = getErrorDetails(c, packageName,
+					SQLErrorDetail[] details = getErrorDetails(c, schemaName, packageName,
 							packageType);
 
 					setErrors(details);
@@ -581,7 +583,7 @@ public class LoadPackageManager
 		try
 		{
 			c = DbUtility.getTempConnection(project, schemaName);
-			return getErrorDetails(c, packageName, errorType);
+			return getErrorDetails(c, schemaName, packageName, errorType);
 		}
 		catch (SQLException e)
 		{
@@ -661,13 +663,16 @@ public class LoadPackageManager
 	 *
 	 * @return The list of error details concerning the compile problems.
 	 */
-	private SQLErrorDetail[] getErrorDetails(Connection c, String packageName,
+	private SQLErrorDetail[] getErrorDetails(Connection c, String schemaName, String packageName,
 			PackageType errorType)
 	{
 		// fix for [ 1539302 ] Load to database report errors from other schema
 		String sql = "select line, position, text from user_errors where upper(name) = upper(?) "
 				+ " and type = ? order by sequence";
-
+		if (schemaName != null) {
+			sql = "select line, position, text from all_errors where upper(name) = upper(?) "
+					+ " and type = ? and upper(owner) = upper(?) order by sequence";
+		}
 		SQLErrorDetail detail = null;
 		SQLErrorDetail[] toReturn = null;
 		PreparedStatement s = null;
@@ -676,9 +681,10 @@ public class LoadPackageManager
 		{
 			s = c.prepareStatement(sql);
 			s.setString(1, packageName.toUpperCase());
-			s
-					.setString(2, errorType.toString().toUpperCase().replace(
-							'_', ' '));
+			s.setString(2, errorType.toString().toUpperCase().replace('_', ' '));
+			if (schemaName != null) {
+				s.setString(3, schemaName.toUpperCase());
+			}
 			rs = s.executeQuery();
 			List<SQLErrorDetail> v = new Vector<SQLErrorDetail>();
 			while (rs.next())

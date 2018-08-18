@@ -1,6 +1,7 @@
 package plsqleditor.parsers;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Comparator;
@@ -16,7 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 /**
  * This class manages parsing of plsql files in one place, delegating to the
  * required parser once the type of the file is determined.
- * 
+ *
  * @author tzines
  * @author vradzius
  */
@@ -68,12 +69,12 @@ public class PlSqlParserManager
             String line = null;
             while ((line = br.readLine()) != null)
             {
-            	Matcher headerM = headerWithout.matcher(line);
-            	Matcher bodyM = bodyWithout.matcher(line);
-            	Matcher headerWithM = headerWithSchema.matcher(line);
-            	Matcher bodyWithM = bodyWithSchema.matcher(line);
-            	Matcher declareM = declare.matcher(line);
-            	Matcher beginM = begin.matcher(line);
+                Matcher headerM = headerWithout.matcher(line);
+                Matcher bodyM = bodyWithout.matcher(line);
+                Matcher headerWithM = headerWithSchema.matcher(line);
+                Matcher bodyWithM = bodyWithSchema.matcher(line);
+                Matcher declareM = declare.matcher(line);
+                Matcher beginM = begin.matcher(line);
                 if (bodyWithM.matches()||bodyM.matches())
                 {
                     containsBody = true;
@@ -84,7 +85,7 @@ public class PlSqlParserManager
                     containsHeader = true;
                     break;
                 } else if (beginM.matches() || declareM.matches()) {
-                	break;
+                    break;
                 }
             }
             br.close();
@@ -112,12 +113,59 @@ public class PlSqlParserManager
         return ParseType.SqlScript;
     }
 
-    
+    /**
+     * This method gets the schema name from the file if it is defined
+     *
+     * @param the body of the file
+     *
+     * @return The name of the schema.
+     */
+    public static String getSchemaName(String str)
+    {
+        ByteArrayInputStream bis = new ByteArrayInputStream(str.getBytes());
+        String header = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] ";
+        String body = header + "+[Bb][Oo][Dd][Yy] ";
+        String withoutSchema = "\\W*(\\w+).*";
+        String withSchema = "\\W*(\\w+)\\.\\W*(\\w+).*";
+        Pattern headerWithSchema = Pattern.compile(header+withSchema);
+        Pattern bodyWithSchema = Pattern.compile(body+withSchema);
+        Pattern headerWithout = Pattern.compile(header+withoutSchema);
+        Pattern bodyWithout = Pattern.compile(body+withoutSchema);
+        String schemaName = null;
+        try
+        {
+            BufferedReader br = new BufferedReader(new InputStreamReader(bis));
+            String line = null;
+            while ((line = br.readLine()) != null)
+            {
+                Matcher headerM = headerWithout.matcher(line);
+                Matcher bodyM = bodyWithout.matcher(line);
+                Matcher headerWithM = headerWithSchema.matcher(line);
+                Matcher bodyWithM = bodyWithSchema.matcher(line);
+                if (bodyWithM.matches()) {
+                    schemaName = bodyWithM.group(1);
+                    break;
+                } else if (headerWithM.matches()) {
+                    schemaName = headerWithM.group(1);
+                    break;
+                } else if (bodyM.matches() || headerM.matches()) {
+                    return null;
+                }
+            }
+            br.close();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+        return schemaName;
+    }
+
     /**
      * This method gets the package name from the file. If this is not a package header or body, then null is returned.
-     * 
+     *
      * @param file The file whose package name is sought.
-     * 
+     *
      * @return The name of the package.
      */
     public static String getPackageName(IFile file)
@@ -137,23 +185,23 @@ public class PlSqlParserManager
             String line = null;
             while ((line = br.readLine()) != null)
             {
-            	Matcher headerM = headerWithout.matcher(line);
-            	Matcher bodyM = bodyWithout.matcher(line);
-            	Matcher headerWithM = headerWithSchema.matcher(line);
-            	Matcher bodyWithM = bodyWithSchema.matcher(line);
-            	if (bodyWithM.matches()) {
-            		packageName = bodyWithM.group(2);
-            		break;
-            	} else if (headerWithM.matches()) {
-            		packageName = headerWithM.group(2);
-            		break;
-            	} else if (bodyM.matches()) {
-            		packageName = bodyM.group(1);
-            		break;
-            	} else if (headerM.matches()){
-            		packageName = headerM.group(1);
-            		break;
-            	}
+                Matcher headerM = headerWithout.matcher(line);
+                Matcher bodyM = bodyWithout.matcher(line);
+                Matcher headerWithM = headerWithSchema.matcher(line);
+                Matcher bodyWithM = bodyWithSchema.matcher(line);
+                if (bodyWithM.matches()) {
+                    packageName = bodyWithM.group(2);
+                    break;
+                } else if (headerWithM.matches()) {
+                    packageName = headerWithM.group(2);
+                    break;
+                } else if (bodyM.matches()) {
+                    packageName = bodyM.group(1);
+                    break;
+                } else if (headerM.matches()){
+                    packageName = headerM.group(1);
+                    break;
+                }
             }
             br.close();
         }
@@ -213,7 +261,7 @@ public class PlSqlParserManager
         {
             return ParseType.Package_Header_And_Body;
         }
-        else 
+        else
         {
             return getTypeFromContext(file);
         }
@@ -263,7 +311,7 @@ public class PlSqlParserManager
      * This method gets the first non code segment located previous to the
      * supplied <code>offset</code> within the list of supplied
      * <code>segments</code>.
-     * 
+     *
      * @param segments
      * @param offset
      * @param goDeep
@@ -336,14 +384,14 @@ public class PlSqlParserManager
      * This method finds the segment (i.e a parameter declaration) with the name
      * equivalent to the supplied <code>identifier</code> that is referenced
      * (i.e a parameter reference) at the supplied <code>documentOffset</code>.
-     * 
+     *
      * @param segments The segments to search through
-     * 
+     *
      * @param identifier The name of the segment we are looking for.
-     * 
+     *
      * @param documentOffset The offset at which the segment was <b>referenced</b>
      *            (i.e not where the segment was declared).
-     * 
+     *
      * @return
      */
     public Segment findNamedSegment(List<?> segments, String identifier, int documentOffset)
