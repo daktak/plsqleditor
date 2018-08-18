@@ -41,11 +41,11 @@ import plsqleditor.stores.PackageStore;
 
 /**
  * This class
- * 
+ *
  * @author Toby Zines
- * 
+ *
  * @version $Id$
- * 
+ *
  *          Created on 2/03/2005
  */
 public class LoadPackageManager
@@ -121,20 +121,20 @@ public class LoadPackageManager
 	 * or similar piece of ddl (rather than dml) into the database. This may be
 	 * executed using jdbc or sqlplus depending on configuration set up in the
 	 * {@link plsqleditor.preferences.DbSetupPreferencePage}.
-	 * 
+	 *
 	 * @param schema
 	 *            The schema against which to execute the code.
-	 * 
+	 *
 	 * @param packageName
 	 *            The name of the package being executed.
-	 * 
+	 *
 	 * @param toLoad
 	 *            The code describing the package to be executed.
-	 * 
+	 *
 	 * @param type
 	 *            The type of the code (pkb,pkh,sql etc - see
 	 *            {@link PackageType}).
-	 * 
+	 *
 	 * @return The errors from either the execution of the code, the failure to
 	 *         retrieve the connection, or the resulting compile errors from the
 	 *         loaded code.
@@ -274,24 +274,24 @@ public class LoadPackageManager
 	 * pool. This is always executed by jdbc. If the file has a specific
 	 * connection against it, that connection is chosen and no commit is
 	 * executed.
-	 * 
+	 *
 	 * @param file
 	 *            The file that is being executed on. This is required in case
 	 *            there is a specific connection set against the file.
-	 * 
+	 *
 	 * @param schemaName
 	 *            The schema against which to retrieve a connection.
-	 * 
+	 *
 	 * @param packageName
 	 *            The name of the package (piece of code) being executed.
-	 * 
+	 *
 	 * @param toLoad
 	 *            The string to execute.
-	 * 
+	 *
 	 * @param type
 	 *            The type of the code being executed (pkb,pkh,sql etc - see
 	 *            {@link PackageType}).
-	 * 
+	 *
 	 * @return The errors from either the execution of the code, the failure to
 	 *         retrieve the connection, or the resulting compile errors from the
 	 *         loaded code.
@@ -301,22 +301,8 @@ public class LoadPackageManager
 			String toLoad, PackageType type)
 	{
 		Connection c = null;
-		String fullFilename = file.getFullPath().toString();
-		String isUsingLocalSettings =  "false";
 		String user = schemaName;
-		String tmpUser = "";
-		try
-		{
-			isUsingLocalSettings = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.USE_LOCAL_DB_SETTINGS));
-			if (Boolean.valueOf(isUsingLocalSettings).booleanValue())
-			{
-				tmpUser = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.P_USER));
-			}
-		}
-		catch (CoreException e)
-		{
-			e.printStackTrace();
-		}
+		String fullFilename = file.getFullPath().toString();
 		if (myFileToSpecificConnectionMap.containsKey(fullFilename))
 		{
 			ConnectionHolder ch = myFileToSpecificConnectionMap
@@ -340,51 +326,7 @@ public class LoadPackageManager
 		{
 			try
 			{
-				String header = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] ";
-				String body = header + "+[Bb][Oo][Dd][Yy] ";
-				String withoutSchema = "\\W*(\\w+).*";
-				String withSchema = "\\W*(\\w+)\\.\\W*(\\w+).*";
-				String declare = "\\W*[Dd][Ee][Cc][Ll][Aa][Rr][Ee].*";
-				String begin = "\\W*[Bb][Ee][Gg][Ii][Nn] ";
-				IPreferenceStore thePrefs = DbUtility.getPrefs();
-				if (thePrefs.getBoolean(PreferenceConstants.P_ALLOW_SCHEMA_LOADING)) {
-					try
-					{
-						//Determine if schema is in the bodyStart string
-						BufferedReader br = new BufferedReader(new InputStreamReader(file.getContents()));
-						String line = null;
-						while ((line = br.readLine()) != null)
-						{
-							if ((line.matches(header+withSchema))||(line.matches(body+withSchema)))
-							{
-								if (tmpUser.equals("")||tmpUser == null)
-								{
-									user = thePrefs.getString(PreferenceConstants.P_USER);
-								} else {
-									user = tmpUser;
-								}
-								break;
-							}
-							//if other start tags found, lets break the loop asap
-							else if ((line.matches(header+withoutSchema)) ||
-									(line.matches(body+withoutSchema)) ||
-									line.matches(declare)||
-									line.matches(begin))
-							{
-								break;
-							}
-						}
-						br.close();
-					}
-					catch (CoreException e)
-					{
-						e.printStackTrace();
-					}
-					catch (IOException e)
-					{
-						e.printStackTrace();
-					}
-				}
+				user = PlsqleditorPlugin.getSchema(file, project, schemaName);
 				c = DbUtility.getTempConnection(project, user);
 				return loadCode(c, packageName, toLoad, type);
 			}
@@ -408,19 +350,19 @@ public class LoadPackageManager
 	/**
 	 * This method loads a file into the database, returning any errors it
 	 * found.
-	 * 
+	 *
 	 * @param c
 	 *            The connection to use to load the database.
-	 * 
+	 *
 	 * @param packageName
 	 *            The name of the package being loaded, for error purposes.
-	 * 
+	 *
 	 * @param toLoad
 	 *            The text representation of the entire package.
-	 * 
+	 *
 	 * @param type
 	 *            The type of thing being loaded. (package/package body etc).
-	 * 
+	 *
 	 * @return The list of errors from the compile, or null if there were none.
 	 */
 	private SQLErrorDetail[] loadCode(Connection c, String packageName,
@@ -457,13 +399,13 @@ public class LoadPackageManager
 	 * This method loads the supplied piece of code <code>toLoad</code> into the
 	 * database using a connection based on the supplied <code>schemaName</code>
 	 * unless there is a specific connection set for the given file. In this
-	 * case the specific connection is used, and the connection remains open. 
-	 * The connection is left unfreed until the caller closes the returned 
+	 * case the specific connection is used, and the connection remains open.
+	 * The connection is left unfreed until the caller closes the returned
 	 * result set wrapper.
 	 * However, a subsequent call to this method will close any previous result
 	 * set for the given <code>schemaName</code> (or file). If there is no
 	 * result set resulting from the execution, the connection is freed.
-	 * 
+	 *
 	 * @param file
 	 *            The file that contains the code to load. If this file has a
 	 *            specific connection against it, that connection will be used
@@ -473,14 +415,14 @@ public class LoadPackageManager
 	 * @param schemaName
 	 *            The name of the schema in which to execute the code
 	 *            <code>toLoad</code>.
-	 * 
+	 *
 	 * @param toLoad
 	 *            The code to execute in the database.
-	 * 
+	 *
 	 * @return The results set (wrapped) resulting from the execution of the
 	 *         code <code>toLoad</code>. If there was no result set, null is
 	 *         returned.
-	 * 
+	 *
 	 * @throws SQLException
 	 *             when the executed code fails for some reason.
 	 */
@@ -521,7 +463,7 @@ public class LoadPackageManager
 
 	/**
 	 * This method returns the number of nanoseconds passed.
-	 * 
+	 *
 	 * @param start
 	 * @param end
 	 * @param freq
@@ -539,10 +481,10 @@ public class LoadPackageManager
 	 * of the last piece of code executed in the database against that schema.
 	 * This may be null if there have been no pieces of code executed against
 	 * this schema, or the last execution had no result.
-	 * 
+	 *
 	 * @param schemaName
 	 *            The name of the schema whose last result set is sought.
-	 * 
+	 *
 	 * @return the result set wrapper that is currently stored against the
 	 *         supplied <code>schemaName</code>.
 	 */
@@ -556,17 +498,17 @@ public class LoadPackageManager
 	 * there have been warnings, the error details will be initialised with the
 	 * new errors, and the first warning message will be returned to indicate
 	 * something is wrong.
-	 * 
+	 *
 	 * @param s
 	 *            The statement whose warning status is being checked.
-	 * 
+	 *
 	 * @param packageName
 	 *            The name of the package/package body that was just created in
 	 *            the statement <code>s</code>.
-	 * 
+	 *
 	 * @param packageType
 	 *            The type of package errors we are searching for on failure.
-	 * 
+	 *
 	 * @return The message from the first warning, or null if there were no
 	 *         warnings.
 	 */
@@ -581,7 +523,7 @@ public class LoadPackageManager
 			{
 				if (packageType == PackageType.Sql)
 				{
-					// TODO this piece of code is mildly faulty 
+					// TODO this piece of code is mildly faulty
 					// i need to grab the blocks of code and execute
 					// each of them separately. Then i need to add the offset
 					// of the previous blocks to each call.
@@ -656,11 +598,11 @@ public class LoadPackageManager
 	}
 
 	/**
-	 * This method gets all the error details currently in the db for the 
+	 * This method gets all the error details currently in the db for the
 	 * schema that backs the supplied connection <code>c</code>.
-	 * 
+	 *
 	 * @param c The connection to use to create the error request statement.
-	 * 
+	 *
 	 * @return The list of error details concerning the compile problems.
 	 */
 	private SQLErrorDetail[] getGeneralErrorDetails(Connection c)
@@ -706,17 +648,17 @@ public class LoadPackageManager
 	 * This method gets the error details from the statement that attempted to
 	 * create/replace the procedure/function of type <code>procType</code> and
 	 * name <code>procName</code>.
-	 * 
+	 *
 	 * @param c
 	 *            The connection to use to create the error request statement.
-	 * 
+	 *
 	 * @param packageName
 	 *            The name of the package or package body that was compiled, but
 	 *            caused warnings.
-	 * 
+	 *
 	 * @param errorType
 	 *            the type of the errors to look for.
-	 * 
+	 *
 	 * @return The list of error details concerning the compile problems.
 	 */
 	private SQLErrorDetail[] getErrorDetails(Connection c, String packageName,
@@ -777,7 +719,7 @@ public class LoadPackageManager
 		}
 		return null;
 	}
-	
+
 	public void removeFixedConnection(IFile file)
 	{
 		String fullFileName = file.getFullPath().toString();

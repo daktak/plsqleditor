@@ -9,7 +9,9 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.swt.widgets.Shell;
@@ -19,6 +21,7 @@ import org.eclipse.ui.texteditor.MarkerUtilities;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import plsqleditor.PlsqleditorPlugin;
+import plsqleditor.db.DbUtility;
 import plsqleditor.db.LoadPackageManager;
 import plsqleditor.db.PackageType;
 import plsqleditor.db.SQLErrorDetail;
@@ -30,11 +33,11 @@ import plsqleditor.preferences.PreferenceConstants;
 
 /**
  * This class manages the loading of a whole file to a database.
- * 
+ *
  * @author Toby Zines
- * 
+ *
  * @version $Id$
- * 
+ *
  *          Created on 15/03/2005
  */
 public class LoadToDatabaseAction extends TextEditorAction
@@ -80,6 +83,28 @@ public class LoadToDatabaseAction extends TextEditorAction
 				ParseType type = PlSqlParserManager.getType(file);
 				String schema = PlsqleditorPlugin.getDefault()
 						.getCurrentSchema();
+				IProject project = PlsqleditorPlugin.getDefault().getProject();
+				schema = PlsqleditorPlugin.getSchema(file, project, schema);
+				IPreferenceStore thePrefs = DbUtility.getPrefs();
+				if (thePrefs.getBoolean(PreferenceConstants.P_ALLOW_SCHEMA_LOADING))
+				{
+					try
+					{
+						String usingProjectSpecific = project.getPersistentProperty(new QualifiedName(
+								"", PreferenceConstants.USE_LOCAL_DB_SETTINGS));
+						if (Boolean.valueOf(usingProjectSpecific).booleanValue())
+						{
+							schema = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.P_USER));
+						} else
+						{
+							schema = thePrefs.getString(PreferenceConstants.P_USER);
+						}
+					}
+					catch (CoreException e)
+					{
+						e.printStackTrace();
+					}
+				}
 
 				deleteMarkers(file);
 				SQLErrorDetail[] details = execute(file, toLoad, packageName,
@@ -96,6 +121,7 @@ public class LoadToDatabaseAction extends TextEditorAction
 					}
 					for (int i = 0; i < details.length; i++)
 					{
+						System.out.println(details[i]);
 						SQLErrorDetail detail = details[i];
 						addError(file, doc, docOffset, detail);
 					}
@@ -212,7 +238,7 @@ public class LoadToDatabaseAction extends TextEditorAction
 		}
 		else
 		{
-			// TODO this gets set, but causes an incorrect message to 
+			// TODO this gets set, but causes an incorrect message to
 			// come back regarding the success or failure of the call
 			packageType = PackageType.Sql;
 		}
@@ -227,7 +253,7 @@ public class LoadToDatabaseAction extends TextEditorAction
 
 	/**
 	 * This method deletes the markers from the supplied <code>file</code>.
-	 * 
+	 *
 	 * @param file
 	 *            The file whose markers will all be deleted.
 	 */
@@ -248,18 +274,18 @@ public class LoadToDatabaseAction extends TextEditorAction
 	/**
 	 * This method adds an error marker to the supplied <code>file</code> based
 	 * on the information in the supplied <code>detail</code>.
-	 * 
+	 *
 	 * @param file
 	 *            The file to which the error marker will be added.
-	 * 
+	 *
 	 * @param doc
 	 *            The document backing the file.
-	 * 
+	 *
 	 * @param docOffset
 	 *            The additional raw offset to add to the offset found in the
 	 *            <code>detail</code> if the detail's row is 0 or 1. Otherwise
 	 *            the detail's column will be used directly.
-	 * 
+	 *
 	 * @param detail
 	 *            The location and mesage of the error.
 	 */

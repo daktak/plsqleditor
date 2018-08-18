@@ -1,7 +1,9 @@
 package plsqleditor;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -145,7 +147,7 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
     /**
      * Returns an image descriptor for the image file at the given plug-in
      * relative path
-     * 
+     *
      * @param path the path
      * @return the image descriptor
      */
@@ -230,7 +232,7 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
     /**
      * N.B. This method can be called before a setFocus has set the correct
      * schema name.
-     * 
+     *
      * @param file
      * @param filename
      * @param document
@@ -251,7 +253,7 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
 
     /**
      * This method gets the name of the schema of the currently focused file.
-     * 
+     *
      * @return The name of the current schema.
      */
     public String getCurrentSchema()
@@ -532,7 +534,7 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
      * @param packageName
      * @return The files for the associated <code>schema</code> and
      *         <code>packageName</code>.
-     * 
+     *
      * @see PackageStore#getFiles(String, String)
      */
     public IFile[] getFiles(String schema, String packageName)
@@ -693,10 +695,10 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
      * This method just gets the url and user name for a given project. If the
      * details are not specific to the project, it will retrieve the global
      * values.
-     * 
+     *
      * @param project The project whose possibly project specific url and user
      *            name are sought.
-     * 
+     *
      * @return A temporary ConnectionDetails containing the supplied
      *         <code>project</code>'s specific user name and url.
      */
@@ -792,5 +794,70 @@ public class PlsqleditorPlugin extends AbstractUIPlugin
             log("Failed to display the console : " + e.getMessage(), e);
             e.printStackTrace();
         }
+    }
+
+    public static String getSchema(IFile file, IProject project, String schemaName)
+    {
+        String isUsingLocalSettings =  "false";
+        String user = schemaName;
+        String tmpUser = "";
+        try
+        {
+            isUsingLocalSettings = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.USE_LOCAL_DB_SETTINGS));
+            if (Boolean.valueOf(isUsingLocalSettings).booleanValue())
+            {
+                tmpUser = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.P_USER));
+            }
+        }
+        catch (CoreException e)
+        {
+            e.printStackTrace();
+        }
+        String header = "\\W*[Cc][Rr][Ee][Aa][Tt][Ee] +[Oo][Rr] +[Rr][Ee][Pp][Ll][Aa][Cc][Ee] +[Pp][Aa][Cc][Kk][Aa][Gg][Ee] ";
+        String body = header + "+[Bb][Oo][Dd][Yy] ";
+        String withoutSchema = "\\W*(\\w+).*";
+        String withSchema = "\\W*(\\w+)\\.\\W*(\\w+).*";
+        String declare = "\\W*[Dd][Ee][Cc][Ll][Aa][Rr][Ee].*";
+        String begin = "\\W*[Bb][Ee][Gg][Ii][Nn] ";
+        IPreferenceStore thePrefs = DbUtility.getPrefs();
+        if (thePrefs.getBoolean(PreferenceConstants.P_ALLOW_SCHEMA_LOADING)) {
+            try
+            {
+                //Determine if schema is in the bodyStart string
+                BufferedReader br = new BufferedReader(new InputStreamReader(file.getContents()));
+                String line = null;
+                while ((line = br.readLine()) != null)
+                {
+                    if ((line.matches(header+withSchema))||(line.matches(body+withSchema)))
+                    {
+                        if (tmpUser.equals("")||tmpUser == null)
+                        {
+                            user = thePrefs.getString(PreferenceConstants.P_USER);
+                        } else {
+                            user = tmpUser;
+                        }
+                        break;
+                    }
+                    //if other start tags found, lets break the loop asap
+                    else if ((line.matches(header+withoutSchema)) ||
+                            (line.matches(body+withoutSchema)) ||
+                            line.matches(declare)||
+                            line.matches(begin))
+                    {
+                        break;
+                    }
+                }
+                br.close();
+            }
+            catch (CoreException e)
+            {
+                e.printStackTrace();
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        return user;
     }
 }
