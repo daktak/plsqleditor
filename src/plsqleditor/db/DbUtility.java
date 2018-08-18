@@ -292,7 +292,8 @@ public class DbUtility
                 String url = null;
                 int initConns = -1;
                 int maxConns = -1;
-                String user = schema;
+                String rootUser = thePrefs.getString(PreferenceConstants.P_USER);
+                String rootPass = thePrefs.getString(PreferenceConstants.P_PASSWORD);
                 String passwd = PlsqleditorPlugin.getDefault().getSchemaRegistry(project)
                         .getPasswordForSchema(schema);
                 boolean isAutoCommitOnClose = false;
@@ -316,6 +317,8 @@ public class DbUtility
                                 .getPersistentProperty(new QualifiedName("",
                                         PreferenceConstants.P_AUTO_COMMIT_ON_CLOSE)))
                                 .booleanValue();
+                        rootUser = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.P_USER));
+                        rootPass = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.P_PASSWORD));
                     }
                     else
                     {
@@ -345,30 +348,9 @@ public class DbUtility
                 }
                 if (passwd == null)
                 {
-                    String tmpPass = "";
-                    String tmpUser = "";
-                    String isUsingLocalSettings;
-                    try
+                    if (schema.equals(rootUser))
                     {
-                        isUsingLocalSettings = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.USE_LOCAL_DB_SETTINGS));
-                        if (Boolean.valueOf(isUsingLocalSettings).booleanValue())
-                        {
-                            tmpPass = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.P_PASSWORD));
-                            tmpUser = project.getPersistentProperty(new QualifiedName("",PreferenceConstants.P_USER));
-                        }
-                    }
-                    catch (CoreException e)
-                    {
-                        e.printStackTrace();
-                    }
-                    if (schema == tmpUser)
-                    {
-                        if (tmpPass.equals("")||tmpPass == null)
-                        {
-                            passwd = thePrefs.getString(PreferenceConstants.P_PASSWORD);
-                        } else {
-                            passwd = tmpPass;
-                        }
+                        passwd = rootPass;
                     }
                     if (passwd == null)
                     {
@@ -376,7 +358,7 @@ public class DbUtility
                     }
                 }
 
-                ConnectionPool cp = new ConnectionPool(driver, url, user, passwd, initConns,
+                ConnectionPool cp = new ConnectionPool(driver, url, schema, passwd, initConns,
                         maxConns, false);
                 cp.setAutoCommitting(isAutoCommitOnClose);
                 myConnectionPools.put(schemaIdentifier, cp);
