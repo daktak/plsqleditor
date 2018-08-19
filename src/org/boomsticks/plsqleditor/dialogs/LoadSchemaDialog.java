@@ -189,7 +189,7 @@ public class LoadSchemaDialog extends Dialog {
     /**
      * This is a sorter for the PackageDetails table in the Load Schema dialog.
      */
-    class PackageDetailSorter extends ViewerComparator {
+    class PackageDetailComparator extends ViewerComparator {
 	/**
 	 * Constructor argument values that indicate to sort items by description, owner
 	 * or percent complete.
@@ -210,7 +210,7 @@ public class LoadSchemaDialog extends Dialog {
 	 * @param criteria the sort criterion to use: one of <code>NAME</code> or
 	 *                 <code>TYPE</code>
 	 */
-	public PackageDetailSorter(int criteria) {
+	public PackageDetailComparator(int criteria) {
 	    super();
 	    this.criteria = criteria;
 	}
@@ -459,7 +459,7 @@ public class LoadSchemaDialog extends Dialog {
 	// clicked
 	column.addSelectionListener(new SelectionAdapter() {
 	    public void widgetSelected(SelectionEvent e) {
-		tableViewer.setComparator(new PackageDetailSorter(PackageDetailSorter.EXECUTE_COLUMN));
+		tableViewer.setComparator(new PackageDetailComparator(PackageDetailComparator.EXECUTE_COLUMN));
 	    }
 	});
 
@@ -471,7 +471,7 @@ public class LoadSchemaDialog extends Dialog {
 	// clicked
 	column.addSelectionListener(new SelectionAdapter() {
 	    public void widgetSelected(SelectionEvent e) {
-		tableViewer.setComparator(new PackageDetailSorter(PackageDetailSorter.NAME_COLUMN));
+		tableViewer.setComparator(new PackageDetailComparator(PackageDetailComparator.NAME_COLUMN));
 	    }
 	});
 
@@ -483,7 +483,7 @@ public class LoadSchemaDialog extends Dialog {
 	// clicked
 	column.addSelectionListener(new SelectionAdapter() {
 	    public void widgetSelected(SelectionEvent e) {
-		tableViewer.setComparator(new PackageDetailSorter(PackageDetailSorter.LOCATION_COLUMN));
+		tableViewer.setComparator(new PackageDetailComparator(PackageDetailComparator.LOCATION_COLUMN));
 	    }
 	});
 
@@ -493,7 +493,7 @@ public class LoadSchemaDialog extends Dialog {
 	column.setWidth(90);
 	column.addSelectionListener(new SelectionAdapter() {
 	    public void widgetSelected(SelectionEvent e) {
-		tableViewer.setComparator(new PackageDetailSorter(PackageDetailSorter.HEADER_COLUMN));
+		tableViewer.setComparator(new PackageDetailComparator(PackageDetailComparator.HEADER_COLUMN));
 	    }
 	});
 
@@ -503,7 +503,7 @@ public class LoadSchemaDialog extends Dialog {
 	column.setWidth(80);
 	column.addSelectionListener(new SelectionAdapter() {
 	    public void widgetSelected(SelectionEvent e) {
-		tableViewer.setComparator(new PackageDetailSorter(PackageDetailSorter.BODY_COLUMN));
+		tableViewer.setComparator(new PackageDetailComparator(PackageDetailComparator.BODY_COLUMN));
 	    }
 	});
 	// 6th column with exception
@@ -568,7 +568,7 @@ public class LoadSchemaDialog extends Dialog {
 	// Set the cell modifier for the viewer
 	// tableViewer.setCellModifier(new ExampleCellModifier(this));
 	// Set the default sorter for the viewer
-	tableViewer.setComparator(new PackageDetailSorter(PackageDetailSorter.NAME_COLUMN));
+	tableViewer.setComparator(new PackageDetailComparator(PackageDetailComparator.NAME_COLUMN));
     }
 
     protected void createButtonsForButtonBar(Composite parent) {
