@@ -1,0 +1,245 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=windows-1252">
+	<TITLE>How to set up database connectivity using plsqleditor 0</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 1.1.4  (Win32)">
+	<META NAME="AUTHOR" CONTENT="Toby Zines">
+	<META NAME="CREATED" CONTENT="20050906;9170000">
+	<META NAME="CHANGEDBY" CONTENT="Toby Zines">
+	<META NAME="CHANGED" CONTENT="20050906;18342456">
+	<STYLE>
+	<!--
+		@page { size: 21cm 29.7cm; margin-right: 3.18cm; margin-top: 2.54cm; margin-bottom: 2.54cm }
+		P { margin-bottom: 0.21cm; direction: ltr; color: #000000; widows: 2; orphans: 2 }
+		P.western { font-family: "Futura Bk BT", sans-serif; font-size: 12pt; so-language: en-AU }
+		P.cjk { font-family: "Times New Roman", serif; font-size: 12pt }
+		P.ctl { font-family: "Times New Roman", serif; font-size: 12pt; so-language: ar-SA }
+	-->
+	</STYLE>
+</HEAD>
+<BODY LANG="en-US" TEXT="#000000" DIR="LTR">
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">How
+to set up database connectivity using plsqleditor 0.3.15</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL>
+	<LI><P LANG="en-AU" CLASS="western" STYLE="margin-bottom: 0cm"><SPAN LANG="en-NZ"><FONT FACE="FuturaA Bk BT, sans-serif">First,
+	let us assume you have a new project called DemoProject.<BR>It would
+	look something like the following:</FONT></SPAN></P>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><IMG SRC="database_connectivity_html_3d66decc.png" NAME="Graphic1" ALIGN=BOTTOM WIDTH=549 HEIGHT=327 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL START=2>
+	<LI><P LANG="en-AU" CLASS="western" STYLE="margin-bottom: 0cm"><SPAN LANG="en-NZ"><FONT FACE="FuturaA Bk BT, sans-serif">Set
+	up the properties for the project.<BR>The database connectivity for
+	the project is now in the project properties.<BR>The schema mapping
+	is here too. <BR>You are able to set the default database
+	connectivity in the project preferences, however, in this demo I
+	will show you the project specific way of doing this.<BR>So, first
+	select the properties, as the diagram below indicates</FONT></SPAN></P>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><IMG SRC="database_connectivity_html_41f306d9.png" NAME="Graphic2" ALIGN=BOTTOM WIDTH=553 HEIGHT=352 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL START=3>
+	<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">Next,
+	select the Database Properties.</FONT></P>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><IMG SRC="database_connectivity_html_3c03580c.png" NAME="Graphic3" ALIGN=BOTTOM WIDTH=553 HEIGHT=429 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">You
+must choose to set Use Local DB Settings to checked to get this.</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">The
+only important setting here is the URL. </FONT>
+</P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">The
+Number of ResultSet rows per fetch, Auto Commit connections on close,
+Initial Connections and Max Connections also affect the schema
+connections, but you can leave these as default.</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">The
+Dba parameters are for auto completing from the database.</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">Ensure
+that your URL is correct.</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL START=4>
+	<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">Next,
+	select the Schema Mapping</FONT></P>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><IMG SRC="database_connectivity_html_m4e66de3c.png" NAME="Graphic4" ALIGN=BOTTOM WIDTH=554 HEIGHT=483 BORDER=0></P>
+<P LANG="en-AU" CLASS="western" STYLE="margin-bottom: 0cm"><SPAN LANG="en-NZ"><FONT FACE="FuturaA Bk BT, sans-serif">You
+can delete the unknown schema for your new file (the schema will by
+default be the name of the directory in which your file is located.
+If no smart name can be detected, &ldquo;unknown&rdquo; will be the
+selected name.</FONT></SPAN></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">We
+will create a new schema, because the package name has not been named
+the default way.</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">If
+you name the file (your blah.pkb) in the format
+schemaname_packagename.pkb, then the schema will be detected as the
+first part of the file name (prior to the underscore). Otherwise you
+will have to do it manually. This demo does it manually.</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL START=5>
+	<LI><P LANG="en-AU" CLASS="western" STYLE="margin-bottom: 0cm"><SPAN LANG="en-NZ"><FONT FACE="FuturaA Bk BT, sans-serif">Now,
+	add the schema by pressing the Add Schema Details button:</FONT></SPAN></P>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><IMG SRC="database_connectivity_html_m2dc6b98f.png" NAME="Graphic5" ALIGN=BOTTOM WIDTH=553 HEIGHT=488 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">This
+will cause the following dialog to pop up:</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><IMG SRC="database_connectivity_html_36fcb274.png" NAME="Graphic6" ALIGN=BOTTOM WIDTH=437 HEIGHT=242 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><BR>
+</P>
+<OL START=6>
+	<LI><P LANG="en-AU" CLASS="western" STYLE="margin-bottom: 0cm"><SPAN LANG="en-NZ"><FONT FACE="FuturaA Bk BT, sans-serif">Now
+	you must populate the schema details (as populated above).<BR>Important
+	fields:</FONT></SPAN></P>
+	<OL>
+		<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">The
+		schema name MUST be a valid schema. For this demo, I have selected
+		system, which is valid in every (or almost every?) oracle database.</FONT></P>
+		<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">The
+		Schema Location is the directories (identified relative to the
+		project base) in which your package files are located. This
+		particular schema currently only has files (one file specifically)
+		in ONE directory &ndash; the directory called schemaname.</FONT></P>
+		<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">The
+		password MUST be the correct password for the schema. My system
+		password is sys. Imaginative aren&rsquo;t I?</FONT></P>
+	</OL>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<FONT FACE="FuturaA Bk BT, sans-serif">This will cause the schema
+mapping page to look like this:</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<IMG SRC="database_connectivity_html_195e8e11.png" NAME="Graphic7" ALIGN=BOTTOM WIDTH=553 HEIGHT=482 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<BR>
+</P>
+<OL START=7>
+	<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">Now
+	add the package by pressing the Add Package Button as below:</FONT></P>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<IMG SRC="database_connectivity_html_m6b63d32b.png" NAME="Graphic8" ALIGN=BOTTOM WIDTH=554 HEIGHT=485 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<BR>
+</P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<FONT FACE="FuturaA Bk BT, sans-serif">This will result in the
+following dialog box:</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<IMG SRC="database_connectivity_html_57635ee7.png" NAME="Graphic9" ALIGN=BOTTOM WIDTH=439 HEIGHT=241 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<BR>
+</P>
+<OL START=8>
+	<LI><P LANG="en-AU" CLASS="western" STYLE="margin-bottom: 0cm"><SPAN LANG="en-NZ"><FONT FACE="FuturaA Bk BT, sans-serif">Now
+	populate the package details (as populated above)<BR>Important
+	fields:</FONT></SPAN></P>
+	<OL>
+		<LI><P LANG="en-AU" CLASS="western" STYLE="margin-bottom: 0cm"><SPAN LANG="en-NZ"><FONT FACE="FuturaA Bk BT, sans-serif">Package
+		Name &ndash; this is the name of the &ldquo;package&rdquo; that you
+		want the database to recognise your file as being. This only
+		matters if you actually want your file to be a real package (and be
+		content assistable by that name when Ctrl-Spacing in other files).
+		Otherwise, <I>scratch</I> is the name I use for a scratch file for
+		any old command.</FONT></SPAN></P>
+		<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">Location
+		&ndash; this is IMPORTANT. It MUST be the name of the file. In our
+		case blah.pkb.</FONT></P>
+	</OL>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<FONT FACE="FuturaA Bk BT, sans-serif">Now your Schema Mapping
+properties will look like this:</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<IMG SRC="database_connectivity_html_5d9306d.png" NAME="Graphic10" ALIGN=BOTTOM WIDTH=553 HEIGHT=529 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<BR>
+</P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<FONT FACE="FuturaA Bk BT, sans-serif">In the bigger context, these
+details relate in the following way:</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<IMG SRC="database_connectivity_html_m31e0cce1.png" NAME="Graphic11" ALIGN=BOTTOM WIDTH=553 HEIGHT=416 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<BR>
+</P>
+<OL START=9>
+	<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">Now
+	press OK on the Properties, and you are back in the main workspace.</FONT></P>
+	<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">You
+	MUST close the blah.pkb file and reopen it. Annoying but required.</FONT></P>
+	<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">When
+	you open it, it should be in the &ldquo;system&rdquo; schema. You
+	can check this by pressing the debug button (seen below).</FONT></P>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<BR>
+</P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<IMG SRC="database_connectivity_html_3bf6a3d1.png" NAME="Graphic12" ALIGN=BOTTOM WIDTH=553 HEIGHT=243 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<BR>
+</P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<FONT FACE="FuturaA Bk BT, sans-serif">As you can see, the file
+blah.pkb is now in the system schema.</FONT></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<BR>
+</P>
+<OL START=12>
+	<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">Now
+	to execute the query/update.  There are three techniques:</FONT></P>
+	<OL>
+		<LI><P LANG="en-AU" CLASS="western" STYLE="margin-bottom: 0cm"><SPAN LANG="en-NZ"><FONT FACE="FuturaA Bk BT, sans-serif">Using
+		the key press; place the cursor on the &ldquo;SELECT * FROM tab&rdquo;
+		line and press Ctrl-Alt-e. This should get the following result:</FONT></SPAN></P>
+	</OL>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<IMG SRC="database_connectivity_html_3faf48e7.png" NAME="Graphic13" ALIGN=BOTTOM WIDTH=553 HEIGHT=408 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<BR>
+</P>
+<OL>
+	<OL START=2>
+		<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">If
+		this doesn&rsquo;t work, it is because your key presses don&rsquo;t
+		work. You can always use the toolbar button:</FONT></P>
+	</OL>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<IMG SRC="database_connectivity_html_6baa36f3.png" NAME="Graphic14" ALIGN=BOTTOM WIDTH=553 HEIGHT=394 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<BR>
+</P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<FONT FACE="FuturaA Bk BT, sans-serif">Hopefully this will work if
+the key press doesn&rsquo;t.</FONT></P>
+<OL>
+	<OL START=3>
+		<LI><P LANG="en-NZ" CLASS="western" STYLE="margin-bottom: 0cm"><FONT FACE="FuturaA Bk BT, sans-serif">If
+		this fails, you could try the right click method:</FONT></P>
+	</OL>
+</OL>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<IMG SRC="database_connectivity_html_3f80bcb2.png" NAME="Graphic15" ALIGN=BOTTOM WIDTH=551 HEIGHT=505 BORDER=0></P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<BR>
+</P>
+<P LANG="en-NZ" CLASS="western" STYLE="margin-left: 0.64cm; margin-bottom: 0cm">
+<FONT FACE="FuturaA Bk BT, sans-serif">Good luck, and happy db
+executing&hellip;</FONT></P>
+</BODY>
+</HTML>

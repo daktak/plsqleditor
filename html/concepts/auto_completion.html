@@ -1,0 +1,72 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>Auto Completion</title>
+</head>
+<body>
+This section covers the types of auto completion that you can manage in the Editor.
+There are two main types of auto completion - <br></br>
+<ol>
+<li>the coded auto completion</li>
+<li>the template driven auto completion (standard eclipse based templates)</li>
+</ol>
+<p></p> 
+
+<h1>Coded Auto Completion in the Editor</h1>
+Auto completion has been coded to auto complete the following types of structures:
+
+<ul>
+<li>built in functions of plsql such as upper, lower, substr etc</li>
+<li>schemas that are identified by the <a href="../reference/schema_mapping.html"> schema mapping</a></li>
+<li>schemas that are detected by the <a href="db_connectivity.html"> connection to the database </a></li>
+<li>packages that are detected by the <a href="../reference/schema_mapping.html"> schema mapping</a></li>
+<li>packages that are detected by the <a href="db_connectivity.html"> connection to the database </a></li>
+<li>procedures and functions that are detected in files identified in the <a href="../reference/schema_mapping.html"> schema mapping</a></li>
+<li>procedures and functions that are detected by the <a href="db_connectivity.html"> connection to the database </a></li>
+<li>tables and columns that are detected by the <a href="db_connectivity.html"> connection to the database </a></li>
+<li>constants, local variables, procedure names (for end proc_name) etc that are in the local file being edited</li>
+</ul>
+
+These structures will be updated with the information in the files in your file system and
+in your database (if you connect to a database).
+Items not currently covered are:
+<ul>
+<li>types</li>
+<li>array count, first, last, next</li>
+<li>records and contained record fields</li>
+<li>objects and their contained fields</li>
+</ul>
+<p></p>
+
+<h1>Template based Auto Completion in the Editor</h1>
+Template auto completion has been enabled in Toby's PL/SQL editor to allow users to 
+determine their own auto completable structures. By default a new package body auto complete
+is present, along with new procedure, new function, begin end, for loops, while loops etc.
+You can modify the provided ones, and add new ones.
+There are two types of templates - code templates and pldoc templates. 
+<p></p>
+<b>Code templates</b>
+<ul>
+<li>if constructs - if, if else, if elsif else</li>
+<li>for loop constructs - for n, for array, for record in cursor</li>
+<li>while loop constructs - basic loop while, standard loop over hash</li>
+<li>new package body</li>
+<li>new procedure, new function</li>
+<li>begin exception block</li>
+<li>savepoint</li>
+</ul>
+
+<p></p>
+<b>Document templates</b>
+<ul>
+<li>true</li>
+</ul>
+
+<p>
+</p>
+You can add templates using the standard eclipse interface for managing templates.
+<a href="http://www.ibm.com/developerworks/opensource/tutorials/os-eclipse-code-templates/">This site</a> shows you how.
+</body>
+</html>

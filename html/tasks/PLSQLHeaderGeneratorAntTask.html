@@ -1,0 +1,96 @@
+<!--
+   Licensed to the Apache Software Foundation (ASF) under one or more
+   contributor license agreements.  See the NOTICE file distributed with
+   this work for additional information regarding copyright ownership.
+   The ASF licenses this file to You under the Apache License, Version 2.0
+   (the "License"); you may not use this file except in compliance with
+   the License.  You may obtain a copy of the License at
+ 
+       http://www.apache.org/licenses/LICENSE-2.0
+ 
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+-->
+<html>
+ 
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<link rel="stylesheet" type="text/css" href="../stylesheets/style.css">
+<title>PLSQLEditor Generate Header Task</title>
+</head>
+ 
+<body>
+ 
+<h2><a name="PlSQLGenHeader">PlSQLGenHeader</a></h2>
+<h3>Description</h3>
+<p>Generates the headers of any supplied PLSQL Bodies</p>
+ 
+ 
+<h3>Parameters</h3>
+<table border="1" cellpadding="2" cellspacing="0">
+  <tr>
+    <td valign="top"><b>Attribute</b></td>
+    <td valign="top"><b>Description</b></td>
+    <td align="center" valign="top"><b>Required</b></td>
+  </tr>
+  <tr>
+    <td valign="top">plsqlfile</td>
+    <td valign="top">The Source PLSQL Body file to generate the header from.</td>
+    <td valign="top" align="center">Yes, unless a nested
+    resource collection element is used.</td>
+  </tr>
+  <tr>
+    <td valign="top">destfile</td>
+    <td valign="top">The Destination PLSQL Header file to create</td>
+    <td valign="top" align="center">No; defaults to false.</td>
+  </tr>
+  <tr>
+    <td valign="top">headerextention</td>
+    <td valign="top">The extention to give all generated header files</td>
+    <td valign="top" align="center">No; defaults to .pkh</td>
+  </tr>
+</table>
+<h3>Parameters specified as nested elements</h3>
+ 
+<h4>fileset</h4>
+<p>
+	A fileset or multiple file sets can be added to include a set of files to generate headers from. The Headers will be created with either the supplied headerextention option or defaulted to .pkh<br>
+	The headers will have the name of the supplied source body.
+</p>
+ 
+<h3>Examples</h3>
+<p><b>taskdef</b></p>
+<p>You need to define this library prior to using it. This can be done by including the following at the head of your build xml.</p>
+<pre>
+  &lt;taskdef name=&quot;plsqlheadgen&quot; classname=&quot;plsqleditor.anttasks.PlsqlHeaderGenTask&quot;&gt;
+     &lt;classpath&gt;
+   	  &lt;fileset dir=&quot;./lib&quot;&gt;
+   	    &lt;include name=&quot;*.jar&quot;/&gt;
+   	  &lt;/fileset&gt;
+    &lt;/classpath&gt;
+  &lt;/taskdef&gt;
+</pre>
+<p><b>Generate a single header</b></p>
+<pre>
+  &lt;plsqlheadgen plsqlfile=&quot;myfile.pkb&quot; destfile=&quot;myfile.pkb&quot;/&gt;
+</pre>
+<p>
+	If the destfile is left blank, the filename is assumed to be the same as the plsqlfile with pkh as an extension instead of pkb.
+</p>
+
+<p><b>Generate a directory of bodies</b></p>
+<pre>
+  &lt;plsqlheadgen&gt;
+    &lt;fileset dir=&quot;${build-dir}/database&quot; includes=&quot;**/*.pkb"/&gt;
+  &lt;/plsqlheadgen&gt;
+</pre>
+<p>
+	This will include all pkb files underneath build_dir/database.
+</p>
+
+ 
+</body></html>
+
