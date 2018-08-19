@@ -14,9 +14,9 @@ import org.eclipse.core.variables.VariablesPlugin;
 import java.io.*;
 import java.util.*;
 
-import org.jdom.*;
-import org.jdom.input.*;
-import org.jdom.output.*;
+import org.jdom2.*;
+import org.jdom2.input.*;
+import org.jdom2.output.*;
 
 /**
  * @author luelljoc
@@ -58,7 +58,7 @@ public class XMLUtilities
 			{
 
 				// No validation
-				SAXBuilder builder = new SAXBuilder(false);
+				SAXBuilder builder = new SAXBuilder();
 				Document doc = builder.build(file);
 
 				// Get the variable manager for substitution

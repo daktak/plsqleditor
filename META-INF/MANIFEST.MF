@@ -2,12 +2,12 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: Toby's PL SQL Editor
 Bundle-SymbolicName: plsqleditor; singleton:=true
-Bundle-Version: 0.5.7
+Bundle-Version: 0.5.8
 Bundle-ClassPath: plsqleditor.jar,
  .,
  libs/ant-1.10.5.jar,
  libs/commons-lang3-3.7.jar,
- libs/jdom-1.1.3.jar,
+ libs/jdom2-2.0.6.jar,
  libs/ojdbc8.jar
 Bundle-Activator: plsqleditor.PlsqleditorPlugin
 Bundle-Vendor: daktak@domo.ddns.net
@@ -77,13 +77,13 @@ Export-Package: .,
  org.boomsticks.plsqleditor.dialogs,
  org.boomsticks.plsqleditor.dialogs.openconnections,
  org.javawiki.swt.common,
- org.jdom,
- org.jdom.adapters,
- org.jdom.filter,
- org.jdom.input,
- org.jdom.output,
- org.jdom.transform,
- org.jdom.xpath,
+ org.jdom2,
+ org.jdom2.adapters,
+ org.jdom2.filter,
+ org.jdom2.input,
+ org.jdom2.output,
+ org.jdom2.transform,
+ org.jdom2.xpath,
  plsqleditor,
  plsqleditor.actions,
  plsqleditor.actions.schemabrowser,

@@ -9,8 +9,8 @@
 	<classpathentry exported="true" kind="lib" path="libs/ant-1.10.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/ant-launcher-1.10.5.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/commons-lang3-3.7.jar"/>
-	<classpathentry exported="true" kind="lib" path="libs/jdom-1.1.3.jar"/>
 	<classpathentry exported="true" kind="lib" path="libs/ojdbc8.jar"/>
+	<classpathentry exported="true" kind="lib" path="libs/jdom2-2.0.6.jar"/>
 	<classpathentry including="**/*.java" kind="src" output="target/classes" path="src">
 		<attributes>
 			<attribute name="optional" value="true"/>

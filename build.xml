@@ -2,7 +2,7 @@
 <project name="plsqleditor" default="build.jars" basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
 
 	<property name="p2.build.repo" value="file:target/buildRepo"/>
-        <property name="version" value= "0.5.7"/>
+        <property name="version" value= "0.5.8"/>
         <property name="eclipse.plugindir" value="/usr/lib/eclipse/plugins"/>
         <property name="oracle.dir" value="/usr/lib/oracle/11.2/client64/lib"/>
 	<property name="basews" value="${ws}"/>
@@ -176,8 +176,8 @@
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/commons-lang3-3.7.jar"/>
                         <pathelement path="${ojdbc}"/>
                         <pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/${ojdbc}"/>
-			<pathelement path="libs/jdom-1.1.3.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-1.1.3.jar"/>
+			<pathelement path="libs/jdom2-2.0.6.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom2-2.0.6.jar"/>
 			<pathelement path="libs/ant-1.10.5.jar"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/ant-1.10.5.jar"/>
 		</path>
@@ -260,8 +260,8 @@
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/commons-lang3-3.7.jar"/>
                         <pathelement path="${ojdbc}"/>
                         <pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/${ojdbc}"/>
-			<pathelement path="libs/jdom-1.1.3.jar"/>
-			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-1.1.3.jar"/>
+			<pathelement path="libs/jdom2-2.0.6.jar"/>
+			<pathelement path="${build.result.folder}/../plsqleditor_${version}/libs/jdom-2.0.6.jar"/>
 			<pathelement path="bin/"/>
 			<pathelement path="${build.result.folder}/../plsqleditor_${version}/bin/"/>
 			<pathelement path="${build.result.folder}/@dot"/>
