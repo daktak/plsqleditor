@@ -162,7 +162,6 @@
 		<mkdir dir="${build.result.folder}/@dot"/>
 		<path id="@dot.classpath">
                     <fileset dir="${eclipse.plugindir}/" includes="**/*.jar"/>
-                    <fileset dir="/usr/share/eclipse/dropins/jdt/plugins/" includes="**/*.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.equinox.registry/runtime_registry_compatibility.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.ui.workbench/e4-workbench.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.ui.workbench/compatibility.jar"/>
@@ -250,7 +249,6 @@
 		<mkdir dir="${temp.folder}/plsqleditor.jar.bin"/>
 		<path id="plsqleditor.jar.classpath">
                     <fileset dir="${eclipse.plugindir}/" includes="**/*.jar"/>
-                    <!-- <fileset dir="/usr/share/eclipse/dropins/jdt/plugins/" includes="**/*.jar"/> -->
 			<pathelement path="target/nestedJars/org.eclipse.equinox.registry/runtime_registry_compatibility.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.ui.workbench/e4-workbench.jar"/>
 			<pathelement path="target/nestedJars/org.eclipse.ui.workbench/compatibility.jar"/>
