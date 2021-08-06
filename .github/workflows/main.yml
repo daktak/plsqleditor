@@ -1,0 +1,43 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-18.04
+    env:
+      ORACLE_HOME: /usr/lib/oracle/11.2/client64/
+      ORACLE_DOWNLOAD_DIR: .cache/oracle
+      ORACLE_COOKIE: ic_linuxx8664
+      ORACLE_FILE: 'instantclient/11204/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm'
+      ORACLE_LOGIN_ssousername: ${{ secrets.ORACLE_LOGIN_USERID }}
+      ORACLE_LOGIN_password: ${{ secrets.ORACLE_LOGIN_PASS }}
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+      - uses: actions/checkout@v2
+      - run: sudo apt-get install -y eclipse
+      - run: sudo apt-get -qq install libaio1 rpm
+      - name: download oracle
+        run: if [ ! -f .cache/oracle/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm ]; then .travis/oracle/download.sh; fi
+      - name: check nize
+        run: if [ `stat -c%s .cache/oracle/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm` -lt 5000 ]; then cat .cache/oracle/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm && rm .cache/oracle/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm; fi
+      - name: install oracle
+        run: sudo rpm --install --nodeps .cache/oracle/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm
+      - name: build
+        run: ant build.update.jar
+
