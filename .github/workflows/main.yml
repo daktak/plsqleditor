@@ -40,4 +40,9 @@ jobs:
         run: sudo rpm --install --nodeps .cache/oracle/oracle-instantclient11.2-basic-11.2.0.4.0-1.x86_64.rpm
       - name: build
         run: ant build.update.jar
+      - name: Upload JAR
+        uses: actions/upload-artifact@v2
+        with:
+          name: App
+          path: ${{ github.workspace }}/target/plsqleditor_*.jar
 
