@@ -30,6 +30,7 @@ jobs:
     steps:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
+      - run: sudo apt update
       - run: sudo apt-get install -y eclipse
       - run: sudo apt-get -qq install libaio1 rpm
       - name: download oracle
